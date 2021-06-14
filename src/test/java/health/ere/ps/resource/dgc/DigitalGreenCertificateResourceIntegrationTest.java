@@ -1,6 +1,12 @@
 package health.ere.ps.resource.dgc;
 
+import health.ere.ps.exception.dgc.DgcCertificateServiceAuthenticationException;
+import health.ere.ps.exception.dgc.DgcCertificateServiceException;
+import health.ere.ps.exception.dgc.DgcException;
+import health.ere.ps.exception.dgc.DgcInternalAuthenticationException;
+import health.ere.ps.exception.dgc.DgcInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
+import health.ere.ps.model.dgc.DgcError;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -18,13 +24,16 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @QuarkusTest
 class DigitalGreenCertificateResourceIntegrationTest {
@@ -176,5 +185,33 @@ class DigitalGreenCertificateResourceIntegrationTest {
 
         // after
         client.close();
+    }
+
+    @Test
+    void testExceptionMapper() throws URISyntaxException {
+        int code = 123456;
+
+        testExceptionMapper(new DgcInvalidParametersException(code, ""), 400, code);
+        testExceptionMapper(new DgcInternalAuthenticationException(), 401, 200401);
+        testExceptionMapper(new DgcCertificateServiceAuthenticationException(code, ""), 403, code);
+        testExceptionMapper(new DgcCertificateServiceException(code, ""), 500, code);
+    }
+
+    private void testExceptionMapper(DgcException dgcException, int expectedResponseCode, int expectedErrorCode)
+            throws URISyntaxException {
+
+        doThrow(dgcException).when(service).issuePdf(any());
+
+        Client client = ClientBuilder.newBuilder().build();
+
+        Response response = client.target(url.toURI().resolve("v2/recovered"))
+                .request("application/pdf")
+                .post(Entity.json("{}"));
+
+        assertEquals(expectedResponseCode, response.getStatus());
+
+        DgcError dgcError = response.readEntity(DgcError.class);
+
+        assertEquals(expectedErrorCode, dgcError.getCode());
     }
 }
