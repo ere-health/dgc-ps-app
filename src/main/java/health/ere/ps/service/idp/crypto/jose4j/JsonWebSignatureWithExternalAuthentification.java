@@ -47,8 +47,18 @@ public class JsonWebSignatureWithExternalAuthentification extends JsonWebSignatu
     @Override
     public void sign() throws JoseException
     {
-        byte[] inputBytes = getSigningInputBytes();
+        // if we have a private key use it
+        if(getKey() != null) {
+            super.sign();
+        } else {
+            // otherwise use the connector for signing
+            byte[] inputBytes = getSigningInputBytes();
+            byte[] signatureBytes =  signBytes(inputBytes);
+            setSignature(signatureBytes);
+        }
+    }
 
+    public byte[] signBytes(byte[] inputBytes) throws JoseException {
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-256");
@@ -58,7 +68,7 @@ public class JsonWebSignatureWithExternalAuthentification extends JsonWebSignatu
         byte[] encodedhash = digest.digest(inputBytes);
 
         byte[] signatureBytes = externalAuthenticate(encodedhash, smcbCardHandle);
-        setSignature(signatureBytes);
+        return signatureBytes;
     }
 
     public byte[] externalAuthenticate(byte[] sha265Hash, String smcbCardHandle) throws JoseException {
@@ -79,7 +89,7 @@ public class JsonWebSignatureWithExternalAuthentification extends JsonWebSignatu
 
         try {
             // Titus Bug:  Client received SOAP Fault from server: No enum constant de.gematik.ti.signenc.authsignature.SignatureScheme.RSASSA-PSS Please see the server log to find more detail regarding exact cause of the failure.
-            service.externalAuthenticate(smcbCardHandle, contextType, null /*optionalInputs*/, binaryDocumentType, statusHolder, signatureObjectHolder);
+            service.externalAuthenticate(smcbCardHandle, contextType, optionalInputs, binaryDocumentType, statusHolder, signatureObjectHolder);
         } catch (FaultMessage e) {
             throw new JoseException("Could not call externalAuthenticate", e);
         }
