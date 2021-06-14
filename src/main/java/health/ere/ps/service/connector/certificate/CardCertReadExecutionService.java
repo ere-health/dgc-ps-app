@@ -67,8 +67,6 @@ public class CardCertReadExecutionService {
                 log.log(Level.SEVERE, "Could find file", e);
             }
         }
-       
-        
     }
 
     public void setUpCustomSSLContext(InputStream p12Certificate) {
@@ -98,6 +96,8 @@ public class CardCertReadExecutionService {
         Holder<X509DataInfoListType> certHolder = new Holder<X509DataInfoListType>();
 
         try {
+            // TODO: Make this configurable
+            contextType.setMandantId("M1");
             certificateService.readCardCertificate(cardHandle, contextType, certRefList,
                     statusHolder, certHolder);
         } catch (FaultMessage faultMessage) {
