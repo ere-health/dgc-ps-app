@@ -26,7 +26,7 @@ public class TokendIntegrationTestHelper {
     private CardCertificateReaderService cardCertificateReaderService;
 
     protected void mockTokenCreation(String token) throws Exception {
-        when(cardCertificateReaderService.retrieveCardCertIdentity(any(), any(), any(), any())).thenReturn(rsaClientIdentity);
+        when(cardCertificateReaderService.retrieveCardCertIdentity(any(), any()/*, any(), any()*/)).thenReturn(rsaClientIdentity);
 
         DiscoveryDocumentResponse discoveryDocumentResponse = mock(DiscoveryDocumentResponse.class);
 
