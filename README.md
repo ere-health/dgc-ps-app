@@ -14,7 +14,7 @@ The dgc-ps-app is comprised of two main components.
 Open a terminal window and do the following:
 
 * Clone the ere-ps-app back-end repository by running: 
-  > git clone https://github.com/ere-health/ere-ps-app.git
+  > git clone https://github.com/ere-health/dgc-ps-app.git
 
 The source files of the front-end UI will be located in the following directory location:
   > src/main/resources/META-INF/resources/resources/dgc/
@@ -47,17 +47,14 @@ the application.
   At this point, the application should be running as highlighted below.
   
   ```shell
-      __  ____  __  _____   ___  __ ____  ______ 
-      --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
-      -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
-      --\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
-      2021-06-08 15:45:41,324 INFO  [ca.uhn.fhi.uti.VersionUtil] (Quarkus Main Thread) HAPI FHIR version 5.3.0 - Rev 919c1dbddc
-      2021-06-08 15:45:41,325 INFO  [ca.uhn.fhi.con.FhirContext] (Quarkus Main Thread) Creating new FHIR context for FHIR version [R4]
-      2021-06-08 15:45:41,571 INFO  [io.und.websockets] (Quarkus Main Thread) UT026003: Adding annotated server endpoint class health.ere.ps.websocket.Websocket for path /websocket
-      2021-06-08 15:45:41,665 INFO  [hea.ere.ps.ser.fs.DirectoryWatcher] (Quarkus Main Thread) Watching directory: /Users/douglas/my-indie-projects-work-area/ere-ps-app/watch-pdf
-      2021-06-08 15:45:41,758 INFO  [io.quarkus] (Quarkus Main Thread) ere-ps-app 1.0.0-SNAPSHOT on JVM (powered by Quarkus 1.13.1.Final) started in 2.158s. Listening on: http://0.0.0.0:8080
-      2021-06-08 15:45:41,760 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
-      2021-06-08 15:45:41,761 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, rest-client, resteasy, resteasy-jsonb, scheduler, servlet, websockets]
+    __  ____  __  _____   ___  __ ____  ______ 
+     --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
+     -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
+    --\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
+    2021-06-14 08:25:16,406 INFO  [hea.ere.ps.ser.dgc.DigitalGreenCertificateService] (Quarkus Main Thread) Application started go to: http://localhost:8080/dgc/covid-19-certificate.html
+    2021-06-14 08:25:16,479 INFO  [io.quarkus] (Quarkus Main Thread) ere-ps-app 1.0.0-SNAPSHOT on JVM (powered by Quarkus 1.13.1.Final) started in 2.250s. Listening on: http://0.0.0.0:8080
+    2021-06-14 08:25:16,481 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
+    2021-06-14 08:25:16,481 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, rest-client, resteasy, resteasy-jsonb, servlet]
   ```
   You can access the front-end UI of the application by making reference to the following URL in a 
   browser!
