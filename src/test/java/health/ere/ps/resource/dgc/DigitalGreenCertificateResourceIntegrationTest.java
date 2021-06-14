@@ -171,11 +171,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
     }
 
     @Test
-    @Disabled("Old servlet version due to avalon dependencies")
-    /*
-     * TODO fix servlet-api
-     * Disabled because servlet is a old version
-     */
     void issueRecoveryCertificateFromIndividualParams() throws Exception {
 
         // model copied from DigitalGreenCertificateServiceIntegrationTest
