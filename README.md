@@ -20,7 +20,7 @@ Open a terminal window and do the following:
   > git clone https://github.com/ere-health/dgc-ps-app.git
 
 The source files of the front-end UI will be located in the following directory location:
-  > src/main/resources/META-INF/resources/resources/dgc/
+  > src/main/resources/META-INF/resources/dgc/
 
 At this point, you should now have access to the source files for both the backend and front-end of 
 the application.
