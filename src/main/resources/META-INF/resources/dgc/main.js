@@ -118,6 +118,21 @@ async function sendRecoveredRequest() {
     await sendRequest("/api/certify/v2/recovered", requestData);
 }
 
+// Copy prefillParameter
+function prefillRecoverParameters() {
+    const form = document.getElementById("request-form");
+
+    // remove '#' from hash
+    const params = new URLSearchParams(window.location.hash.substring(1));
+
+    for (const name of ["fn", "gn", "dob", "id", "tg", "is", "fr", "df", "du"]) {
+        // setting the values to null will cause the validation to be triggered
+        if (params.has(name)) {
+            form.elements[name].value = params.get(name);
+        }
+    }
+}
+
 /**
  * @param {string} path the request path.
  * @param {{}} requestData
