@@ -53,7 +53,7 @@ function setCovid19ToField(field) {
     field.focus()
 }
 
-async function sendVacinationRequest() {
+async function sendVaccinationRequest() {
     const form = document.getElementById("vacination-request-form");
 
     if (!form.reportValidity()) {
@@ -82,7 +82,7 @@ async function sendVacinationRequest() {
     await sendRequest("/api/certify/v2/issue", oVacinationRequest)
 }
 
-function prefillParameters() {
+function prefillVaccineParameters() {
     const form = document.getElementById("vacination-request-form");
 
     // remove '#' from hash
