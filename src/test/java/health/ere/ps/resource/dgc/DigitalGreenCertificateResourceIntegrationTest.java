@@ -1,12 +1,16 @@
 package health.ere.ps.resource.dgc;
 
-import health.ere.ps.model.dgc.*;
+import health.ere.ps.model.dgc.CertificateRequest;
+import health.ere.ps.model.dgc.PersonName;
+import health.ere.ps.model.dgc.RecoveryCertificateRequest;
+import health.ere.ps.model.dgc.RecoveryEntry;
+import health.ere.ps.model.dgc.V;
+import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.service.dgc.DigitalGreenCertificateService;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectSpy;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -33,11 +37,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
     private URL url;
 
     @Test
-    @Disabled("Old servlet version due ot avalon dependencies")
-    /*
-     * TODO fix servlet-api
-     * Disabled because servlet is a old version
-     */
     void issueVaccinationCertificate() throws Exception {
 
         // model copied from DigitalGreenCertificateServiceIntegrationTest
@@ -113,11 +112,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
     }
 
     @Test
-    @Disabled("Old servlet version due to avalon dependencies")
-    /*
-     * TODO fix servlet-api
-     * Disabled because servlet is a old version
-     */
     void issueRecoverCertificate() throws Exception {
 
         // model copied from DigitalGreenCertificateServiceIntegrationTest
