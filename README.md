@@ -1,6 +1,9 @@
 # dgc-ps-app
 DGC Primary System Desktop Client Application of the Gematik TI
 
+### Set Up Video
+
+https://www.youtube.com/watch?v=0Cyj9nBQzO0
 
 ### Overview
 The dgc-ps-app is comprised of two main components. 
