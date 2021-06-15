@@ -4,6 +4,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -98,7 +99,9 @@ public class IdpClientTest {
                 appConfig.getIdpConnectorTlsCertTustStorePwd());
     }
 
+
     @Test
+    @Disabled("This test will only work in the Telematik RU Infrastructure")
     public void test_Successful_Idp_Login_With_Connector_Smcb() throws IdpJoseException,
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
             ConnectorCardsException {
