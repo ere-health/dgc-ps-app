@@ -21,6 +21,7 @@ import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
 import health.ere.ps.exception.idp.IdpJoseException;
 import health.ere.ps.model.idp.client.IdpTokenResult;
+import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
@@ -113,7 +114,7 @@ public class IdpClientTest {
         X509Certificate x509Certificate = cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId,
                 clientSystem, workplace, cardHandle.get());
 
-        IdpTokenResult idpTokenResult = idpClient.login(x509Certificate);
+        IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));
 
         Assertions.assertNotNull(idpTokenResult, "Idp Token result present.");
         Assertions.assertNotNull(idpTokenResult.getAccessToken(), "Access Token present");

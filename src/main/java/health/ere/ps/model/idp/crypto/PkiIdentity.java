@@ -10,6 +10,10 @@ public class PkiIdentity {
     private Optional<String> keyId;
     private Optional<String> use;
 
+    public PkiIdentity(X509Certificate certificate) {
+        this.setCertificate(certificate);
+    }
+
     public PkiIdentity(X509Certificate certificate, PrivateKey privateKey, Optional<String> keyId,
                        Optional<String> use) {
         this.setCertificate(certificate);
