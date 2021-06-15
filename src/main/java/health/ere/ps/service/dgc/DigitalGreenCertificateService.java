@@ -69,7 +69,7 @@ public class DigitalGreenCertificateService {
      * @param gn  given name
      * @param dob date of birth
      * @param id administering instance id
-     * @param tg illness
+     * @param tg disease
      * @param vp vaccine
      * @param mp product
      * @param ma manufacturer
@@ -115,7 +115,7 @@ public class DigitalGreenCertificateService {
      * @param gn  given name
      * @param dob date of birth
      * @param id  administering instance id
-     * @param tg  illness
+     * @param tg  disease
      * @param fr  date of test result, that has been positive
      * @param is  issuer of certificate
      * @param df  certificate validity date beginning

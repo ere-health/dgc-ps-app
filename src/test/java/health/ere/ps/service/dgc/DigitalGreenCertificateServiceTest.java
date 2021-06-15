@@ -130,6 +130,7 @@ class DigitalGreenCertificateServiceTest {
 
         byte[] response = new byte[]{123, 124, 125};
 
+        // doReturn because of the null check in issuePdf
         doReturn(response).when(digitalGreenCertificateService).issuePdf(vaccinationCertificateRequest);
 
         assertEquals(response, digitalGreenCertificateService.issueVaccinationCertificatePdf(fn, gn, dob, id, tg, vp, mp,
@@ -174,6 +175,7 @@ class DigitalGreenCertificateServiceTest {
 
         recoveryCertificateRequest.setR(Collections.singletonList(r));
 
+        // doReturn because of the null check in issuePdf
         doReturn(bytes).when(digitalGreenCertificateService).issuePdf(recoveryCertificateRequest);
 
         assertSame(bytes, digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df,

@@ -8,6 +8,9 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Provider to use LocalDate as (Query)Parameter in resources.
+ */
 @Provider
 public class LocalDateParamConverterProvider implements ParamConverterProvider {
     @Override
