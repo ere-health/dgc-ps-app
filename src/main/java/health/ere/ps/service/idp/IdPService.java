@@ -1,5 +1,6 @@
 package health.ere.ps.service.idp;
 
+import health.ere.ps.model.idp.crypto.PkiIdentity;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.security.cert.X509Certificate;
@@ -87,7 +88,7 @@ public class IdPService {
                             appConfig.getClientSystem(), appConfig.getWorkplace(),
                             cardHandle.get());
 
-            IdpTokenResult idpTokenResult = idpClient.login(x509Certificate);
+            IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));
             requestBearerTokenFromIdpEvent.setBearerToken(idpTokenResult.getAccessToken().getRawString());
         } catch(IdpClientException | IdpException | IdpJoseException |
                 ConnectorCardCertificateReadException | ConnectorCardsException e) {
