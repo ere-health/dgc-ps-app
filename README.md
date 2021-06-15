@@ -5,6 +5,18 @@ DGC Primary System Desktop Client Application of the Gematik TI
 
 https://www.youtube.com/watch?v=0Cyj9nBQzO0
 
+### Result for the doctor
+
+![](img/browser-pdf.png)
+
+Our solution will show the pdf to the doctor.
+ 
+### Result for the patient
+
+![](img/impfzertifikat-anonymized.png)
+
+In the end the patient can scan the QR code with the [Corona-Warn-App](https://github.com/corona-warn-app), the [CovPass app Android](https://play.google.com/store/apps/details?id=de.rki.covpass.app) or [iOS](https://apps.apple.com/de/app/covpass/id1566140352)
+
 ### Overview
 The dgc-ps-app is comprised of two main components. 
 
