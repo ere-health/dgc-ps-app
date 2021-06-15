@@ -26,6 +26,9 @@ public class PersonName {
     @Size(max = 50)
     public String gn;
 
+    @Size(max = 100)
+    public String fnt;
+
     public PersonName() {
         // default constructor for serialization
     }
@@ -40,11 +43,12 @@ public class PersonName {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PersonName that = (PersonName) o;
-        return Objects.equals(fn, that.fn) && Objects.equals(gn, that.gn);
+        return Objects.equals(fn, that.fn) && Objects.equals(gn, that.gn)
+                && Objects.equals(fnt, that.fnt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fn, gn);
+        return Objects.hash(fn, gn, fnt);
     }
 }

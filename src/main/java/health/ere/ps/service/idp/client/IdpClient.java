@@ -73,7 +73,6 @@ import health.ere.ps.model.idp.client.IdpTokenResult;
 import health.ere.ps.model.idp.client.ImpfnachweisAuthenticationRequest;
 import health.ere.ps.model.idp.client.ImpfnachweisAuthorizationResponse;
 import health.ere.ps.model.idp.client.TokenRequest;
-import health.ere.ps.model.idp.client.TokenRequest.TokenRequestBuilder;
 import health.ere.ps.model.idp.client.authentication.AuthenticationChallenge;
 import health.ere.ps.model.idp.client.authentication.AuthenticationResponseBuilder;
 import health.ere.ps.model.idp.client.brainPoolExtension.BrainpoolAlgorithmSuiteIdentifiers;
@@ -126,7 +125,7 @@ public class IdpClient implements IIdpClient {
     private String redirectUrl;
     private String discoveryDocumentUrl;
     private boolean shouldVerifyState;
-    private Set<IdpScope> scopes = Set.of(IdpScope.OPENID/*, IdpScope.EREZEPT*/);
+    private Set<IdpScope> scopes = Set.of(IdpScope.OPENID);
     private CodeChallengeMethod codeChallengeMethod = CodeChallengeMethod.S256;
 
     private DiscoveryDocumentResponse discoveryDocumentResponse;

@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public class VaccinationCertificateRequest extends CertificateRequestBase {
     public List<V> v;
+    public String ver = "1.0.1";
 
     @Override
     public boolean equals(Object o) {
