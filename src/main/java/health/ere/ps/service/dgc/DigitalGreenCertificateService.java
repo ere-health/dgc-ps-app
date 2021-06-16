@@ -1,10 +1,10 @@
 package health.ere.ps.service.dgc;
 
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
-import health.ere.ps.exception.dgc.DgcCertificateServiceAuthenticationException;
-import health.ere.ps.exception.dgc.DgcCertificateServiceException;
-import health.ere.ps.exception.dgc.DgcInternalAuthenticationException;
-import health.ere.ps.exception.dgc.DgcInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.V;
@@ -21,7 +21,6 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.enterprise.event.Observes;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -143,24 +142,24 @@ public class DigitalGreenCertificateService {
                 try {
                     return response.readEntity(InputStream.class).readAllBytes();
                 } catch (IOException ioe) {
-                    throw new DgcCertificateServiceException(100200, "Could not read response from certificate service");
+                    throw new DigitalGreenCertificateCertificateServiceException(100200, "Could not read response from certificate service");
                 }
             }
             case 400:
             case 406: {
-                throw new DgcInvalidParametersException(100000 + response.getStatus(), "Invalid parameters in request" +
+                throw new DigitalGreenCertificateInvalidParametersException(100000 + response.getStatus(), "Invalid parameters in request" +
                         " to certificate service");
             }
             case 401:
             case 403: {
-                throw new DgcCertificateServiceAuthenticationException(100000 + response.getStatus(), "Credentials " +
+                throw new DigitalGreenCertificateCertificateServiceAuthenticationException(100000 + response.getStatus(), "Credentials " +
                         "were not accepted by certificate service");
             }
             case 500: {
-                throw new DgcCertificateServiceException(100500, "Internal server error in certificate service");
+                throw new DigitalGreenCertificateCertificateServiceException(100500, "Internal server error in certificate service");
             }
             default: {
-                throw new DgcCertificateServiceException(100000 + response.getStatus(), "Unspecified response from " +
+                throw new DigitalGreenCertificateCertificateServiceException(100000 + response.getStatus(), "Unspecified response from " +
                         "certificate service");
             }
         }
@@ -171,6 +170,6 @@ public class DigitalGreenCertificateService {
 
         requestBearerTokenFromIdp.fire(event);
 
-        return Optional.ofNullable(event.getBearerToken()).orElseThrow(DgcInternalAuthenticationException::new);
+        return Optional.ofNullable(event.getBearerToken()).orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);
     }
 }

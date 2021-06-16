@@ -1,10 +1,10 @@
 package health.ere.ps.service.dgc;
 
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
-import health.ere.ps.exception.dgc.DgcCertificateServiceAuthenticationException;
-import health.ere.ps.exception.dgc.DgcCertificateServiceException;
-import health.ere.ps.exception.dgc.DgcException;
-import health.ere.ps.exception.dgc.DgcInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.V;
@@ -60,13 +60,13 @@ class DigitalGreenCertificateServiceTest {
 
     @Test
     void issuePdfWithCertificateServiceException() {
-        issuePdfWithCertificateServiceException(401, DgcCertificateServiceAuthenticationException.class, 100401);
-        issuePdfWithCertificateServiceException(403, DgcCertificateServiceAuthenticationException.class, 100403);
-        issuePdfWithCertificateServiceException(400, DgcInvalidParametersException.class, 100400);
-        issuePdfWithCertificateServiceException(406, DgcInvalidParametersException.class, 100406);
-        issuePdfWithCertificateServiceException(500, DgcCertificateServiceException.class, 100500);
+        issuePdfWithCertificateServiceException(401, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100401);
+        issuePdfWithCertificateServiceException(403, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100403);
+        issuePdfWithCertificateServiceException(400, DigitalGreenCertificateInvalidParametersException.class, 100400);
+        issuePdfWithCertificateServiceException(406, DigitalGreenCertificateInvalidParametersException.class, 100406);
+        issuePdfWithCertificateServiceException(500, DigitalGreenCertificateCertificateServiceException.class, 100500);
         // other unknown codes
-        issuePdfWithCertificateServiceException(543, DgcCertificateServiceException.class, 100543);
+        issuePdfWithCertificateServiceException(543, DigitalGreenCertificateCertificateServiceException.class, 100543);
     }
 
 
@@ -125,7 +125,7 @@ class DigitalGreenCertificateServiceTest {
                 ma, dn, sd, dt));
     }
 
-    private void issuePdfWithCertificateServiceException(int responseCode, Class<? extends DgcException> expectedExceptionClass,
+    private void issuePdfWithCertificateServiceException(int responseCode, Class<? extends DigitalGreenCertificateException> expectedExceptionClass,
                                                          int expectedErrorCode) {
 
         CertificateRequest certificateRequest = mock(CertificateRequest.class);
@@ -134,10 +134,10 @@ class DigitalGreenCertificateServiceTest {
 
         when(response.getStatus()).thenReturn(responseCode);
 
-        DgcException dgcException = assertThrows(expectedExceptionClass
+        DigitalGreenCertificateException digitalGreenCertificateException = assertThrows(expectedExceptionClass
                 ,() -> digitalGreenCertificateService.issuePdf(certificateRequest));
 
-        assertEquals(expectedErrorCode, dgcException.getCode());
+        assertEquals(expectedErrorCode, digitalGreenCertificateException.getCode());
     }
 
     private Response mockAuthenticatedResponse(CertificateRequest certificateRequest) {

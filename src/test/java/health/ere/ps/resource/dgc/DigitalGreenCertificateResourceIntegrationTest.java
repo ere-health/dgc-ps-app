@@ -1,12 +1,12 @@
 package health.ere.ps.resource.dgc;
 
-import health.ere.ps.exception.dgc.DgcCertificateServiceAuthenticationException;
-import health.ere.ps.exception.dgc.DgcCertificateServiceException;
-import health.ere.ps.exception.dgc.DgcException;
-import health.ere.ps.exception.dgc.DgcInternalAuthenticationException;
-import health.ere.ps.exception.dgc.DgcInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
-import health.ere.ps.model.dgc.DgcError;
+import health.ere.ps.model.dgc.DigitalGreenCertificateError;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -191,16 +191,16 @@ class DigitalGreenCertificateResourceIntegrationTest {
     void testExceptionMapper() throws URISyntaxException {
         int code = 123456;
 
-        testExceptionMapper(new DgcInvalidParametersException(code, ""), 400, code);
-        testExceptionMapper(new DgcInternalAuthenticationException(), 401, 200401);
-        testExceptionMapper(new DgcCertificateServiceAuthenticationException(code, ""), 403, code);
-        testExceptionMapper(new DgcCertificateServiceException(code, ""), 500, code);
+        testExceptionMapper(new DigitalGreenCertificateInvalidParametersException(code, ""), 400, code);
+        testExceptionMapper(new DigitalGreenCertificateInternalAuthenticationException(), 401, 200401);
+        testExceptionMapper(new DigitalGreenCertificateCertificateServiceAuthenticationException(code, ""), 403, code);
+        testExceptionMapper(new DigitalGreenCertificateCertificateServiceException(code, ""), 500, code);
     }
 
-    private void testExceptionMapper(DgcException dgcException, int expectedResponseCode, int expectedErrorCode)
+    private void testExceptionMapper(DigitalGreenCertificateException digitalGreenCertificateException, int expectedResponseCode, int expectedErrorCode)
             throws URISyntaxException {
 
-        doThrow(dgcException).when(service).issuePdf(any());
+        doThrow(digitalGreenCertificateException).when(service).issuePdf(any());
 
         Client client = ClientBuilder.newBuilder().build();
 
@@ -210,8 +210,8 @@ class DigitalGreenCertificateResourceIntegrationTest {
 
         assertEquals(expectedResponseCode, response.getStatus());
 
-        DgcError dgcError = response.readEntity(DgcError.class);
+        DigitalGreenCertificateError digitalGreenCertificateError = response.readEntity(DigitalGreenCertificateError.class);
 
-        assertEquals(expectedErrorCode, dgcError.getCode());
+        assertEquals(expectedErrorCode, digitalGreenCertificateError.getCode());
     }
 }

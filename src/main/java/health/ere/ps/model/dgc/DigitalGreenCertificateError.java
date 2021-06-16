@@ -2,16 +2,19 @@ package health.ere.ps.model.dgc;
 
 import java.util.Objects;
 
-public class DgcError {
+/**
+ * Dto class for error responses.
+ */
+public class DigitalGreenCertificateError {
     private int code;
 
     private String message;
 
-    public DgcError() {
+    public DigitalGreenCertificateError() {
         // default constructor
     }
 
-    public DgcError(int code, String message) {
+    public DigitalGreenCertificateError(int code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -36,8 +39,8 @@ public class DgcError {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DgcError dgcError = (DgcError) o;
-        return code == dgcError.code && Objects.equals(message, dgcError.message);
+        DigitalGreenCertificateError digitalGreenCertificateError = (DigitalGreenCertificateError) o;
+        return code == digitalGreenCertificateError.code && Objects.equals(message, digitalGreenCertificateError.message);
     }
 
     @Override

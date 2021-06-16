@@ -5,8 +5,8 @@ package health.ere.ps.exception.dgc;
  * creation service.
  * Unknown exceptions should also be mapped to this exception.
  */
-public class DgcCertificateServiceException extends DgcException {
-    public DgcCertificateServiceException(int code, String message) {
+public class DigitalGreenCertificateCertificateServiceException extends DigitalGreenCertificateException {
+    public DigitalGreenCertificateCertificateServiceException(int code, String message) {
         super(code, message);
     }
 }
