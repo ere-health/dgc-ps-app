@@ -7,7 +7,7 @@ function prefillVaccineData(value) {
     /**
      * @type {HTMLFormElement}
      */
-    const form = document.getElementById("vacination-request-form");
+    const form = document.getElementById("vaccination-request-form");
     switch (value) {
         case "Biontech":
             form.elements["tg"].value = "840539006" // COVID19
@@ -54,7 +54,7 @@ function setCovid19ToField(field) {
 }
 
 async function sendVaccinationRequest() {
-    const form = document.getElementById("vacination-request-form");
+    const form = document.getElementById("vaccination-request-form");
 
     if (!form.reportValidity()) {
         return Promise.reject("invalid data");
@@ -83,7 +83,7 @@ async function sendVaccinationRequest() {
 }
 
 function prefillVaccineParameters() {
-    const form = document.getElementById("vacination-request-form");
+    const form = document.getElementById("vaccination-request-form");
 
     // remove '#' from hash
     const params = new URLSearchParams(window.location.hash.substring(1));
