@@ -4,6 +4,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
 import health.ere.ps.exception.idp.IdpJoseException;
 import health.ere.ps.model.idp.client.IdpTokenResult;
+import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
@@ -50,6 +52,9 @@ public class IdpClientTest {
 
     @ConfigProperty(name = "idp.connector.client.system.id")
     String clientSystem;
+
+    @ConfigProperty(name = "idp.connector.mandant.id")
+    String mandantId;
 
     @ConfigProperty(name = "idp.connector.workplace.id")
     String workplace;
@@ -94,7 +99,9 @@ public class IdpClientTest {
                 appConfig.getIdpConnectorTlsCertTustStorePwd());
     }
 
+
     @Test
+    @Disabled("This test will only work in the Telematik RU Infrastructure")
     public void test_Successful_Idp_Login_With_Connector_Smcb() throws IdpJoseException,
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
             ConnectorCardsException {
@@ -107,10 +114,10 @@ public class IdpClientTest {
         Optional<String> cardHandle = connectorCardsService.getConnectorCardHandle(
                 ConnectorCardsService.CardHandleType.SMC_B);
 
-        X509Certificate x509Certificate = cardCertificateReaderService.retrieveSmcbCardCertificate(clientId,
+        X509Certificate x509Certificate = cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId,
                 clientSystem, workplace, cardHandle.get());
 
-        IdpTokenResult idpTokenResult = idpClient.login(x509Certificate);
+        IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));
 
         Assertions.assertNotNull(idpTokenResult, "Idp Token result present.");
         Assertions.assertNotNull(idpTokenResult.getAccessToken(), "Access Token present");

@@ -26,8 +26,8 @@ public class InvocationContext {
      * @param clientSystemId client system
      * @param workplaceId    work place
      */
-    public InvocationContext(String clientId, String clientSystemId, String workplaceId) {
-        this.clientId = clientId;
+    public InvocationContext(String mandantId, String clientSystemId, String workplaceId) {
+        this.mandantId = mandantId;
         this.clientSystemId = clientSystemId;
         this.workplaceId = workplaceId;
     }
@@ -40,23 +40,15 @@ public class InvocationContext {
      * @param workplaceId    work place
      * @param userId       user Id
      */
-    public InvocationContext(String clientId, String clientSystemId, String workplaceId, String userId) {
-        this.clientId = clientId;
+    public InvocationContext(String mandantId, String clientSystemId, String workplaceId, String userId) {
+        this.mandantId = mandantId;
         this.clientSystemId = clientSystemId;
         this.workplaceId = workplaceId;
         this.userId = userId;
     }
 
-    public String getClientId() {
-        return clientId;
-    }
-
     public String getMandantId() {
         return mandantId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 
     public String getClientSystemId() {
@@ -105,7 +97,7 @@ public class InvocationContext {
      */
     public boolean isValidInvocationContext() {
         return (null != convertToContextType()
-                && StringUtils.isNotBlank(getClientId())
+                && StringUtils.isNotBlank(getMandantId())
                 && StringUtils.isNotBlank(getClientSystemId())
                 && StringUtils.isNotBlank(getWorkplaceId()));
     }

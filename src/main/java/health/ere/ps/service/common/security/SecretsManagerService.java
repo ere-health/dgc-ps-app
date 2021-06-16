@@ -166,7 +166,8 @@ public class SecretsManagerService {
                     sc.getSocketFactory());
 
         } catch (IOException e) {
-            throw new SecretsManagerException("SSL transport configuration error.", e);
+            // throw new SecretsManagerException("SSL transport configuration error.", e);
+            log.log(Level.SEVERE, "Could not configure SecretsManagerService", e);
         }
     }
 
