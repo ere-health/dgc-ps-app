@@ -5,6 +5,7 @@ package health.ere.ps.exception.dgc;
  */
 public class DigitalGreenCertificateInternalAuthenticationException extends DigitalGreenCertificateException {
     public DigitalGreenCertificateInternalAuthenticationException() {
+        // the error code offset 200000 indicated an error that originates in this application
         super(200401, "Could not get authentication token from internal connector");
     }
 }

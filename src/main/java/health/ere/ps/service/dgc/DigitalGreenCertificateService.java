@@ -137,6 +137,10 @@ public class DigitalGreenCertificateService {
                 .header("Authorization", "Bearer " + getToken())
                 .post(entity);
 
+        // the error codes in the exceptions reflect the response https status from the api request
+        // the offset is added to support future error codes; offset 100000 is used for errors that
+        // originate in the pdf creation webservice
+
         switch (response.getStatus()) {
             case 200: {
                 try {
