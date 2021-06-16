@@ -1,6 +1,12 @@
 package health.ere.ps.resource.dgc;
 
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
+import health.ere.ps.model.dgc.DigitalGreenCertificateError;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -18,13 +24,16 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @QuarkusTest
 class DigitalGreenCertificateResourceIntegrationTest {
@@ -228,5 +237,33 @@ class DigitalGreenCertificateResourceIntegrationTest {
 
         // after
         client.close();
+    }
+
+    @Test
+    void testExceptionMapper() throws URISyntaxException {
+        int code = 123456;
+
+        testExceptionMapper(new DigitalGreenCertificateInvalidParametersException(code, ""), 400, code);
+        testExceptionMapper(new DigitalGreenCertificateInternalAuthenticationException(), 401, 200401);
+        testExceptionMapper(new DigitalGreenCertificateCertificateServiceAuthenticationException(code, ""), 403, code);
+        testExceptionMapper(new DigitalGreenCertificateCertificateServiceException(code, ""), 500, code);
+    }
+
+    private void testExceptionMapper(DigitalGreenCertificateException digitalGreenCertificateException, int expectedResponseCode, int expectedErrorCode)
+            throws URISyntaxException {
+
+        doThrow(digitalGreenCertificateException).when(service).issuePdf(any());
+
+        Client client = ClientBuilder.newBuilder().build();
+
+        Response response = client.target(url.toURI().resolve("v2/recovered"))
+                .request("application/pdf")
+                .post(Entity.json("{}"));
+
+        assertEquals(expectedResponseCode, response.getStatus());
+
+        DigitalGreenCertificateError digitalGreenCertificateError = response.readEntity(DigitalGreenCertificateError.class);
+
+        assertEquals(expectedErrorCode, digitalGreenCertificateError.getCode());
     }
 }
