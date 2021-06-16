@@ -3,7 +3,11 @@ package health.ere.ps.service.dgc;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
-import health.ere.ps.model.dgc.*;
+import health.ere.ps.model.dgc.PersonName;
+import health.ere.ps.model.dgc.RecoveryCertificateRequest;
+import health.ere.ps.model.dgc.RecoveryEntry;
+import health.ere.ps.model.dgc.V;
+import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.model.idp.crypto.PkiKeyResolver;
 import health.ere.ps.utils.dgc.TokendIntegrationTestHelper;
@@ -20,12 +24,14 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 
 @QuarkusTest
 @TestProfile(LocalOfflineQuarkusTestProfile.class)
@@ -39,8 +45,6 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
     private String issuerApiUrl;
 
     private WireMockServer wireMockServer;
-
-    private String mockPath;
 
     private MappingBuilder serverMatcher;
     private byte[] response;
@@ -56,7 +60,6 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         if (!"localhost".equals(url.getHost())) {
             throw new RuntimeException("Testing is only possible for localhost urls");
         }
-        mockPath = url.getPath();
         wireMockServer = new WireMockServer(wireMockConfig().port(url.getPort()).bindAddress("localhost"));
         wireMockServer.start();
 
@@ -64,10 +67,11 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         String token = "testToken";
         mockTokenCreation(token);
 
-        response = new byte[]{};
-        serverMatcher = post(mockPath)
+        response = new byte[]{1, 2, 4, 8, 16};
+        serverMatcher = post(url.getPath())
                 .withHeader("Authorization", equalTo("Bearer " + token))
                 .withHeader("Accept", equalTo("application/pdf"))
+                .withHeader("Content-Type", equalTo("application/vnd.dgc.v1+json"))
                 .willReturn(ok().withBody(response));
     }
 
@@ -83,7 +87,7 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
 
         // mock response
 
-        String dob = "1921-01-01";
+        LocalDate dob = LocalDate.of(1921, 1, 1);
         String name = "Testname Lastname";
         String givenName = "Testgiven Name";
         String id = "testId";
@@ -93,11 +97,9 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         String ma = "testMa";
         int dn = 123;
         int sd = 345;
-        String dt = "2021-01-01";
-        byte[] response = new byte[]{};
+        LocalDate dt = LocalDate.of(2021, 1, 1);
 
         wireMockServer.stubFor(serverMatcher
-                .withHeader("Content-Type", equalTo("application/vnd.dgc.v1+json"))
                 .withRequestBody(equalToJson("{\"nam\":{" +
                         "\"fn\": \"" + name + "\"," +
                         "\"gn\": \"" + givenName + "\"" +
@@ -126,11 +128,8 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         v.dt = dt;
 
         final VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
-        final PersonName personName = new PersonName();
-        personName.gn = givenName;
-        personName.fn = name;
-        vaccinationCertificateRequest.nam = personName;
-        vaccinationCertificateRequest.dob = dob;
+        vaccinationCertificateRequest.setNam(new PersonName(name, givenName));
+        vaccinationCertificateRequest.setDob(dob);
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
         byte[] actualResponse = digitalGreenCertificateService.issuePdf(vaccinationCertificateRequest);
@@ -139,8 +138,7 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
     }
 
     @Test
-    void issueRecoverCertificate() {
-
+    void issueRecoveryCertificate() {
         // mock response
 
         final String testId = "testId";
@@ -150,11 +148,11 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         final String testDateDu = "2022-01-01";
         final String testDateDf = "2021-01-01";
         final String testDataDob = "1921-01-01";
-        final String firstName = "Testname Lastname";
+        final String name = "Testname";
         final String givenName = "Testgiven Name";
 
         final String jsonContentResponse = "{\"nam\":{" +
-                "\"fn\": \"" + firstName + "\"," +
+                "\"fn\": \"" + name + "\"," +
                 "\"gn\": \"" + givenName + "\"" +
                 "}," +
                 "\"dob\": \"" + testDataDob + "\"," +
@@ -167,14 +165,10 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
                 "\"df\": \"" + testDateDf + "\""+
                 "}]}";
         wireMockServer.stubFor(serverMatcher
-                .withHeader("Content-Type", equalTo("application/vnd.dgc.v1+json"))
                 .withRequestBody(equalToJson(jsonContentResponse))
                 .withRequestBody(matchingJsonPath("r.length()", equalTo("1")))
         );
 
-        final PersonName testDataPersonName = new PersonName();
-        testDataPersonName.fn = firstName;
-        testDataPersonName.gn = givenName;
         final RecoveryEntry recoveryEntry = new RecoveryEntry();
         recoveryEntry.setId(testId);
         recoveryEntry.setTg(testTg);
@@ -184,8 +178,8 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         recoveryEntry.setDf(LocalDate.parse(testDateDf));
 
         final RecoveryCertificateRequest certificateRequest = new RecoveryCertificateRequest();
-        certificateRequest.setNam(testDataPersonName);
-        certificateRequest.dob(LocalDate.parse(testDataDob));
+        certificateRequest.setNam(new PersonName(name, givenName));
+        certificateRequest.setDob(LocalDate.parse(testDataDob));
         certificateRequest.addRItem(recoveryEntry);
 
         final byte[] actualResponse = digitalGreenCertificateService.issuePdf(certificateRequest);
@@ -193,4 +187,42 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         assertArrayEquals(response, actualResponse);
     }
 
+    @Test
+    void issueRecoveryCertificateFromIndividualParams() {
+        // mock response
+
+        final String testId = "testId";
+        final String testTg = "testTg";
+        final String testIs = "testIs";
+        final String testDateFr = "2023-01-01";
+        final String testDateDu = "2022-01-01";
+        final String testDateDf = "2021-01-01";
+        final String testDataDob = "1921-01-01";
+        final String name = "Testname";
+        final String givenName = "Testgiven Name";
+
+        final String jsonContentResponse = "{\"nam\":{" +
+                "\"fn\": \"" + name + "\"," +
+                "\"gn\": \"" + givenName + "\"" +
+                "}," +
+                "\"dob\": \"" + testDataDob + "\"," +
+                "\"r\": [{" +
+                "\"id\": \"" + testId + "\"," +
+                "\"tg\": \"" + testTg + "\"," +
+                "\"is\": \"" + testIs + "\"," +
+                "\"fr\": \"" + testDateFr + "\"," +
+                "\"du\": \"" + testDateDu + "\"," +
+                "\"df\": \"" + testDateDf + "\""+
+                "}]}";
+        wireMockServer.stubFor(serverMatcher
+                .withRequestBody(equalToJson(jsonContentResponse))
+                .withRequestBody(matchingJsonPath("r.length()", equalTo("1")))
+        );
+
+        final byte[] actualResponse = digitalGreenCertificateService.issueRecoveryCertificatePdf(name, givenName,
+                LocalDate.parse(testDataDob), testId, testTg, LocalDate.parse(testDateFr), testIs,
+                LocalDate.parse(testDateDf), LocalDate.parse(testDateDu));
+        assertNotNull(actualResponse);
+        assertArrayEquals(response, actualResponse);
+    }
 }

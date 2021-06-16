@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 import java.util.logging.Logger;
 
 @Path("/api/certify/v2")
@@ -27,10 +28,10 @@ public class DigitalGreenCertificateResource {
 
     @Path("/issue")
     @GET
-    public Response issue(@QueryParam("fn") String fn, @QueryParam("gn") String gn, @QueryParam("dob") String dob,
+    public Response issue(@QueryParam("fn") String fn, @QueryParam("gn") String gn, @QueryParam("dob") LocalDate dob,
                           @QueryParam("id") String id, @QueryParam("tg") String tg, @QueryParam("vp") String vp,
                           @QueryParam("mp") String mp, @QueryParam("ma") String ma, @QueryParam("dn") Integer dn,
-                          @QueryParam("sd") Integer sd, @QueryParam("dt") String dt) {
+                          @QueryParam("sd") Integer sd, @QueryParam("dt") LocalDate dt) {
 
         return okPdf(digitalGreenCertificateService.issueVaccinationCertificatePdf(fn, gn, dob, id, tg, vp, mp, ma,
                 dn, sd, dt));
@@ -40,6 +41,16 @@ public class DigitalGreenCertificateResource {
     @POST
     public Response recovered(RecoveryCertificateRequest recoveryCertificateRequest) {
         return okPdf(digitalGreenCertificateService.issuePdf(recoveryCertificateRequest));
+    }
+
+    @Path("/recovered")
+    @GET
+    public Response recovered(@QueryParam("fn") String fn, @QueryParam("gn") String gn,
+                              @QueryParam("dob") LocalDate dob, @QueryParam("id") String id,
+                              @QueryParam("tg") String tg, @QueryParam("fr") LocalDate fr, @QueryParam("is") String is,
+                              @QueryParam("df") LocalDate df, @QueryParam("du") LocalDate du) {
+
+        return okPdf(digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df, du));
     }
 
     private static Response okPdf(byte[] bytes) {

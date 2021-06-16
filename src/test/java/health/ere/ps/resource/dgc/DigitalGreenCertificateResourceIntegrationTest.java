@@ -1,6 +1,12 @@
 package health.ere.ps.resource.dgc;
 
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
+import health.ere.ps.model.dgc.DigitalGreenCertificateError;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -18,13 +24,16 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 
 @QuarkusTest
 class DigitalGreenCertificateResourceIntegrationTest {
@@ -40,7 +49,7 @@ class DigitalGreenCertificateResourceIntegrationTest {
     void issueVaccinationCertificate() throws Exception {
 
         // model copied from DigitalGreenCertificateServiceIntegrationTest
-        String dob = "1921-01-01";
+        LocalDate dob = LocalDate.of(1921, 1, 1);
         String name = "Testname Lastname";
         String givenName = "Testgiven Name";
         String id = "testId";
@@ -50,8 +59,8 @@ class DigitalGreenCertificateResourceIntegrationTest {
         String ma = "testMa";
         int dn = 123;
         int sd = 345;
-        String dt = "2021-01-01";
-        byte[] pdf = new byte[]{};
+        LocalDate dt = LocalDate.of(2021, 1, 1);
+        byte[] pdf = new byte[]{1, 2, 3, 4};
 
         final String requestBody = "{\"nam\":{" +
                 "\"fn\": \"" + name + "\"," +
@@ -69,7 +78,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
                 "\"dt\": \"" + dt + "\"" +
                 "}]}";
 
-
         final V v = new V();
         v.id = id;
         v.tg = tg;
@@ -80,13 +88,9 @@ class DigitalGreenCertificateResourceIntegrationTest {
         v.sd = sd;
         v.dt = dt;
 
-        final PersonName personName = new PersonName();
-        personName.gn = givenName;
-        personName.fn = name;
-
         final VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
-        vaccinationCertificateRequest.nam = personName;
-        vaccinationCertificateRequest.dob = dob;
+        vaccinationCertificateRequest.setNam(new PersonName(name, givenName));
+        vaccinationCertificateRequest.setDob(dob);
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
         Client client = ClientBuilder.newBuilder().build();
@@ -112,7 +116,7 @@ class DigitalGreenCertificateResourceIntegrationTest {
     }
 
     @Test
-    void issueRecoverCertificate() throws Exception {
+    void issueRecoveryCertificate() throws Exception {
 
         // model copied from DigitalGreenCertificateServiceIntegrationTest
         final String testId = "testId";
@@ -122,11 +126,11 @@ class DigitalGreenCertificateResourceIntegrationTest {
         final String testDateDu = "2022-01-01";
         final String testDateDf = "2021-01-01";
         final String testDataDob = "1921-01-01";
-        final String firstName = "Testname Lastname";
+        final String familyName = "Testname Lastname";
         final String givenName = "Testgiven Name";
 
         final String requestBody = "{\"nam\":{" +
-                "\"fn\": \"" + firstName + "\"," +
+                "\"fn\": \"" + familyName + "\"," +
                 "\"gn\": \"" + givenName + "\"" +
                 "}," +
                 "\"dob\": \"" + testDataDob + "\"," +
@@ -140,9 +144,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
                 "}]}";
         Client client = ClientBuilder.newBuilder().build();
 
-        final PersonName testDataPersonName = new PersonName();
-        testDataPersonName.fn = firstName;
-        testDataPersonName.gn = givenName;
         final RecoveryEntry recoveryEntry = new RecoveryEntry();
         recoveryEntry.setId(testId);
         recoveryEntry.setTg(testTg);
@@ -152,11 +153,11 @@ class DigitalGreenCertificateResourceIntegrationTest {
         recoveryEntry.setDf(LocalDate.parse(testDateDf));
 
         final RecoveryCertificateRequest certificateRequest = new RecoveryCertificateRequest();
-        certificateRequest.setNam(testDataPersonName);
-        certificateRequest.dob(LocalDate.parse(testDataDob));
+        certificateRequest.setNam(new PersonName(familyName, givenName));
+        certificateRequest.setDob(LocalDate.parse(testDataDob));
         certificateRequest.addRItem(recoveryEntry);
 
-        byte[] pdf = new byte[]{};
+        byte[] pdf = new byte[]{34, 56};
 
         // mock response
         final ArgumentCaptor<CertificateRequest> ac = ArgumentCaptor.forClass(CertificateRequest.class);
@@ -176,5 +177,93 @@ class DigitalGreenCertificateResourceIntegrationTest {
 
         // after
         client.close();
+    }
+
+    @Test
+    void issueRecoveryCertificateFromIndividualParams() throws Exception {
+
+        // model copied from DigitalGreenCertificateServiceIntegrationTest
+        final String testId = "testId";
+        final String testTg = "testTg";
+        final String testIs = "testIs";
+        final String testDateFr = "2023-01-01";
+        final String testDateDu = "2022-01-01";
+        final String testDateDf = "2021-01-01";
+        final String testDataDob = "1921-01-01";
+        final String familyName = "Testname Lastname";
+        final String givenName = "Testgiven Name";
+
+        Client client = ClientBuilder.newBuilder().build();
+
+        final RecoveryEntry recoveryEntry = new RecoveryEntry();
+        recoveryEntry.setId(testId);
+        recoveryEntry.setTg(testTg);
+        recoveryEntry.setIs(testIs);
+        recoveryEntry.setFr(LocalDate.parse(testDateFr));
+        recoveryEntry.setDu(LocalDate.parse(testDateDu));
+        recoveryEntry.setDf(LocalDate.parse(testDateDf));
+
+        final RecoveryCertificateRequest certificateRequest = new RecoveryCertificateRequest();
+        certificateRequest.setNam(new PersonName(familyName, givenName));
+        certificateRequest.setDob(LocalDate.parse(testDataDob));
+        certificateRequest.addRItem(recoveryEntry);
+
+        byte[] pdf = new byte[]{34, 56};
+
+        // mock response
+        final ArgumentCaptor<CertificateRequest> ac = ArgumentCaptor.forClass(CertificateRequest.class);
+        // doReturn because of the null check in issuePdf
+        doReturn(pdf).when(service).issuePdf(ac.capture());
+
+        Response response = client.target(url.toURI().resolve("v2/recovered"))
+                .queryParam("fn", familyName)
+                .queryParam("gn", givenName)
+                .queryParam("dob", testDataDob)
+                .queryParam("id", testId)
+                .queryParam("tg", testTg)
+                .queryParam("fr", testDateFr)
+                .queryParam("is", testIs)
+                .queryParam("df", testDateDf)
+                .queryParam("du", testDateDu)
+                .request("application/pdf")
+                .get();
+
+        // then
+        assertEquals(200, response.getStatus());
+        assertArrayEquals(pdf, response.readEntity(byte[].class));
+
+        CertificateRequest value = ac.getValue();
+        assertEquals(value, certificateRequest);
+
+        // after
+        client.close();
+    }
+
+    @Test
+    void testExceptionMapper() throws URISyntaxException {
+        int code = 123456;
+
+        testExceptionMapper(new DigitalGreenCertificateInvalidParametersException(code, ""), 400, code);
+        testExceptionMapper(new DigitalGreenCertificateInternalAuthenticationException(), 401, 200401);
+        testExceptionMapper(new DigitalGreenCertificateCertificateServiceAuthenticationException(code, ""), 403, code);
+        testExceptionMapper(new DigitalGreenCertificateCertificateServiceException(code, ""), 500, code);
+    }
+
+    private void testExceptionMapper(DigitalGreenCertificateException digitalGreenCertificateException, int expectedResponseCode, int expectedErrorCode)
+            throws URISyntaxException {
+
+        doThrow(digitalGreenCertificateException).when(service).issuePdf(any());
+
+        Client client = ClientBuilder.newBuilder().build();
+
+        Response response = client.target(url.toURI().resolve("v2/recovered"))
+                .request("application/pdf")
+                .post(Entity.json("{}"));
+
+        assertEquals(expectedResponseCode, response.getStatus());
+
+        DigitalGreenCertificateError digitalGreenCertificateError = response.readEntity(DigitalGreenCertificateError.class);
+
+        assertEquals(expectedErrorCode, digitalGreenCertificateError.getCode());
     }
 }

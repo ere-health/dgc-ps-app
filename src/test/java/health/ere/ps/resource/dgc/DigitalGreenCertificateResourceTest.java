@@ -13,9 +13,17 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DigitalGreenCertificateResourceTest {
@@ -54,7 +62,7 @@ class DigitalGreenCertificateResourceTest {
 
         String gn = "testGn";
 
-        String dob = "testDob";
+        LocalDate dob = LocalDate.of(1970, 10, 15);
 
         String id = "testId";
 
@@ -70,7 +78,7 @@ class DigitalGreenCertificateResourceTest {
 
         Integer sd = 34;
 
-        String dt = "testDt";
+        LocalDate dt = LocalDate.of(2020, 10, 10);
 
         byte[] bytes = new byte[]{123};
 
@@ -99,5 +107,37 @@ class DigitalGreenCertificateResourceTest {
         assertSame(response.getEntity(), bytes);
 
         verifyNoInteractions(certificateRequest);
+    }
+
+    @Test
+    void issueRecoveryCertificateFromParameters() {
+        String fn = "testFn";
+
+        String gn = "testGn";
+
+        LocalDate dob = LocalDate.of(1990, 4, 5);
+
+        String id = "testId";
+
+        String tg = "testTg";
+
+        LocalDate fr = LocalDate.of(2021, 6, 10);
+
+        String is = "testIs";
+
+        LocalDate df = LocalDate.of(2021, 7, 1);
+
+        LocalDate du = LocalDate.of(2022, 1, 1);
+
+        byte[] bytes = new byte[] {2, 4, 6, 8};
+
+        when(digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df, du))
+                .thenReturn(bytes);
+
+        Response response = digitalGreenCertificateResource.recovered(fn, gn, dob, id, tg, fr, is, df, du);
+
+        assertNotNull(response);
+        assertEquals("application/pdf", response.getMediaType().toString());
+        assertSame(bytes, response.getEntity());
     }
 }

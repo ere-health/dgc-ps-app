@@ -1,5 +1,6 @@
 package health.ere.ps.service.idp;
 
+import health.ere.ps.model.idp.crypto.PkiIdentity;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.security.cert.X509Certificate;
