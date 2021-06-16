@@ -42,7 +42,6 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 @TestProfile(LocalOfflineQuarkusTestProfile.class)
-@ExtendWith(PkiKeyResolver.class)
 class DigitalGreenCertificateServiceIntegrationTest {
 
     @Inject
@@ -84,7 +83,7 @@ class DigitalGreenCertificateServiceIntegrationTest {
         digitalGreenCertificateService.setRequestBearerTokenFromIdp(requestBearerTokenFromIdpEvent);
 
         response = new byte[]{1, 2, 4, 8, 16};
-        serverMatcher = post(url.getPath())
+        serverMatcher = post("/issue/api/certify/v2/issue")
                 .withHeader("Authorization", equalTo("Bearer " + token))
                 .withHeader("Accept", equalTo("application/pdf"))
                 .withHeader("Content-Type", equalTo("application/vnd.dgc.v1+json"))

@@ -213,6 +213,7 @@ class DigitalGreenCertificateServiceTest {
         digitalGreenCertificateService.issuerAPIUrl = issuerAPIUrl;
         digitalGreenCertificateService.client = client;
         when(client.target(issuerAPIUrl)).thenReturn(webTarget);
+        when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
         when(webTarget.request("application/pdf")).thenReturn(builder1);
         when(builder1.header("Authorization", "Bearer " + token)).thenReturn(builder2);
         when(builder2.post(Entity.entity(certificateRequest, "application/vnd.dgc.v1+json"))).thenReturn(response);
