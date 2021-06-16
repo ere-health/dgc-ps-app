@@ -69,6 +69,7 @@ async function sendVaccinationRequest() {
         "dob": form.elements["dob"].value,
         "v": [
             {
+                "id": form.elements["id"].value,
                 "tg": form.elements["tg"].value,
                 "vp": form.elements["vp"].value,
                 "mp": form.elements["mp"].value,
@@ -88,7 +89,7 @@ function prefillVaccineParameters() {
     // remove '#' from hash
     const params = new URLSearchParams(window.location.hash.substring(1));
 
-    for (const name of ["fn", "gn", "dob", "tg", "vp", "mp", "ma", "dn", "sd", "sd"]) {
+    for (const name of ["fn", "gn", "dob", "id", "tg", "vp", "mp", "ma", "dn", "sd", "sd"]) {
         // setting the values to null will cause the validation to be triggered
         if (params.has(name)) {
             form.elements[name].value = params.get(name);
