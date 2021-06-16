@@ -77,13 +77,13 @@ the application.
   > http://localhost:8080/dgc/covid-19-certificate.html
   
 ### Environment Variables
-#### Development Mode
-For dev mode purposes, the environment variables referenced in the application.properties file 
-are located in a file named .env. This file should be located in the root project folder 
-(ere-ps-app).
 
-In regards to file and directory paths, configure the values for the environment variables in the
-.env file to reference paths on your local computer.
+For configuration purposes, the environment variables referenced in the `application.properties` file
+are located in a file named `.env`. This file should be located in the root project folder
+(dgc-ps-app).
+
+If needed and the `.env` file is not present, create a copy of the file `.env-example` with name `.env`.
+In regard to file and directory paths, configure the values for the environment variables in the
+`.env` file to reference paths on your local computer.
 
 > Important! Configure the .env file to be ignored and not checked into the source code repository.
-
