@@ -16,12 +16,20 @@ import org.jose4j.lang.JoseException;
 
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.AuthSignatureService;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.AuthSignatureServicePortType;
+import de.gematik.ws.conn.authsignatureservice.wsdl.v7.FaultMessage;
+import de.gematik.ws.conn.cardservice.v8.AuthorizeSmc;
+import de.gematik.ws.conn.cardservice.v8.PinStatusEnum;
+import de.gematik.ws.conn.cardservice.wsdl.v8.CardService;
+import de.gematik.ws.conn.cardservice.wsdl.v8.CardServicePortType;
+import de.gematik.ws.conn.cardservicecommon.v2.PinResultEnum;
+import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -59,6 +67,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.crypto.Data;
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Holder;
 
 import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
@@ -101,6 +110,9 @@ public class IdpClient implements IIdpClient {
     @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
     String titusClientCertificate;
 
+    @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
+    String titusClientCertificatePassword;
+
     @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
     String authSignatureServiceEndpointAddress;
 
@@ -119,6 +131,9 @@ public class IdpClient implements IIdpClient {
     @ConfigProperty(name = "signature-service.context.userId", defaultValue = "")
     String signatureServiceContextUserId;
 
+    @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
+    String cardServiceEndpointAddress;
+
     SSLContext customSSLContext = null;
 
     private String clientId;
@@ -131,6 +146,7 @@ public class IdpClient implements IIdpClient {
     private DiscoveryDocumentResponse discoveryDocumentResponse;
 
     AuthSignatureServicePortType authSignatureService;
+    CardServicePortType cardService;
 
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -142,7 +158,7 @@ public class IdpClient implements IIdpClient {
             if (titusClientCertificate != null && !("".equals(titusClientCertificate))
                     && !("!".equals(titusClientCertificate))) {
                 try {
-                    setUpCustomSSLContext(new FileInputStream(titusClientCertificate));
+                    setUpCustomSSLContext(new FileInputStream(titusClientCertificate), titusClientCertificatePassword);
                 } catch(FileNotFoundException e) {
                     logger.error("Could not find titus file", e);
                 }
@@ -155,14 +171,26 @@ public class IdpClient implements IIdpClient {
             if (customSSLContext != null) {
                 bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                         customSSLContext.getSocketFactory());
-            }       
+            }
+
+            cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
+            /* Set endpoint to configured endpoint */
+            bp = (BindingProvider) cardService;
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, cardServiceEndpointAddress);
+            if (customSSLContext != null) {
+                bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
+                        customSSLContext.getSocketFactory());
+            } 
         } catch(Exception ex) {
-            logger.error("Could not init AuthSignatureService for IdpClient", ex);
+            logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
         }
     }
 
     public void setUpCustomSSLContext(InputStream p12Certificate) {
-        customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate);
+        setUpCustomSSLContext(p12Certificate);
+    }
+    public void setUpCustomSSLContext(InputStream p12Certificate, String password) {
+        customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, password);
     }
 
     public void init(String clientId, String redirectUrl, String discoveryDocumentUrl,
@@ -291,7 +319,28 @@ public class IdpClient implements IIdpClient {
             try {
                 signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
             } catch (JoseException e) {
-                throw new IdpJoseException(e);
+                if(e.getCause() instanceof FaultMessage) {
+                    FaultMessage authSignatureFaultMessage = (FaultMessage) e.getCause();
+                    // Zugriffsbedingungen nicht erfüllt
+                    boolean code4085 = authSignatureFaultMessage.getFaultInfo().getTrace().stream().anyMatch(t -> t.getCode().equals(BigInteger.valueOf(4085l)));
+                    if(code4085) {
+
+                        try {
+                            Holder<Status> status = new Holder<>();
+                            Holder<PinResultEnum> pinResultEnum = new Holder<>();
+                            Holder<BigInteger> error = new Holder<>();
+                            cardService.verifyPin(createContextType(), authSignatureServiceSmbcCardHandle, "PIN.SMC", status, pinResultEnum, error);
+                            // try again
+                            signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
+                        } catch (Exception e1) {
+                            throw new IdpJoseException(e);
+                        }
+                    } else {
+                        throw new IdpJoseException(e);
+                    }
+                } else {
+                    throw new IdpJoseException(e);
+                }
             }
             Client client = ClientBuilder.newClient();
             Response response;

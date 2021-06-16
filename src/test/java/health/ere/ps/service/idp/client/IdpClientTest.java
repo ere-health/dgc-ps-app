@@ -27,6 +27,7 @@ import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
+import health.ere.ps.ssl.SSLUtilities;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -101,7 +102,7 @@ public class IdpClientTest {
 
 
     @Test
-    @Disabled("This test will only work in the Telematik RU Infrastructure")
+    // @Disabled("This test will only work in the Telematik RU Infrastructure")
     public void test_Successful_Idp_Login_With_Connector_Smcb() throws IdpJoseException,
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
             ConnectorCardsException {
