@@ -26,8 +26,14 @@ public class PersonName {
     @Size(max = 50)
     public String gn;
 
-    @Size(max = 100)
-    public String fnt;
+    public PersonName() {
+        // default constructor for serialization
+    }
+
+    public PersonName(String fn, String gn) {
+        this.fn = fn;
+        this.gn = gn;
+    }
 
     @Override
     public boolean equals(Object o) {

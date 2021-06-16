@@ -7,6 +7,8 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
+import health.ere.ps.model.dgc.RecoveryCertificateRequest;
+import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,14 +72,13 @@ class DigitalGreenCertificateServiceTest {
         issuePdfWithCertificateServiceException(543, DigitalGreenCertificateCertificateServiceException.class, 100543);
     }
 
-
     @Test
     void issueVaccinationCertificate() {
         String fn = "testName";
 
         String gn = "testGivenName";
 
-        String dob = "testDob";
+        LocalDate dob = LocalDate.of(1967, 8, 9);
 
         String id = "testId";
 
@@ -92,17 +94,12 @@ class DigitalGreenCertificateServiceTest {
 
         Integer sd = 2;
 
-        String dt = "testDt";
+        LocalDate dt = LocalDate.of(2021, 3, 4);
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 
-        PersonName nam = new PersonName();
-
-        nam.fn = fn;
-        nam.gn = gn;
-
-        vaccinationCertificateRequest.nam = nam;
-        vaccinationCertificateRequest.dob = dob;
+        vaccinationCertificateRequest.setNam(new PersonName(fn, gn));
+        vaccinationCertificateRequest.setDob(dob);
 
         V v = new V();
 
@@ -119,10 +116,56 @@ class DigitalGreenCertificateServiceTest {
 
         byte[] response = new byte[]{123, 124, 125};
 
+        // doReturn because of the null check in issuePdf
         doReturn(response).when(digitalGreenCertificateService).issuePdf(vaccinationCertificateRequest);
 
         assertEquals(response, digitalGreenCertificateService.issueVaccinationCertificatePdf(fn, gn, dob, id, tg, vp, mp,
                 ma, dn, sd, dt));
+    }
+
+    @Test
+    void issueRecoveryCertificatePdf() {
+        String fn = "testFn";
+
+        String gn = "testGn";
+
+        LocalDate dob = LocalDate.of(2000, 1, 1);
+
+        String id = "testId";
+
+        String tg = "testTg";
+
+        LocalDate fr = LocalDate.of(2021, 5, 31);
+
+        String is = "testIs";
+
+        LocalDate df = LocalDate.of(2021, 7, 1);
+
+        LocalDate du = LocalDate.of(2022, 7, 1);
+
+        byte[] bytes = new byte[]{56, 67, 78};
+
+        RecoveryCertificateRequest recoveryCertificateRequest = new RecoveryCertificateRequest();
+
+        recoveryCertificateRequest.setNam(new PersonName(fn, gn));
+        recoveryCertificateRequest.setDob(dob);
+
+        RecoveryEntry r = new RecoveryEntry();
+
+        r.setId(id);
+        r.setTg(tg);
+        r.setFr(fr);
+        r.setIs(is);
+        r.setDf(df);
+        r.setDu(du);
+
+        recoveryCertificateRequest.setR(Collections.singletonList(r));
+
+        // doReturn because of the null check in issuePdf
+        doReturn(bytes).when(digitalGreenCertificateService).issuePdf(recoveryCertificateRequest);
+
+        assertSame(bytes, digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df,
+                du));
     }
 
     private void issuePdfWithCertificateServiceException(int responseCode, Class<? extends DigitalGreenCertificateException> expectedExceptionClass,

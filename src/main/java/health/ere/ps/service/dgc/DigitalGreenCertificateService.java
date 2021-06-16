@@ -7,6 +7,8 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthentication
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
+import health.ere.ps.model.dgc.RecoveryCertificateRequest;
+import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.ssl.SSLUtilities;
@@ -27,6 +29,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,11 +69,11 @@ public class DigitalGreenCertificateService {
     /**
      * Issue a certificate based on the given values.
      *
-     * @param fn  full name
+     * @param fn  (family) name
      * @param gn  given name
      * @param dob date of birth
      * @param id administering instance id
-     * @param tg illness
+     * @param tg disease
      * @param vp vaccine
      * @param mp product
      * @param ma manufacturer
@@ -79,20 +82,14 @@ public class DigitalGreenCertificateService {
      * @param dt vaccination date
      * @return bytes of certificate pdf
      */
-    public byte[] issueVaccinationCertificatePdf(String fn, String gn, String dob,
+    public byte[] issueVaccinationCertificatePdf(String fn, String gn, LocalDate dob,
                                                  String id, String tg, String vp, String mp, String ma, Integer dn,
-                                                 Integer sd, String dt) {
+                                                 Integer sd, LocalDate dt) {
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 
-        vaccinationCertificateRequest.dob = dob;
-
-        PersonName nam = new PersonName();
-
-        nam.gn = gn;
-        nam.fn = fn;
-
-        vaccinationCertificateRequest.nam = nam;
+        vaccinationCertificateRequest.setDob(dob);
+        vaccinationCertificateRequest.setNam(new PersonName(fn, gn));
 
         V v = new V();
 
@@ -110,9 +107,40 @@ public class DigitalGreenCertificateService {
         return issuePdf(vaccinationCertificateRequest);
     }
 
-    private String standardize(String fn) {
-        // TODO: implement me in a better way
-        return fn.toUpperCase();
+    /**
+     * Create a recovery certificate pdf.
+     *
+     * @param fn  (family) name
+     * @param gn  given name
+     * @param dob date of birth
+     * @param id  administering instance id
+     * @param tg  disease
+     * @param fr  date of test result, that has been positive
+     * @param is  issuer of certificate
+     * @param df  certificate validity date beginning
+     * @param du  certificate validity date ending
+     * @return bytes of certificate pdf
+     */
+    public byte[] issueRecoveryCertificatePdf(String fn, String gn, LocalDate dob, String id, String tg, LocalDate fr,
+                                              String is, LocalDate df, LocalDate du) {
+
+        RecoveryCertificateRequest recoveryCertificateRequest = new RecoveryCertificateRequest();
+
+        recoveryCertificateRequest.setNam(new PersonName(fn, gn));
+        recoveryCertificateRequest.setDob(dob);
+
+        RecoveryEntry r = new RecoveryEntry();
+
+        r.setId(id);
+        r.setTg(tg);
+        r.setFr(fr);
+        r.setIs(is);
+        r.setDf(df);
+        r.setDu(du);
+
+        recoveryCertificateRequest.setR(Collections.singletonList(r));
+
+        return issuePdf(recoveryCertificateRequest);
     }
 
     /**
@@ -125,10 +153,7 @@ public class DigitalGreenCertificateService {
     public byte[] issuePdf(@NotNull CertificateRequest requestData) {
 
         Objects.requireNonNull(requestData); // can removed, if a validator is running.
-        if(requestData instanceof VaccinationCertificateRequest) {
-            VaccinationCertificateRequest vaccinationCertificateRequest = (VaccinationCertificateRequest) requestData;
-            vaccinationCertificateRequest.nam.fnt = standardize(vaccinationCertificateRequest.nam.fn);
-        }
+
         Entity<CertificateRequest> entity = Entity.entity(requestData, "application/vnd.dgc.v1+json");
         // entity = Entity.entity("{\r\n  \"ver\": \"1.0.0\",\r\n  \"nam\": {\r\n    \"fn\": \"d'Ars\u00F8ns - van Halen\",\r\n    \"gn\": \"Fran\u00E7ois-Joan\",\r\n    \"fnt\": \"DARSONS<VAN<HALEN\",\r\n    \"gnt\": \"FRANCOIS<JOAN\"\r\n  },\r\n  \"dob\": \"2009-02-28\",\r\n  \"v\": [\r\n    {\r\n      \"id\": \"123456\",\r\n      \"tg\": \"840539006\",\r\n      \"vp\": \"1119349007\",\r\n      \"mp\": \"EU/1/20/1528\",\r\n      \"ma\": \"ORG-100030215\",\r\n      \"dn\": 2,\r\n      \"sd\": 2,\r\n      \"dt\": \"2021-04-21\",\r\n      \"co\": \"NL\",\r\n      \"is\": \"Ministry of Public Health, Welfare and Sport\",\r\n      \"ci\": \"urn:uvci:01:NL:PlA8UWS60Z4RZXVALl6GAZ\"\r\n    }\r\n  ]\r\n}", "application/vnd.dgc.v1+json");
         Response response = client.target(issuerAPIUrl)

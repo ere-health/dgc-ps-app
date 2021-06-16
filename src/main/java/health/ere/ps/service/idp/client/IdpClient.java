@@ -453,7 +453,6 @@ public class IdpClient implements IIdpClient {
         logger.debug("Performing getToken with remote-URL: " +
                 getDiscoveryDocumentResponse().getTokenEndpoint());
 
-                
         return getAuthenticatorClient().retrieveAccessToken(TokenRequest.builder()
                 .tokenUrl(getDiscoveryDocumentResponse().getTokenEndpoint())
                 .clientId(getClientId())
