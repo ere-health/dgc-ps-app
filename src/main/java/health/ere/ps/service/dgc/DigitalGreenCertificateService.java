@@ -84,7 +84,7 @@ public class DigitalGreenCertificateService {
      */
     public byte[] issueVaccinationCertificatePdf(String fn, String gn, LocalDate dob,
                                                  String id, String tg, String vp, String mp, String ma, Integer dn,
-                                                 Integer sd, String dt) {
+                                                 Integer sd, LocalDate dt) {
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 

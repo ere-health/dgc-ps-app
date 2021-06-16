@@ -97,7 +97,7 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         String ma = "testMa";
         int dn = 123;
         int sd = 345;
-        String dt = "2021-01-01";
+        LocalDate dt = LocalDate.of(2021, 1, 1);
 
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson("{\"nam\":{" +

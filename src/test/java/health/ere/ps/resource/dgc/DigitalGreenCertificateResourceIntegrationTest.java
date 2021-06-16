@@ -59,7 +59,7 @@ class DigitalGreenCertificateResourceIntegrationTest {
         String ma = "testMa";
         int dn = 123;
         int sd = 345;
-        String dt = "2021-01-01";
+        LocalDate dt = LocalDate.of(2021, 1, 1);
         byte[] pdf = new byte[]{1, 2, 3, 4};
 
         final String requestBody = "{\"nam\":{" +

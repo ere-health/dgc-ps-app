@@ -1,5 +1,6 @@
 package health.ere.ps.model.dgc;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ public class V {
     public String ma;
     public Integer dn;
     public Integer sd;
-    public String dt;
+    public LocalDate dt;
     public String co = "DE";
     public String is = "";
     public String ci = "";

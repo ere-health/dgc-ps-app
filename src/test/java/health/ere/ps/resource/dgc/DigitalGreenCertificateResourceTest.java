@@ -78,7 +78,7 @@ class DigitalGreenCertificateResourceTest {
 
         Integer sd = 34;
 
-        String dt = "testDt";
+        LocalDate dt = LocalDate.of(2020, 10, 10);
 
         byte[] bytes = new byte[]{123};
 

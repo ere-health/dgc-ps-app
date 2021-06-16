@@ -94,7 +94,7 @@ class DigitalGreenCertificateServiceTest {
 
         Integer sd = 2;
 
-        String dt = "testDt";
+        LocalDate dt = LocalDate.of(2021, 3, 4);
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 

@@ -31,7 +31,7 @@ public class DigitalGreenCertificateResource {
     public Response issue(@QueryParam("fn") String fn, @QueryParam("gn") String gn, @QueryParam("dob") LocalDate dob,
                           @QueryParam("id") String id, @QueryParam("tg") String tg, @QueryParam("vp") String vp,
                           @QueryParam("mp") String mp, @QueryParam("ma") String ma, @QueryParam("dn") Integer dn,
-                          @QueryParam("sd") Integer sd, @QueryParam("dt") String dt) {
+                          @QueryParam("sd") Integer sd, @QueryParam("dt") LocalDate dt) {
 
         return okPdf(digitalGreenCertificateService.issueVaccinationCertificatePdf(fn, gn, dob, id, tg, vp, mp, ma,
                 dn, sd, dt));
