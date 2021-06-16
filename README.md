@@ -37,6 +37,20 @@ The source files of the front-end UI will be located in the following directory 
 At this point, you should now have access to the source files for both the backend and front-end of 
 the application.
 
+### Routing
+In order to reach the German certificate API (that is used by this system), the corresponding
+routing needs to be set up throgh the card connector.
+
+#### Linux
+```
+ip route add 100.102.0.0/16 via <IP_OF_THE_CARD_CONNECTOR>
+```
+(depending on the used linux distribution)
+
+#### Windows
+```
+route ADD 100.102.0.0 MASK 255.255.0.0 <IP_OF_THE_CARD_CONNECTOR>
+```
 
 ### Running the DGC-PS-App Application
 
