@@ -41,7 +41,7 @@ public class DigitalGreenCertificateService {
     Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdp;
 
     void onStart(@Observes StartupEvent ev) {               
-        log.info("Application started go to: http://localhost:8080/dgc/covid-19-certificate.html");
+        log.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
     }
 
     @PostConstruct
