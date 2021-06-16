@@ -98,6 +98,12 @@ function prefillVaccineParameters() {
 
 async function sendRecoveredRequest() {
     const form = document.getElementById("request-form");
+
+    if (!form.reportValidity()) {
+        return Promise.reject("invalid data");
+        // TODO display error in frontend
+    }
+
     const requestData = {
         "nam": {
             "fn": form.elements["fn"].value,
