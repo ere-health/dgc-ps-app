@@ -35,7 +35,7 @@ The source files of the front-end UI will be located in the following directory 
   > src/main/resources/META-INF/resources/dgc/
 
 At this point, you should now have access to the source files for both the backend and front-end of 
-the application.
+the application. The forms support helpers to [pre-fill parameters](doc/FORMS.md) using an url.
 
 ### Routing
 In order to reach the German certificate API (that is used by this system), the corresponding
