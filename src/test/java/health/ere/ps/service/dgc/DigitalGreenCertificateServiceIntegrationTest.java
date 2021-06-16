@@ -3,6 +3,7 @@ package health.ere.ps.service.dgc;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
+import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -10,7 +11,6 @@ import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.model.idp.crypto.PkiKeyResolver;
-import health.ere.ps.utils.dgc.TokendIntegrationTestHelper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -18,7 +18,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.net.URL;
 import java.time.LocalDate;
@@ -32,11 +35,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 @TestProfile(LocalOfflineQuarkusTestProfile.class)
 @ExtendWith(PkiKeyResolver.class)
-class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTestHelper {
+class DigitalGreenCertificateServiceIntegrationTest {
 
     @Inject
     private DigitalGreenCertificateService digitalGreenCertificateService;
@@ -50,10 +57,7 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
     private byte[] response;
 
     @BeforeEach
-    void startup(@PkiKeyResolver.Filename("ecc") final PkiIdentity serverIdentity,
-                 @PkiKeyResolver.Filename("C_CH_AUT_R2048") final PkiIdentity rsaClientIdentity) throws Exception {
-        this.serverIdentity = serverIdentity;
-        this.rsaClientIdentity = rsaClientIdentity;
+    void startup() throws Exception {
 
         URL url = new URL(issuerApiUrl);
 
@@ -65,7 +69,19 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
 
         // mock setup for token
         String token = "testToken";
-        mockTokenCreation(token);
+
+        Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEvent = mock(Event.class);
+
+        doAnswer(new Answer<Void>() {
+                public Void answer(InvocationOnMock invocation) {
+                        Object[] args = invocation.getArguments();
+                        ((RequestBearerTokenFromIdpEvent)args[0]).setBearerToken(token);
+                        Object mock = invocation.getMock();
+                        return null;
+                } 
+        }).when(requestBearerTokenFromIdpEvent).fire(any());
+
+        digitalGreenCertificateService.setRequestBearerTokenFromIdp(requestBearerTokenFromIdpEvent);
 
         response = new byte[]{1, 2, 4, 8, 16};
         serverMatcher = post(url.getPath())
@@ -113,8 +129,12 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
                         "\"ma\": \"" + ma + "\"," +
                         "\"dn\": " + dn + "," +
                         "\"sd\": " + sd + "," +
-                        "\"dt\": \"" + dt + "\"" +
-                        "}]}"))
+                        "\"dt\": \"" + dt + "\"," +
+                        "\"ci\": \"\"," +
+                        "\"co\": \"DE\"," +
+                        "\"is\": \"\"" +
+                        "}"+
+                        "], \"ver\" : \"1.0.1\"}"))
         );
 
         final V v = new V();

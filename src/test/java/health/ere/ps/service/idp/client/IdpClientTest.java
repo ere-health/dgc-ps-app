@@ -102,7 +102,7 @@ public class IdpClientTest {
 
 
     @Test
-    // @Disabled("This test will only work in the Telematik RU Infrastructure")
+    @Disabled("This test will only work in the Telematik RU Infrastructure")
     public void test_Successful_Idp_Login_With_Connector_Smcb() throws IdpJoseException,
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
             ConnectorCardsException {
