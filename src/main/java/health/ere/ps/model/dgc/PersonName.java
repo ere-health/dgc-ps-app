@@ -26,6 +26,7 @@ public class PersonName {
     @Size(max = 50)
     public String gn;
 
+
     public PersonName() {
         // default constructor for serialization
     }
