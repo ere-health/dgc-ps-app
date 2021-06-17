@@ -99,11 +99,15 @@ public class IdPService {
                 cardHandle = connectorCardsService.getConnectorCardHandle(
                         ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
             } else {
-                mandantId = Optional.ofNullable(callContext.getMandantId()).orElse(appConfig.getMandantId());
-                clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElse(appConfig.getClientSystem());
-                workplace = Optional.ofNullable(callContext.getWorkplace()).orElse(appConfig.getWorkplace());
-                cardHandle = Optional.ofNullable(callContext.getCardHandle()).orElse(connectorCardsService.getConnectorCardHandle(
-                        ConnectorCardsService.CardHandleType.SMC_B).orElseThrow());
+                mandantId = Optional.ofNullable(callContext.getMandantId()).orElseGet(appConfig::getMandantId);
+                clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElseGet(appConfig::getClientSystem);
+                workplace = Optional.ofNullable(callContext.getWorkplace()).orElseGet(appConfig::getWorkplace);
+                if (callContext.getCardHandle() != null) {
+                    cardHandle = callContext.getCardHandle();
+                }  else {
+                    cardHandle = connectorCardsService.getConnectorCardHandle(
+                            ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+                }
             }
 
             X509Certificate x509Certificate =
