@@ -14,7 +14,6 @@ function prefillVaccineData(value) {
             form.elements["vp"].value = "1119349007" // mRNA
             form.elements['mp'].value = "EU/1/20/1528" // Comirnaty
             form.elements['ma'].value = "ORG-100030215"
-            form.elements['dn'].value = 2
             form.elements['sd'].value = 2
             break;
         case "Johnson":
@@ -30,7 +29,6 @@ function prefillVaccineData(value) {
             form.elements["vp"].value = "1119349007" //mRNA
             form.elements['mp'].value = "EU/1/20/1507" // COVID-19 Vaccine Moderna
             form.elements['ma'].value = "ORG-100031184"
-            form.elements['dn'].value = 2
             form.elements['sd'].value = 2
             break;
         case "AstraZeneca":
@@ -38,7 +36,6 @@ function prefillVaccineData(value) {
             form.elements["vp"].value = "1119305005" // antigen vaccine
             form.elements['mp'].value = "EU/1/21/1529" // Vaxzevria
             form.elements['ma'].value = "ORG-100001699"
-            form.elements['dn'].value = 2
             form.elements['sd'].value = 2
             break;
     }
