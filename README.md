@@ -89,7 +89,20 @@ route ADD 100.102.0.0 MASK 255.255.0.0 <IP_OF_THE_CARD_CONNECTOR>
   browser!
   
   > http://localhost:8080/dgc/covid-19-certificate.html
-  
+
+### Docker image
+To create a docker image, the corresponding quarkus extension may be used:
+```
+mvn package -Dquarkus.container-image.build=true -DskipTests=true
+```
+
+This command will create a docker image called `ere.health/dgc:latest` which contains a service
+that listens on port 8080. To locally start the image, the command
+```
+docker run --rm -p 127.0.0.1:8080:8080 ere.health/dgc:latest
+```
+may be used.
+
 ### Environment Variables
 #### Development Mode
 For dev mode purposes, the environment variables referenced in the application.properties file 
