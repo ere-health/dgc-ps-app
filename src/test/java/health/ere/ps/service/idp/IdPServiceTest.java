@@ -173,7 +173,8 @@ class IdPServiceTest {
 
     @Test
     void requestBearerTokenWithException() throws IdpJoseException, IdpClientException, IdpException {
-        IdpClientException idpClientException = mock(IdpClientException.class);
+        // no mock to avoid NPE when writing the log
+        IdpClientException idpClientException = new IdpClientException("test");
 
         when(idpClient.initializeClient()).thenThrow(idpClientException);
 
