@@ -12,16 +12,15 @@ import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.ssl.SSLUtilities;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,11 +32,12 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ApplicationScoped
 public class DigitalGreenCertificateService {
-    private static Logger log = Logger.getLogger(DigitalGreenCertificateService.class.getName());
+    private static final Logger LOG = Logger.getLogger(DigitalGreenCertificateService.class.getName());
 
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl", defaultValue = "")
     String issuerAPIUrl;
@@ -48,7 +48,7 @@ public class DigitalGreenCertificateService {
     Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdp;
 
     void onStart(@Observes StartupEvent ev) {               
-        log.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
+        LOG.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
     }
 
     @PostConstruct
@@ -213,8 +213,14 @@ public class DigitalGreenCertificateService {
     private String getToken() {
         RequestBearerTokenFromIdpEvent event = new RequestBearerTokenFromIdpEvent();
 
-        requestBearerTokenFromIdp.fire(event);
+        try {
+            requestBearerTokenFromIdp.fire(event);
+        } catch (Throwable t) {
+            LOG.log(Level.SEVERE, t, () -> "Error fetching token");
+            throw new DigitalGreenCertificateInternalAuthenticationException();
+        }
 
-        return Optional.ofNullable(event.getBearerToken()).orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);
+        return Optional.ofNullable(event.getBearerToken())
+                .orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);
     }
 }

@@ -4,6 +4,7 @@ import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
@@ -13,6 +14,8 @@ import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -33,12 +36,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DigitalGreenCertificateServiceTest {
+    @Mock
+    private Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEventEvent;
+
+    @InjectMocks
     @Spy
     private DigitalGreenCertificateService digitalGreenCertificateService;
 
@@ -70,6 +78,31 @@ class DigitalGreenCertificateServiceTest {
         issuePdfWithCertificateServiceException(500, DigitalGreenCertificateCertificateServiceException.class, 100500);
         // other unknown codes
         issuePdfWithCertificateServiceException(543, DigitalGreenCertificateCertificateServiceException.class, 100543);
+    }
+
+    @Test
+    void issuePdfWithTokenException() {
+        doThrow(new RuntimeException()).when(requestBearerTokenFromIdpEventEvent).fire(any());
+
+        // mock web request
+        Client client = mock(Client.class);
+
+        String issuerAPIUrl = "testIssuerAPIUrl";
+
+        WebTarget webTarget = mock(WebTarget.class);
+
+        Invocation.Builder builder = mock(Invocation.Builder.class);
+
+        digitalGreenCertificateService.issuerAPIUrl = issuerAPIUrl;
+        digitalGreenCertificateService.client = client;
+        when(client.target(issuerAPIUrl)).thenReturn(webTarget);
+        when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
+        when(webTarget.request("application/pdf")).thenReturn(builder);
+
+        // now, the getToken function will be called
+
+        assertThrows(DigitalGreenCertificateInternalAuthenticationException.class,
+                () -> digitalGreenCertificateService.issuePdf(mock(CertificateRequest.class)));
     }
 
     @Test
@@ -187,15 +220,10 @@ class DigitalGreenCertificateServiceTest {
         // mock token
         String token = "testToken";
 
-        @SuppressWarnings("unchecked")
-        Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEventEvent = mock(Event.class);
-
         doAnswer((invocation) -> {
             ((RequestBearerTokenFromIdpEvent) invocation.getArgument(0)).setBearerToken(token);
             return null;
         }).when(requestBearerTokenFromIdpEventEvent).fire(any());
-
-        digitalGreenCertificateService.requestBearerTokenFromIdp = requestBearerTokenFromIdpEventEvent;
 
         // mock web request
         Client client = mock(Client.class);

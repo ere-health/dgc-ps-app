@@ -137,6 +137,10 @@ function prefillRecoverParameters() {
     }
 }
 
+function showError(message) {
+    alert(message);
+}
+
 /**
  * @param {string} path the request path.
  * @param {{}} requestData
@@ -149,11 +153,27 @@ async function sendRequest(path, requestData) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(requestData)
         });
-        const buffer = await response.arrayBuffer();
-        const blob = new Blob([buffer], {"type": "application/pdf"});
-        window.location = URL.createObjectURL(blob);
+
+        const contentType = response.headers.get('Content-Type');
+
+        if (response.status === 200 && contentType === 'application/pdf') {
+            const buffer = await response.arrayBuffer();
+
+            const blob = new Blob([buffer], {"type": "application/pdf"});
+            window.location = URL.createObjectURL(blob);
+        } else if (response.status >= 400 && contentType === 'application/json') {
+            const error = await response.json();
+
+            if (error['code'] && error['message']) {
+                showError(error['code'] + ': ' + error['message']);
+            } else {
+                showError('Unknown error (unknown error response)');
+            }
+        } else {
+            showError('Unknown error (unknown response code and content type)');
+        }
     } catch (e) {
         console.error(e);
-        // TODO display error code in frontend
+        showError(e.message);
     }
 }
