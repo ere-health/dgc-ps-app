@@ -9,19 +9,17 @@ import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
-import health.ere.ps.model.idp.crypto.PkiIdentity;
-import health.ere.ps.model.idp.crypto.PkiKeyResolver;
+import health.ere.ps.service.idp.IdPService;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import javax.enterprise.event.Event;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.net.URL;
 import java.time.LocalDate;
@@ -35,17 +33,32 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @QuarkusTest
 @TestProfile(LocalOfflineQuarkusTestProfile.class)
 class DigitalGreenCertificateServiceIntegrationTest {
+    @ApplicationScoped
+    private static class RequestBearerTokenEventObserver {
+        private String token;
+
+        public void addToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {
+            requestBearerTokenFromIdpEvent.setBearerToken(token);
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+    }
 
     @Inject
     private DigitalGreenCertificateService digitalGreenCertificateService;
+
+    @Inject
+    private RequestBearerTokenEventObserver requestBearerTokenEventObserver;
+
+    // mock service to disable the @Observes annotation
+    @InjectMock
+    private IdPService idPService;
 
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     private String issuerApiUrl;
@@ -69,18 +82,7 @@ class DigitalGreenCertificateServiceIntegrationTest {
         // mock setup for token
         String token = "testToken";
 
-        Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEvent = mock(Event.class);
-
-        doAnswer(new Answer<Void>() {
-                public Void answer(InvocationOnMock invocation) {
-                        Object[] args = invocation.getArguments();
-                        ((RequestBearerTokenFromIdpEvent)args[0]).setBearerToken(token);
-                        Object mock = invocation.getMock();
-                        return null;
-                } 
-        }).when(requestBearerTokenFromIdpEvent).fire(any());
-
-        digitalGreenCertificateService.setRequestBearerTokenFromIdp(requestBearerTokenFromIdpEvent);
+        requestBearerTokenEventObserver.setToken(token);
 
         response = new byte[]{1, 2, 4, 8, 16};
         serverMatcher = post("/issue/api/certify/v2/issue")
