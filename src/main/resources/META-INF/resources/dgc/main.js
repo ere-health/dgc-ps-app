@@ -77,7 +77,7 @@ async function sendVaccinationRequest() {
             }
         ]
     };
-    await sendRequest("/api/certify/v2/issue", oVacinationRequest)
+    await sendRequest("../api/certify/v2/issue", oVacinationRequest)
 }
 
 function prefillVaccineParameters() {
@@ -98,7 +98,7 @@ async function sendRecoveredRequest() {
     const form = document.getElementById("request-form");
 
     if (!form.reportValidity()) {
-        return Promise.reject("invalid data");
+        return Promise.reject("form data is invalid");
         // TODO display error in frontend
     }
 
@@ -119,7 +119,7 @@ async function sendRecoveredRequest() {
             }
         ]
     };
-    await sendRequest("/api/certify/v2/recovered", requestData);
+    await sendRequest("../api/certify/v2/recovered", requestData);
 }
 
 // Copy prefillParameter
