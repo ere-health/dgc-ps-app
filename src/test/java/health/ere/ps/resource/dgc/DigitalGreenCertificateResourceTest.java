@@ -1,16 +1,13 @@
 package health.ere.ps.resource.dgc;
 
 import health.ere.ps.model.dgc.CallContext;
-import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.service.dgc.DigitalGreenCertificateService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.core.Response;
@@ -19,30 +16,17 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DigitalGreenCertificateResourceTest {
-    @Spy
+    @Mock
     private DigitalGreenCertificateService digitalGreenCertificateService;
 
     @InjectMocks
     private DigitalGreenCertificateResource digitalGreenCertificateResource;
-
-    final byte[] bytes = new byte[]{123};
-
-    @BeforeEach
-    public void init() {
-        // start with doReturn because null check.
-        // TODO: move to test method with proper checks
-        doReturn(bytes).when(digitalGreenCertificateService).issuePdf(any(), any());
-    }
 
     @Test
     void issueVaccinationCertificate() {
@@ -56,11 +40,14 @@ class DigitalGreenCertificateResourceTest {
 
         String cardHandle = "testCardHandle";
 
+        byte[] bytes = {3, 4, 5};
+
+        when(digitalGreenCertificateService.issuePdf(vaccinationCertificateRequest,
+                new CallContext(mandantId, clientSystem, workplace, cardHandle))).thenReturn(bytes);
+
         Response response = digitalGreenCertificateResource.issue(vaccinationCertificateRequest, mandantId,
                 clientSystem, workplace, cardHandle);
 
-        verify(digitalGreenCertificateService, times(1)).issuePdf(vaccinationCertificateRequest,
-                new CallContext(mandantId, clientSystem, workplace, cardHandle));
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
         assertEquals(response.getMediaType().toString(), "application/pdf");
@@ -127,11 +114,13 @@ class DigitalGreenCertificateResourceTest {
 
         String cardHandle = "testCardHandle";
 
+        byte[] bytes = {3, 4, 5};
+
+        when(digitalGreenCertificateService.issuePdf(certificateRequest,
+                new CallContext(mandantId, clientSystem, workplace, cardHandle))).thenReturn(bytes);
+
         Response response = digitalGreenCertificateResource.recovered(certificateRequest, mandantId, clientSystem,
                 workplace, cardHandle);
-
-        verify(digitalGreenCertificateService, times(1)).issuePdf(certificateRequest,
-                new CallContext(mandantId, clientSystem, workplace, cardHandle));
 
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
