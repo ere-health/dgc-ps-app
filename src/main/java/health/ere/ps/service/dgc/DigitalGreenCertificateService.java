@@ -5,6 +5,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuth
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
@@ -84,7 +85,7 @@ public class DigitalGreenCertificateService {
      */
     public byte[] issueVaccinationCertificatePdf(String fn, String gn, LocalDate dob,
                                                  String id, String tg, String vp, String mp, String ma, Integer dn,
-                                                 Integer sd, LocalDate dt) {
+                                                 Integer sd, LocalDate dt, CallContext callContext) {
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 
@@ -104,7 +105,7 @@ public class DigitalGreenCertificateService {
 
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
-        return issuePdf(vaccinationCertificateRequest);
+        return issuePdf(vaccinationCertificateRequest, callContext);
     }
 
     /**
@@ -119,10 +120,11 @@ public class DigitalGreenCertificateService {
      * @param is  issuer of certificate
      * @param df  certificate validity date beginning
      * @param du  certificate validity date ending
+     * @param callContext optional call context that specifies the tenant
      * @return bytes of certificate pdf
      */
     public byte[] issueRecoveryCertificatePdf(String fn, String gn, LocalDate dob, String id, String tg, LocalDate fr,
-                                              String is, LocalDate df, LocalDate du) {
+                                              String is, LocalDate df, LocalDate du, CallContext callContext) {
 
         RecoveryCertificateRequest recoveryCertificateRequest = new RecoveryCertificateRequest();
 
@@ -140,7 +142,7 @@ public class DigitalGreenCertificateService {
 
         recoveryCertificateRequest.setR(Collections.singletonList(r));
 
-        return issuePdf(recoveryCertificateRequest);
+        return issuePdf(recoveryCertificateRequest, callContext);
     }
 
     /**
@@ -148,9 +150,10 @@ public class DigitalGreenCertificateService {
      *
      * @param requestData       the data send to the backend, only allowed are: VaccinationCertificateRequest,
      *                          RecoveryCertificateRequest and TestCertificateRequest. Must be not null.
+     * @param callContext       call context that specifies the tenant; optional
      * @return the serialized response.
      */
-    public byte[] issuePdf(@NotNull CertificateRequest requestData) {
+    public byte[] issuePdf(@NotNull CertificateRequest requestData, CallContext callContext) {
 
         Objects.requireNonNull(requestData); // can removed, if a validator is running.
 
@@ -159,7 +162,7 @@ public class DigitalGreenCertificateService {
         Response response = client.target(issuerAPIUrl)
                 .path("/api/certify/v2/issue")
                 .request("application/pdf")
-                .header("Authorization", "Bearer " + getToken())
+                .header("Authorization", "Bearer " + getToken(callContext))
                 .post(entity);
 
         // the error codes in the exceptions reflect the response https status from the api request
@@ -210,9 +213,10 @@ public class DigitalGreenCertificateService {
         return error;
     }
 
-    private String getToken() {
+    private String getToken(CallContext callContext) {
         RequestBearerTokenFromIdpEvent event = new RequestBearerTokenFromIdpEvent();
 
+        event.setCallContext(callContext);
         requestBearerTokenFromIdp.fire(event);
 
         return Optional.ofNullable(event.getBearerToken()).orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);

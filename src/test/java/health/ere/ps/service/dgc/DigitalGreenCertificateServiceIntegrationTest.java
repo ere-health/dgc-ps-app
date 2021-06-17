@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -32,7 +33,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @QuarkusTest
 @TestProfile(LocalOfflineQuarkusTestProfile.class)
@@ -41,12 +45,19 @@ class DigitalGreenCertificateServiceIntegrationTest {
     private static class RequestBearerTokenEventObserver {
         private String token;
 
+        private CallContext callContext;
+
         public void addToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {
+            assertEquals(callContext, requestBearerTokenFromIdpEvent.getCallContext());
             requestBearerTokenFromIdpEvent.setBearerToken(token);
         }
 
         public void setToken(String token) {
             this.token = token;
+        }
+
+        public void setCallContext(CallContext callContext) {
+            this.callContext = callContext;
         }
     }
 
@@ -115,6 +126,10 @@ class DigitalGreenCertificateServiceIntegrationTest {
         int dn = 123;
         int sd = 345;
         LocalDate dt = LocalDate.of(2021, 1, 1);
+        // we may use a mock here since the call context is supposed to be passed to the event only with no interaction
+        CallContext callContext = mock(CallContext.class);
+
+        requestBearerTokenEventObserver.setCallContext(callContext);
 
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson("{\"nam\":{" +
@@ -153,9 +168,11 @@ class DigitalGreenCertificateServiceIntegrationTest {
         vaccinationCertificateRequest.setDob(dob);
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
-        byte[] actualResponse = digitalGreenCertificateService.issuePdf(vaccinationCertificateRequest);
+        byte[] actualResponse = digitalGreenCertificateService.issuePdf(vaccinationCertificateRequest, callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
+
+        verifyNoInteractions(callContext);
     }
 
     @Test
@@ -185,6 +202,12 @@ class DigitalGreenCertificateServiceIntegrationTest {
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
                 "}]}";
+
+        // we may use a mock here since the call context is supposed to be passed to the event only with no interaction
+        CallContext callContext = mock(CallContext.class);
+
+        requestBearerTokenEventObserver.setCallContext(callContext);
+
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson(jsonContentResponse))
                 .withRequestBody(matchingJsonPath("r.length()", equalTo("1")))
@@ -203,9 +226,11 @@ class DigitalGreenCertificateServiceIntegrationTest {
         certificateRequest.setDob(LocalDate.parse(testDataDob));
         certificateRequest.addRItem(recoveryEntry);
 
-        final byte[] actualResponse = digitalGreenCertificateService.issuePdf(certificateRequest);
+        final byte[] actualResponse = digitalGreenCertificateService.issuePdf(certificateRequest, callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
+
+        verifyNoInteractions(callContext);
     }
 
     @Test
@@ -235,6 +260,12 @@ class DigitalGreenCertificateServiceIntegrationTest {
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
                 "}]}";
+
+        // we may use a mock here since the call context is supposed to be passed to the event only with no interaction
+        CallContext callContext = mock(CallContext.class);
+
+        requestBearerTokenEventObserver.setCallContext(callContext);
+
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson(jsonContentResponse))
                 .withRequestBody(matchingJsonPath("r.length()", equalTo("1")))
@@ -242,8 +273,10 @@ class DigitalGreenCertificateServiceIntegrationTest {
 
         final byte[] actualResponse = digitalGreenCertificateService.issueRecoveryCertificatePdf(name, givenName,
                 LocalDate.parse(testDataDob), testId, testTg, LocalDate.parse(testDateFr), testIs,
-                LocalDate.parse(testDateDf), LocalDate.parse(testDateDu));
+                LocalDate.parse(testDateDf), LocalDate.parse(testDateDu), callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
+
+        verifyNoInteractions(callContext);
     }
 }

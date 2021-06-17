@@ -5,6 +5,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceExce
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.DigitalGreenCertificateError;
 import health.ere.ps.model.dgc.PersonName;
@@ -23,6 +24,8 @@ import org.mockito.ArgumentCaptor;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -32,6 +35,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
@@ -60,6 +64,11 @@ class DigitalGreenCertificateResourceIntegrationTest {
         int dn = 123;
         int sd = 345;
         LocalDate dt = LocalDate.of(2021, 1, 1);
+        String mandantId = "testMandantId";
+        String clientSystem = "testClientSystem";
+        String workplace = "testWorkplace";
+        String cardHandle = "testCardHandle";
+
         byte[] pdf = new byte[]{1, 2, 3, 4};
 
         final String requestBody = "{\"nam\":{" +
@@ -98,10 +107,12 @@ class DigitalGreenCertificateResourceIntegrationTest {
         // mock response
         final ArgumentCaptor<CertificateRequest> ac = ArgumentCaptor.forClass(CertificateRequest.class);
         // doReturn because of the null check in issuePdf
-        doReturn(pdf).when(service).issuePdf(ac.capture());
+        doReturn(pdf).when(service).issuePdf(ac.capture(), eq(new CallContext(mandantId, clientSystem, workplace
+                , cardHandle)));
 
         Response response = client.target(url.toURI().resolve("v2/issue"))
                 .request("application/pdf")
+                .headers(createHeaders(mandantId, clientSystem, workplace, cardHandle))
                 .post(Entity.json(requestBody));
 
         // then
@@ -128,6 +139,10 @@ class DigitalGreenCertificateResourceIntegrationTest {
         final String testDataDob = "1921-01-01";
         final String familyName = "Testname Lastname";
         final String givenName = "Testgiven Name";
+        final String mandantId = "testMandantId";
+        final String clientSystem = "testClientSystem";
+        final String workplace = "testWorkplace";
+        final String cardHandle = "testCardHandle";
 
         final String requestBody = "{\"nam\":{" +
                 "\"fn\": \"" + familyName + "\"," +
@@ -162,10 +177,12 @@ class DigitalGreenCertificateResourceIntegrationTest {
         // mock response
         final ArgumentCaptor<CertificateRequest> ac = ArgumentCaptor.forClass(CertificateRequest.class);
         // doReturn because of the null check in issuePdf
-        doReturn(pdf).when(service).issuePdf(ac.capture());
+        doReturn(pdf).when(service).issuePdf(ac.capture(), eq(new CallContext(mandantId, clientSystem, workplace,
+                cardHandle)));
 
         Response response = client.target(url.toURI().resolve("v2/recovered"))
                 .request("application/pdf")
+                .headers(createHeaders(mandantId, clientSystem, workplace, cardHandle))
                 .post(Entity.json(requestBody));
 
         // then
@@ -192,6 +209,10 @@ class DigitalGreenCertificateResourceIntegrationTest {
         final String testDataDob = "1921-01-01";
         final String familyName = "Testname Lastname";
         final String givenName = "Testgiven Name";
+        final String mandantId = "testMandantId";
+        final String clientSystem = "testClientSystem";
+        final String workplace = "testWorkplace";
+        final String cardHandle = "testCardHandle";
 
         Client client = ClientBuilder.newBuilder().build();
 
@@ -213,7 +234,8 @@ class DigitalGreenCertificateResourceIntegrationTest {
         // mock response
         final ArgumentCaptor<CertificateRequest> ac = ArgumentCaptor.forClass(CertificateRequest.class);
         // doReturn because of the null check in issuePdf
-        doReturn(pdf).when(service).issuePdf(ac.capture());
+        doReturn(pdf).when(service).issuePdf(ac.capture(), eq(new CallContext(mandantId, clientSystem, workplace,
+                cardHandle)));
 
         Response response = client.target(url.toURI().resolve("v2/recovered"))
                 .queryParam("fn", familyName)
@@ -226,6 +248,7 @@ class DigitalGreenCertificateResourceIntegrationTest {
                 .queryParam("df", testDateDf)
                 .queryParam("du", testDateDu)
                 .request("application/pdf")
+                .headers(createHeaders(mandantId, clientSystem, workplace, cardHandle))
                 .get();
 
         // then
@@ -252,7 +275,7 @@ class DigitalGreenCertificateResourceIntegrationTest {
     private void testExceptionMapper(DigitalGreenCertificateException digitalGreenCertificateException, int expectedResponseCode, int expectedErrorCode)
             throws URISyntaxException {
 
-        doThrow(digitalGreenCertificateException).when(service).issuePdf(any());
+        doThrow(digitalGreenCertificateException).when(service).issuePdf(any(), any());
 
         Client client = ClientBuilder.newBuilder().build();
 
@@ -265,5 +288,17 @@ class DigitalGreenCertificateResourceIntegrationTest {
         DigitalGreenCertificateError digitalGreenCertificateError = response.readEntity(DigitalGreenCertificateError.class);
 
         assertEquals(expectedErrorCode, digitalGreenCertificateError.getCode());
+    }
+
+    private static MultivaluedMap<String, Object> createHeaders(String mandantId, String clientSystem,
+                                                                String workplace, String cardHandle) {
+        MultivaluedHashMap<String, Object> multivaluedHashMap = new MultivaluedHashMap<>();
+
+        multivaluedHashMap.put("X-Mandant", Collections.singletonList(mandantId));
+        multivaluedHashMap.put("X-ClientSystem", Collections.singletonList(clientSystem));
+        multivaluedHashMap.put("X-Workplace", Collections.singletonList(workplace));
+        multivaluedHashMap.put("X-CardHandle", Collections.singletonList(cardHandle));
+
+        return multivaluedHashMap;
     }
 }

@@ -5,6 +5,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuth
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
@@ -30,7 +31,6 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -48,17 +48,20 @@ class DigitalGreenCertificateServiceTest {
 
         CertificateRequest certificateRequest = mock(CertificateRequest.class);
 
+        CallContext callContext = mock(CallContext.class);
+
         byte[] bytes = new byte[]{34, 45, 56};
 
-        Response response = mockAuthenticatedResponse(certificateRequest);
+        Response response = mockAuthenticatedResponse(certificateRequest, callContext);
 
         when(response.getStatus()).thenReturn(200);
         when(response.readEntity(InputStream.class)).thenReturn(inputStream);
         when(inputStream.readAllBytes()).thenReturn(bytes);
 
-        assertSame(bytes, digitalGreenCertificateService.issuePdf(certificateRequest));
+        assertSame(bytes, digitalGreenCertificateService.issuePdf(certificateRequest, callContext));
 
         verifyNoInteractions(certificateRequest);
+        verifyNoInteractions(callContext);
     }
 
     @Test
@@ -114,13 +117,16 @@ class DigitalGreenCertificateServiceTest {
 
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
+        CallContext callContext = mock(CallContext.class);
+
         byte[] response = new byte[]{123, 124, 125};
 
         // doReturn because of the null check in issuePdf
-        doReturn(response).when(digitalGreenCertificateService).issuePdf(vaccinationCertificateRequest);
+        doReturn(response).when(digitalGreenCertificateService).issuePdf(vaccinationCertificateRequest, callContext);
 
         assertEquals(response, digitalGreenCertificateService.issueVaccinationCertificatePdf(fn, gn, dob, id, tg, vp, mp,
-                ma, dn, sd, dt));
+                ma, dn, sd, dt, callContext));
+        verifyNoInteractions(callContext);
     }
 
     @Test
@@ -161,11 +167,14 @@ class DigitalGreenCertificateServiceTest {
 
         recoveryCertificateRequest.setR(Collections.singletonList(r));
 
+        CallContext callContext = mock(CallContext.class);
+
         // doReturn because of the null check in issuePdf
-        doReturn(bytes).when(digitalGreenCertificateService).issuePdf(recoveryCertificateRequest);
+        doReturn(bytes).when(digitalGreenCertificateService).issuePdf(recoveryCertificateRequest, callContext);
 
         assertSame(bytes, digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df,
-                du));
+                du, callContext));
+        verifyNoInteractions(callContext);
     }
 
     private void issuePdfWithCertificateServiceException(int responseCode, Class<? extends DigitalGreenCertificateException> expectedExceptionClass,
@@ -173,19 +182,28 @@ class DigitalGreenCertificateServiceTest {
 
         CertificateRequest certificateRequest = mock(CertificateRequest.class);
 
-        Response response = mockAuthenticatedResponse(certificateRequest);
+        CallContext callContext = mock(CallContext.class);
+
+        Response response = mockAuthenticatedResponse(certificateRequest, callContext);
 
         when(response.getStatus()).thenReturn(responseCode);
 
         DigitalGreenCertificateException digitalGreenCertificateException = assertThrows(expectedExceptionClass
-                ,() -> digitalGreenCertificateService.issuePdf(certificateRequest));
+                ,() -> digitalGreenCertificateService.issuePdf(certificateRequest, callContext));
 
         assertEquals(expectedErrorCode, digitalGreenCertificateException.getCode());
+
+        verifyNoInteractions(certificateRequest);
+        verifyNoInteractions(callContext);
     }
 
-    private Response mockAuthenticatedResponse(CertificateRequest certificateRequest) {
+    private Response mockAuthenticatedResponse(CertificateRequest certificateRequest, CallContext callContext) {
         // mock token
         String token = "testToken";
+
+        RequestBearerTokenFromIdpEvent eventContext = new RequestBearerTokenFromIdpEvent();
+
+        eventContext.setCallContext(callContext);
 
         @SuppressWarnings("unchecked")
         Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEventEvent = mock(Event.class);
@@ -193,7 +211,7 @@ class DigitalGreenCertificateServiceTest {
         doAnswer((invocation) -> {
             ((RequestBearerTokenFromIdpEvent) invocation.getArgument(0)).setBearerToken(token);
             return null;
-        }).when(requestBearerTokenFromIdpEventEvent).fire(any());
+        }).when(requestBearerTokenFromIdpEventEvent).fire(eventContext);
 
         digitalGreenCertificateService.requestBearerTokenFromIdp = requestBearerTokenFromIdpEventEvent;
 
