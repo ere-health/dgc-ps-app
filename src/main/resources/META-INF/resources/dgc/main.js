@@ -14,7 +14,6 @@ function prefillVaccineData(value) {
             form.elements["vp"].value = "1119349007" // mRNA
             form.elements['mp'].value = "EU/1/20/1528" // Comirnaty
             form.elements['ma'].value = "ORG-100030215"
-            form.elements['dn'].value = 2
             form.elements['sd'].value = 2
             break;
         case "Johnson":
@@ -30,7 +29,6 @@ function prefillVaccineData(value) {
             form.elements["vp"].value = "1119349007" //mRNA
             form.elements['mp'].value = "EU/1/20/1507" // COVID-19 Vaccine Moderna
             form.elements['ma'].value = "ORG-100031184"
-            form.elements['dn'].value = 2
             form.elements['sd'].value = 2
             break;
         case "AstraZeneca":
@@ -38,7 +36,6 @@ function prefillVaccineData(value) {
             form.elements["vp"].value = "1119305005" // antigen vaccine
             form.elements['mp'].value = "EU/1/21/1529" // Vaxzevria
             form.elements['ma'].value = "ORG-100001699"
-            form.elements['dn'].value = 2
             form.elements['sd'].value = 2
             break;
     }
@@ -140,6 +137,10 @@ function prefillRecoverParameters() {
     }
 }
 
+function showError(message) {
+    alert(message);
+}
+
 /**
  * @param {string} path the request path.
  * @param {{}} requestData
@@ -152,11 +153,27 @@ async function sendRequest(path, requestData) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(requestData)
         });
-        const buffer = await response.arrayBuffer();
-        const blob = new Blob([buffer], {"type": "application/pdf"});
-        window.location = URL.createObjectURL(blob);
+
+        const contentType = response.headers.get('Content-Type');
+
+        if (response.status === 200 && contentType === 'application/pdf') {
+            const buffer = await response.arrayBuffer();
+
+            const blob = new Blob([buffer], {"type": "application/pdf"});
+            window.location = URL.createObjectURL(blob);
+        } else if (response.status >= 400 && contentType === 'application/json') {
+            const error = await response.json();
+
+            if (error['code'] && error['message']) {
+                showError(error['code'] + ': ' + error['message']);
+            } else {
+                showError('Unknown error (unknown error response)');
+            }
+        } else {
+            showError('Unknown error (unknown response code and content type)');
+        }
     } catch (e) {
         console.error(e);
-        // TODO display error code in frontend
+        showError(e.message);
     }
 }
