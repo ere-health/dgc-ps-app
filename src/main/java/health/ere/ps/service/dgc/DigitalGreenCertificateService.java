@@ -211,15 +211,10 @@ public class DigitalGreenCertificateService {
     }
 
     private String getToken() {
-
         RequestBearerTokenFromIdpEvent event = new RequestBearerTokenFromIdpEvent();
 
         requestBearerTokenFromIdp.fire(event);
 
         return Optional.ofNullable(event.getBearerToken()).orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);
-    }
-
-    public void setRequestBearerTokenFromIdp(Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdp) {
-        this.requestBearerTokenFromIdp = requestBearerTokenFromIdp;
     }
 }
