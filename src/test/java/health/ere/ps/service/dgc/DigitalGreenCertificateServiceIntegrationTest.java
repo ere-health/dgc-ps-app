@@ -145,12 +145,9 @@ class DigitalGreenCertificateServiceIntegrationTest {
                         "\"ma\": \"" + ma + "\"," +
                         "\"dn\": " + dn + "," +
                         "\"sd\": " + sd + "," +
-                        "\"dt\": \"" + dt + "\"," +
-                        "\"ci\": \"\"," +
-                        "\"co\": \"DE\"," +
-                        "\"is\": \"\"" +
+                        "\"dt\": \"" + dt + "\"" +
                         "}"+
-                        "], \"ver\" : \"1.0.1\"}"))
+                        "]}"))
         );
 
         final V v = new V();
