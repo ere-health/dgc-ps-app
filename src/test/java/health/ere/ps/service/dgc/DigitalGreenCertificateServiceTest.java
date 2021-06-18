@@ -45,11 +45,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DigitalGreenCertificateServiceTest {
     @Mock
-    private Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEventEvent;
+    Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdpEventEvent;
 
     @InjectMocks
     @Spy
-    private DigitalGreenCertificateService digitalGreenCertificateService;
+    DigitalGreenCertificateService digitalGreenCertificateService;
 
     @Test
     void issuePdf() throws IOException {

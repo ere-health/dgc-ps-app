@@ -1,5 +1,6 @@
 package health.ere.ps.config;
 
+import health.ere.ps.EnvironmentQuarkusTestProfile;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -15,14 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SetEnvironmentVariable.SetEnvironmentVariables({
         // use the offline_test profile to not interfere with the other tests.
         @SetEnvironmentVariable(
-                key = "_OFFLINE_TEST_IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS", value = "foobarbaz"),
+                key = "_ENV_TEST_IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS", value = "foobarbaz"),
         @SetEnvironmentVariable(
-                key = "_OFFLINE_TEST_CONNECTOR_SIMULATOR_TITUSCLIENTCERTIFICATEPASSWORD", value = "tcpassword"),
+                key = "_ENV_TEST_IDP_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD", value = "tcpassword"),
         @SetEnvironmentVariable(
                 key = "THIS_IS_A_TEST_PROPERTY", value = "this.is.a.test.property")
 })
 @QuarkusTest
-@TestProfile(LocalOfflineQuarkusTestProfile.class)
+@TestProfile(EnvironmentQuarkusTestProfile.class)
 class AppConfigEnvironmentsVariablesTest {
 
     /**
