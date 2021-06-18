@@ -19,18 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
                 key = "_ENV_TEST_IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS", value = "foobarbaz"),
         @SetEnvironmentVariable(
                 key = "_ENV_TEST_IDP_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD", value = "tcpassword"),
-        @SetEnvironmentVariable(
-                key = "THIS_IS_A_TEST_PROPERTY", value = "this.is.a.test.property")
 })
 @QuarkusTest
 @TestProfile(EnvironmentQuarkusTestProfile.class)
 class AppConfigEnvironmentsVariablesTest {
-
-    /**
-     * Creates new property to not interfere with others.
-     */
-    @ConfigProperty(name = "this.is.a.test.property")
-    String testProperty;
 
     @Inject
     AppConfig config;
@@ -42,7 +34,6 @@ class AppConfigEnvironmentsVariablesTest {
     void propertiesShouldBeFromEnvironmentVariables() {
         assertEquals("foobarbaz", config.getIdpConnectorAuthSignatureEndpointAddress());
         assertEquals("tcpassword", config.getIdpConnectorTlsCertTustStorePwd());
-        assertEquals("this.is.a.test.property", testProperty);
     }
 
 }
