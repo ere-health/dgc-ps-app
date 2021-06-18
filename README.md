@@ -35,8 +35,22 @@ The source files of the front-end UI will be located in the following directory 
   > src/main/resources/META-INF/resources/dgc/
 
 At this point, you should now have access to the source files for both the backend and front-end of 
-the application.
+the application. The forms support helpers to [pre-fill parameters](doc/FORMS.md) using an url.
 
+### Routing
+In order to reach the German certificate API (that is used by this system), the corresponding
+routing needs to be set up throgh the card connector.
+
+#### Linux
+```
+ip route add 100.102.0.0/16 via <IP_OF_THE_CARD_CONNECTOR>
+```
+(depending on the used linux distribution)
+
+#### Windows
+```
+route ADD 100.102.0.0 MASK 255.255.0.0 <IP_OF_THE_CARD_CONNECTOR>
+```
 
 ### Running the DGC-PS-App Application
 
@@ -75,7 +89,20 @@ the application.
   browser!
   
   > http://localhost:8080/dgc/covid-19-certificate.html
-  
+
+### Docker image
+To create a docker image, the corresponding quarkus extension may be used:
+```
+mvn package -Dquarkus.container-image.build=true -DskipTests=true
+```
+
+This command will create a docker image called `ere.health/dgc:latest` which contains a service
+that listens on port 8080. To locally start the image, the command
+```
+docker run --rm -p 127.0.0.1:8080:8080 ere.health/dgc:latest
+```
+may be used.
+
 ### Environment Variables
 
 For configuration purposes, the environment variables referenced in the `application.properties` file

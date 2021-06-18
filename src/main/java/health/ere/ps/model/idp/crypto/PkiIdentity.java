@@ -2,6 +2,7 @@ package health.ere.ps.model.idp.crypto;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
+import java.util.Objects;
 import java.util.Optional;
 
 public class PkiIdentity {
@@ -55,5 +56,19 @@ public class PkiIdentity {
 
     public void setUse(Optional<String> use) {
         this.use = use;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PkiIdentity that = (PkiIdentity) o;
+        return Objects.equals(certificate, that.certificate) && Objects.equals(privateKey, that.privateKey)
+                && Objects.equals(keyId, that.keyId) && Objects.equals(use, that.use);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(certificate, privateKey, keyId, use);
     }
 }

@@ -27,6 +27,7 @@ import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
+import health.ere.ps.ssl.SSLUtilities;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest

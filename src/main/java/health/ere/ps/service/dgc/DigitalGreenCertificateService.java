@@ -5,6 +5,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuth
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
@@ -12,16 +13,15 @@ import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.ssl.SSLUtilities;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import io.quarkus.runtime.StartupEvent;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
-import javax.inject.Inject;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -33,11 +33,12 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ApplicationScoped
 public class DigitalGreenCertificateService {
-    private static Logger log = Logger.getLogger(DigitalGreenCertificateService.class.getName());
+    private static final Logger LOG = Logger.getLogger(DigitalGreenCertificateService.class.getName());
 
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl", defaultValue = "")
     String issuerAPIUrl;
@@ -48,7 +49,7 @@ public class DigitalGreenCertificateService {
     Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdp;
 
     void onStart(@Observes StartupEvent ev) {               
-        log.info("Application started go to: http://localhost:8080/dgc/covid-19-certificate.html");
+        LOG.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
     }
 
     @PostConstruct
@@ -84,7 +85,7 @@ public class DigitalGreenCertificateService {
      */
     public byte[] issueVaccinationCertificatePdf(String fn, String gn, LocalDate dob,
                                                  String id, String tg, String vp, String mp, String ma, Integer dn,
-                                                 Integer sd, LocalDate dt) {
+                                                 Integer sd, LocalDate dt, CallContext callContext) {
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 
@@ -104,7 +105,7 @@ public class DigitalGreenCertificateService {
 
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
-        return issuePdf(vaccinationCertificateRequest);
+        return issuePdf(vaccinationCertificateRequest, callContext);
     }
 
     /**
@@ -119,10 +120,11 @@ public class DigitalGreenCertificateService {
      * @param is  issuer of certificate
      * @param df  certificate validity date beginning
      * @param du  certificate validity date ending
+     * @param callContext optional call context that specifies the tenant
      * @return bytes of certificate pdf
      */
     public byte[] issueRecoveryCertificatePdf(String fn, String gn, LocalDate dob, String id, String tg, LocalDate fr,
-                                              String is, LocalDate df, LocalDate du) {
+                                              String is, LocalDate df, LocalDate du, CallContext callContext) {
 
         RecoveryCertificateRequest recoveryCertificateRequest = new RecoveryCertificateRequest();
 
@@ -140,7 +142,7 @@ public class DigitalGreenCertificateService {
 
         recoveryCertificateRequest.setR(Collections.singletonList(r));
 
-        return issuePdf(recoveryCertificateRequest);
+        return issuePdf(recoveryCertificateRequest, callContext);
     }
 
     /**
@@ -148,17 +150,19 @@ public class DigitalGreenCertificateService {
      *
      * @param requestData       the data send to the backend, only allowed are: VaccinationCertificateRequest,
      *                          RecoveryCertificateRequest and TestCertificateRequest. Must be not null.
+     * @param callContext       call context that specifies the tenant; optional
      * @return the serialized response.
      */
-    public byte[] issuePdf(@NotNull CertificateRequest requestData) {
+    public byte[] issuePdf(@NotNull CertificateRequest requestData, CallContext callContext) {
 
         Objects.requireNonNull(requestData); // can removed, if a validator is running.
 
         Entity<CertificateRequest> entity = Entity.entity(requestData, "application/vnd.dgc.v1+json");
         // entity = Entity.entity("{\r\n  \"ver\": \"1.0.0\",\r\n  \"nam\": {\r\n    \"fn\": \"d'Ars\u00F8ns - van Halen\",\r\n    \"gn\": \"Fran\u00E7ois-Joan\",\r\n    \"fnt\": \"DARSONS<VAN<HALEN\",\r\n    \"gnt\": \"FRANCOIS<JOAN\"\r\n  },\r\n  \"dob\": \"2009-02-28\",\r\n  \"v\": [\r\n    {\r\n      \"id\": \"123456\",\r\n      \"tg\": \"840539006\",\r\n      \"vp\": \"1119349007\",\r\n      \"mp\": \"EU/1/20/1528\",\r\n      \"ma\": \"ORG-100030215\",\r\n      \"dn\": 2,\r\n      \"sd\": 2,\r\n      \"dt\": \"2021-04-21\",\r\n      \"co\": \"NL\",\r\n      \"is\": \"Ministry of Public Health, Welfare and Sport\",\r\n      \"ci\": \"urn:uvci:01:NL:PlA8UWS60Z4RZXVALl6GAZ\"\r\n    }\r\n  ]\r\n}", "application/vnd.dgc.v1+json");
         Response response = client.target(issuerAPIUrl)
+                .path("/api/certify/v2/issue")
                 .request("application/pdf")
-                .header("Authorization", "Bearer " + getToken())
+                .header("Authorization", "Bearer " + getToken(callContext))
                 .post(entity);
 
         // the error codes in the exceptions reflect the response https status from the api request
@@ -168,15 +172,17 @@ public class DigitalGreenCertificateService {
         switch (response.getStatus()) {
             case 200: {
                 try {
-                    return response.readEntity(InputStream.class).readAllBytes();
+                    byte[] pdf = response.readEntity(InputStream.class).readAllBytes();
+                    return pdf;
                 } catch (IOException ioe) {
                     throw new DigitalGreenCertificateCertificateServiceException(100200, "Could not read response from certificate service");
                 }
             }
             case 400:
             case 406: {
+                String error = getError(response);
                 throw new DigitalGreenCertificateInvalidParametersException(100000 + response.getStatus(), "Invalid parameters in request" +
-                        " to certificate service");
+                        " to certificate service: "+error);
             }
             case 401:
             case 403: {
@@ -184,7 +190,8 @@ public class DigitalGreenCertificateService {
                         "were not accepted by certificate service");
             }
             case 500: {
-                throw new DigitalGreenCertificateCertificateServiceException(100500, "Internal server error in certificate service");
+                String error = getError(response);
+                throw new DigitalGreenCertificateCertificateServiceException(100500, "Internal server error in certificate service "+error);
             }
             default: {
                 throw new DigitalGreenCertificateCertificateServiceException(100000 + response.getStatus(), "Unspecified response from " +
@@ -193,11 +200,32 @@ public class DigitalGreenCertificateService {
         }
     }
 
-    private String getToken() {
+    private String getError(Response response) {
+        String error = "";
+        try {
+            InputStream inputStream = response.readEntity(InputStream.class);
+            if(inputStream != null) {
+                error = new String(inputStream.readAllBytes());
+            }
+        } catch (IOException e) {
+            throw new DigitalGreenCertificateCertificateServiceException(100200, "Could not read response from certificate service");
+        }
+        return error;
+    }
+
+    private String getToken(CallContext callContext) {
         RequestBearerTokenFromIdpEvent event = new RequestBearerTokenFromIdpEvent();
 
-        requestBearerTokenFromIdp.fire(event);
+        event.setCallContext(callContext);
 
-        return Optional.ofNullable(event.getBearerToken()).orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);
+        try {
+            requestBearerTokenFromIdp.fire(event);
+        } catch (Throwable t) {
+            LOG.log(Level.SEVERE, t, () -> "Error fetching token");
+            throw new DigitalGreenCertificateInternalAuthenticationException();
+        }
+
+        return Optional.ofNullable(event.getBearerToken())
+                .orElseThrow(DigitalGreenCertificateInternalAuthenticationException::new);
     }
 }

@@ -4,6 +4,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -45,6 +46,7 @@ class AuthenticatorClientTest {
     String idpAuthRequestRedirectUrl;
 
     @Test
+    @Disabled("This test needs access to the TI infrastructure")
     void test_Successful_Authorization_Request() throws IdpClientException, IdpException {
         AuthenticatorClient authenticatorClient = new AuthenticatorClient();
 
@@ -92,6 +94,7 @@ class AuthenticatorClientTest {
     }
 
     @Test
+    @Disabled("This test needs access to the TI infrastructure")
     void test_Successful_Retrieval_Of_Discovery_Document_Using_Idp_Http_Client()
             throws IdpClientException {
         IdpHttpClientService idpHttpClientService =
@@ -112,6 +115,7 @@ class AuthenticatorClientTest {
     }
 
     @Test
+    @Disabled("This test needs access to the TI infrastructure")
     void test_Successful_Retrieval_Of_Discovery_Document_Using_Auth_Client()
             throws IdpClientException, IdpException, IdpJoseException {
         DiscoveryDocumentResponse discoveryDocumentResponse =

@@ -42,6 +42,9 @@ public class CardCertReadExecutionService {
     @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
     String titusClientCertificate;
 
+    @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
+    String titusClientCertificatePassword;
+
     private CertificateServicePortType certificateService;
 
     static {
@@ -70,7 +73,7 @@ public class CardCertReadExecutionService {
     }
 
     public void setUpCustomSSLContext(InputStream p12Certificate) {
-        SSLContext customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate);
+        SSLContext customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, titusClientCertificatePassword);
         BindingProvider bp = (BindingProvider) certificateService;
 
         bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",

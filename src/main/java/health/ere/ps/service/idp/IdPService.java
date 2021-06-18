@@ -1,5 +1,6 @@
 package health.ere.ps.service.idp;
 
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.idp.crypto.PkiIdentity;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -81,13 +82,37 @@ public class IdPService {
             idpClient.init(clientId, redirectUrl, discoveryDocumentUrl, true);
             idpClient.initializeClient();
 
-            Optional<String> cardHandle = connectorCardsService.getConnectorCardHandle(
-                    ConnectorCardsService.CardHandleType.SMC_B);
+            CallContext callContext = requestBearerTokenFromIdpEvent.getCallContext();
+
+            String mandantId;
+
+            String clientSystem;
+
+            String workplace;
+
+            String cardHandle;
+
+            if (callContext == null) {
+                mandantId = appConfig.getMandantId();
+                clientSystem = appConfig.getClientSystem();
+                workplace = appConfig.getWorkplace();
+                cardHandle = connectorCardsService.getConnectorCardHandle(
+                        ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+            } else {
+                mandantId = Optional.ofNullable(callContext.getMandantId()).orElseGet(appConfig::getMandantId);
+                clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElseGet(appConfig::getClientSystem);
+                workplace = Optional.ofNullable(callContext.getWorkplace()).orElseGet(appConfig::getWorkplace);
+                if (callContext.getCardHandle() != null) {
+                    cardHandle = callContext.getCardHandle();
+                }  else {
+                    cardHandle = connectorCardsService.getConnectorCardHandle(
+                            ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+                }
+            }
 
             X509Certificate x509Certificate =
-                    cardCertificateReaderService.retrieveSmcbCardCertificate(appConfig.getMandantId(),
-                            appConfig.getClientSystem(), appConfig.getWorkplace(),
-                            cardHandle.get());
+                    cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace,
+                            cardHandle);
 
             IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));
             requestBearerTokenFromIdpEvent.setBearerToken(idpTokenResult.getAccessToken().getRawString());

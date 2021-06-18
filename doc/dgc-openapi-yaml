@@ -11,6 +11,10 @@ paths:
   /api/certify/v2/issue:
     get:
       parameters:
+        - $ref: '#/components/parameters/Mandant'
+        - $ref: '#/components/parameters/ClientSystem'
+        - $ref: '#/components/parameters/Workplace'
+        - $ref: '#/components/parameters/CardHandle'
         - $ref: '#/components/parameters/FamilyName'
         - $ref: '#/components/parameters/GivenName'
         - $ref: '#/components/parameters/DateOfBirth'
@@ -37,9 +41,41 @@ paths:
           $ref: '#/components/responses/InternalEreServerError'
         501:
           $ref: '#/components/responses/InvalidCertificateServerError'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Mandant'
+        - $ref: '#/components/parameters/ClientSystem'
+        - $ref: '#/components/parameters/Workplace'
+        - $ref: '#/components/parameters/CardHandle'
+      requestBody:
+        description: Vaccination certificate creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VaccinationCertificateRequest'
+      responses:
+        200:
+          description: PDF file with certificate
+          content:
+            application/pdf: {}
+        400:
+          $ref: '#/components/responses/InvalidParameters'
+        401:
+          $ref: '#/components/responses/InvalidSmcbAuthentication'
+        403:
+          $ref: '#/components/responses/InvalidCertificateServiceAuthentication'
+        500:
+          $ref: '#/components/responses/InternalEreServerError'
+        501:
+          $ref: '#/components/responses/InvalidCertificateServerError'
+
   /api/certify/v2/recovered:
     get:
       parameters:
+        - $ref: '#/components/parameters/Mandant'
+        - $ref: '#/components/parameters/ClientSystem'
+        - $ref: '#/components/parameters/Workplace'
+        - $ref: '#/components/parameters/CardHandle'
         - $ref: '#/components/parameters/FamilyName'
         - $ref: '#/components/parameters/GivenName'
         - $ref: '#/components/parameters/DateOfBirth'
@@ -49,6 +85,33 @@ paths:
         - $ref: '#/components/parameters/Issuer'
         - $ref: '#/components/parameters/CertificateStartDate'
         - $ref: '#/components/parameters/CertificateEndDate'
+      responses:
+        200:
+          description: PDF file with certificate
+          content:
+            application/pdf: {}
+        400:
+          $ref: '#/components/responses/InvalidParameters'
+        401:
+          $ref: '#/components/responses/InvalidSmcbAuthentication'
+        403:
+          $ref: '#/components/responses/InvalidCertificateServiceAuthentication'
+        500:
+          $ref: '#/components/responses/InternalEreServerError'
+        501:
+          $ref: '#/components/responses/InvalidCertificateServerError'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Mandant'
+        - $ref: '#/components/parameters/ClientSystem'
+        - $ref: '#/components/parameters/Workplace'
+        - $ref: '#/components/parameters/CardHandle'
+      requestBody:
+        description: Vaccination certificate creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverdCertificateRequest'
       responses:
         200:
           description: PDF file with certificate
@@ -78,6 +141,96 @@ components:
         message:
           description: Human readable error message (may contain also technical details)
           type: string
+    CertificateRequest:
+      type: object
+      properties:
+        nam:
+          type: object
+          properties:
+            fn:
+              type: string
+              description: Family name
+            gn:
+              type: string
+              description: Given name
+        dob:
+          type: string
+          description: Date of bith
+          format: date
+    VaccinationCertificateRequest:
+      allOf:
+        - $ref: '#/components/schemas/CertificateRequest'
+        - type: object
+          properties:
+            v:
+              type: array
+              minItems: 1
+              maxItems: 1
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Administering id (e.g. Betriebsstättennummer)
+                  tg:
+                    type: string
+                    description: Illenss identification
+                  vp:
+                    type: string
+                    description: Vaccination name
+                  mp:
+                    type: string
+                    description: Product
+                  ma:
+                    type: string
+                    description: Manufacturer of vaccination
+                  dn:
+                    type: integer
+                    minimum: 1
+                    description: Number of dosis
+                  sd:
+                    type: integer
+                    minimum: 1
+                    description: Total dosis count for complete immunization
+                  dt:
+                    type: string
+                    format: date
+                    description: Date of vaccination
+    RecoverdCertificateRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CertificateRequest'
+        - type: object
+          properties:
+            r:
+              type: array
+              minItems: 1
+              maxItems: 1
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Administering id (e.g. Betriebsstättennummer)
+                  tg:
+                    type: string
+                    description: Illenss identification
+                  fr:
+                    type: string
+                    format: date
+                    description: Date of first positive test result
+                  is:
+                    type: string
+                    description: Issuer of certificate
+                  df:
+                    type: string
+                    format: date
+                    description: Start date of certificate validity
+                  du:
+                    type: string
+                    format: date
+                    description: End date of certificate validity
+      
   responses:
     InvalidParameters:
       description: Missing parameters in request or invalid types
@@ -110,6 +263,30 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   parameters:
+    Mandant:
+      name: X-Mandant
+      in: header
+      description: Mandant id to be used in the request (overrides the default value)
+      schema:
+        type: string
+    ClientSystem:
+      name: X-ClientSystem
+      in: header
+      description: Client system to be used in the request (overrides the default value)
+      schema:
+        type: string
+    Workplace:
+      name: X-Workplace
+      in: header
+      description: Workplace identification to be used in the request (overrides the default value)
+      schema:
+        type: string
+    CardHandle:
+      name: X-CardHandle
+      in: header
+      description: Card handle to be used in the request (overrides the default value)
+      schema:
+        type: string
     FamilyName:
       name: fn
       in: query
@@ -220,7 +397,7 @@ components:
       name: du
       in: query
       required: true
-      description: end date of certificate validity
+      description: End date of certificate validity
       schema:
         type: string
         format: date

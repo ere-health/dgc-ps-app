@@ -3,22 +3,24 @@ package health.ere.ps.service.dgc;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
+import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
+import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
-import health.ere.ps.model.idp.crypto.PkiIdentity;
-import health.ere.ps.model.idp.crypto.PkiKeyResolver;
-import health.ere.ps.utils.dgc.TokendIntegrationTestHelper;
+import health.ere.ps.service.idp.IdPService;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.net.URL;
 import java.time.LocalDate;
@@ -31,15 +33,43 @@ import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @QuarkusTest
 @TestProfile(LocalOfflineQuarkusTestProfile.class)
-@ExtendWith(PkiKeyResolver.class)
-class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTestHelper {
+class DigitalGreenCertificateServiceIntegrationTest {
+    @ApplicationScoped
+    private static class RequestBearerTokenEventObserver {
+        private String token;
+
+        private CallContext callContext;
+
+        public void addToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {
+            assertEquals(callContext, requestBearerTokenFromIdpEvent.getCallContext());
+            requestBearerTokenFromIdpEvent.setBearerToken(token);
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+
+        public void setCallContext(CallContext callContext) {
+            this.callContext = callContext;
+        }
+    }
 
     @Inject
     private DigitalGreenCertificateService digitalGreenCertificateService;
+
+    @Inject
+    private RequestBearerTokenEventObserver requestBearerTokenEventObserver;
+
+    // mock service to disable the @Observes annotation
+    @InjectMock
+    private IdPService idPService;
 
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     private String issuerApiUrl;
@@ -50,10 +80,7 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
     private byte[] response;
 
     @BeforeEach
-    void startup(@PkiKeyResolver.Filename("ecc") final PkiIdentity serverIdentity,
-                 @PkiKeyResolver.Filename("C_CH_AUT_R2048") final PkiIdentity rsaClientIdentity) throws Exception {
-        this.serverIdentity = serverIdentity;
-        this.rsaClientIdentity = rsaClientIdentity;
+    void startup() throws Exception {
 
         URL url = new URL(issuerApiUrl);
 
@@ -65,10 +92,11 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
 
         // mock setup for token
         String token = "testToken";
-        mockTokenCreation(token);
+
+        requestBearerTokenEventObserver.setToken(token);
 
         response = new byte[]{1, 2, 4, 8, 16};
-        serverMatcher = post(url.getPath())
+        serverMatcher = post("/issue/api/certify/v2/issue")
                 .withHeader("Authorization", equalTo("Bearer " + token))
                 .withHeader("Accept", equalTo("application/pdf"))
                 .withHeader("Content-Type", equalTo("application/vnd.dgc.v1+json"))
@@ -98,6 +126,10 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         int dn = 123;
         int sd = 345;
         LocalDate dt = LocalDate.of(2021, 1, 1);
+        // we may use a mock here since the call context is supposed to be passed to the event only with no interaction
+        CallContext callContext = mock(CallContext.class);
+
+        requestBearerTokenEventObserver.setCallContext(callContext);
 
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson("{\"nam\":{" +
@@ -113,8 +145,12 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
                         "\"ma\": \"" + ma + "\"," +
                         "\"dn\": " + dn + "," +
                         "\"sd\": " + sd + "," +
-                        "\"dt\": \"" + dt + "\"" +
-                        "}]}"))
+                        "\"dt\": \"" + dt + "\"," +
+                        "\"ci\": \"\"," +
+                        "\"co\": \"DE\"," +
+                        "\"is\": \"\"" +
+                        "}"+
+                        "], \"ver\" : \"1.0.1\"}"))
         );
 
         final V v = new V();
@@ -132,9 +168,11 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         vaccinationCertificateRequest.setDob(dob);
         vaccinationCertificateRequest.v = Collections.singletonList(v);
 
-        byte[] actualResponse = digitalGreenCertificateService.issuePdf(vaccinationCertificateRequest);
+        byte[] actualResponse = digitalGreenCertificateService.issuePdf(vaccinationCertificateRequest, callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
+
+        verifyNoInteractions(callContext);
     }
 
     @Test
@@ -164,6 +202,12 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
                 "}]}";
+
+        // we may use a mock here since the call context is supposed to be passed to the event only with no interaction
+        CallContext callContext = mock(CallContext.class);
+
+        requestBearerTokenEventObserver.setCallContext(callContext);
+
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson(jsonContentResponse))
                 .withRequestBody(matchingJsonPath("r.length()", equalTo("1")))
@@ -182,9 +226,11 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
         certificateRequest.setDob(LocalDate.parse(testDataDob));
         certificateRequest.addRItem(recoveryEntry);
 
-        final byte[] actualResponse = digitalGreenCertificateService.issuePdf(certificateRequest);
+        final byte[] actualResponse = digitalGreenCertificateService.issuePdf(certificateRequest, callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
+
+        verifyNoInteractions(callContext);
     }
 
     @Test
@@ -214,6 +260,12 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
                 "}]}";
+
+        // we may use a mock here since the call context is supposed to be passed to the event only with no interaction
+        CallContext callContext = mock(CallContext.class);
+
+        requestBearerTokenEventObserver.setCallContext(callContext);
+
         wireMockServer.stubFor(serverMatcher
                 .withRequestBody(equalToJson(jsonContentResponse))
                 .withRequestBody(matchingJsonPath("r.length()", equalTo("1")))
@@ -221,8 +273,10 @@ class DigitalGreenCertificateServiceIntegrationTest extends TokendIntegrationTes
 
         final byte[] actualResponse = digitalGreenCertificateService.issueRecoveryCertificatePdf(name, givenName,
                 LocalDate.parse(testDataDob), testId, testTg, LocalDate.parse(testDateFr), testIs,
-                LocalDate.parse(testDateDf), LocalDate.parse(testDateDu));
+                LocalDate.parse(testDateDf), LocalDate.parse(testDateDu), callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
+
+        verifyNoInteractions(callContext);
     }
 }

@@ -27,10 +27,12 @@ import javax.crypto.KeyGenerator;
 import javax.enterprise.context.ApplicationScoped;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.xml.ws.BindingProvider;
 
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.idp.crypto.CryptoLoader;
+import health.ere.ps.ssl.SSLUtilities;
 
 @ApplicationScoped
 public class SecretsManagerService {
@@ -187,7 +189,7 @@ public class SecretsManagerService {
 
             kmf.init(ks, keyStorePassword);
 
-            sc.init( kmf.getKeyManagers(), null, null );
+            sc.init( kmf.getKeyManagers(), new TrustManager[]{new SSLUtilities.FakeX509TrustManager()}, null );
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException
                 | UnrecoverableKeyException | KeyManagementException e) {
             throw new SecretsManagerException("SSL context creation error.", e);
@@ -197,6 +199,10 @@ public class SecretsManagerService {
     }
 
     public static SSLContext setUpCustomSSLContext(InputStream p12Certificate) {
+        return setUpCustomSSLContext(p12Certificate, "00");
+    }
+
+    public static SSLContext setUpCustomSSLContext(InputStream p12Certificate, String password) {
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -204,9 +210,9 @@ public class SecretsManagerService {
             KeyStore ks = KeyStore.getInstance("PKCS12");
             // Download this file from the titus backend
             // https://frontend.titus.ti-dienste.de/#/platform/mandant
-            ks.load(p12Certificate, "00".toCharArray());
-            kmf.init(ks, "00".toCharArray());
-            sc.init(kmf.getKeyManagers(), null, null);
+            ks.load(p12Certificate, password.toCharArray());
+            kmf.init(ks, password.toCharArray());
+            sc.init(kmf.getKeyManagers(), new TrustManager[]{new SSLUtilities.FakeX509TrustManager()}, null);
             return sc;
         } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException
                 | UnrecoverableKeyException | KeyManagementException e) {
