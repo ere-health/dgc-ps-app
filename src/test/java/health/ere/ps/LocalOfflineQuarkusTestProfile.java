@@ -9,4 +9,9 @@ public class LocalOfflineQuarkusTestProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         return Map.of("digital-green-certificate-service.issuerAPIUrl", "http://localhost:8123/issue");
     }
+
+    @Override
+    public String getConfigProfile() {
+        return "offline_test";
+    }
 }

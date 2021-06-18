@@ -108,9 +108,35 @@ may be used.
 For configuration purposes, the environment variables referenced in the `application.properties` file
 are located in a file named `.env`. This file should be located in the root project folder
 (dgc-ps-app).
+See https://quarkus.io/guides/config-reference#environment_variables for additional information.
 
 If needed and the `.env` file is not present, create a copy of the file `.env-example` with name `.env`.
 In regard to file and directory paths, configure the values for the environment variables in the
 `.env` file to reference paths on your local computer.
 
 > Important! Configure the .env file to be ignored and not checked into the source code repository.
+
+#### List of project-specific Environment Variables
+
+* ERE_DIRECTORY_WATCHER_DIR
+* IDP_CONNECTOR_CERT_AUTH_STORE_FILE
+* IDP_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD
+* IDP_CLIENT_ID
+* IDP_AUTH_REQUEST_URL
+* IDP_AUTH_REQUEST_REDIRECT_URL
+* IDP_CONNECTOR_CLIENT_SYSTEM_ID
+* IDP_CONNECTOR_MANDANT_ID
+* IDP_CONNECTOR_WORKPLACE_ID
+* IDP_CONNECTOR_CERTIFICATE_SERVICE_ENDPOINT_ADDRESS
+* IDP_CONNECTOR_CARD_HANDLE
+* IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS
+* SIGNATURE_SERVICE_CONTEXT_MANDANTID
+* SIGNATURE_SERVICE_CONTEXT_CLIENTSYSTEMID
+* SIGNATURE_SERVICE_CONTEXT_WORKPLACEID
+* SIGNATURE_SERVICE_CONTEXT_USERID
+* CONNECTOR_SIMULATOR_TITUSCLIENTCERTIFICATE
+* CONNECTOR_SIMULATOR_TITUSCLIENTCERTIFICATEPASSWORD
+* EVENT_SERVICE_ENDPOINTADDRESS
+* CARD_SERVICE_ENDPOINTADDRESS
+* AUTH_SIGNATURE_SERVICE_ENDPOINTADDRESS
+* AUTH_SIGNATURE_SERVICE_SMBCCARDHANDLE
