@@ -61,7 +61,7 @@ public class IdPService {
                 appConfig.getEventServiceEndpointAddress(),
                 SecretsManagerService.SslContextType.TLS,
                 appConfig.getConnectorTlsCertTrustStore()
-                        .orElseThrow(() -> new DeploymentException("No connector tsl cert trust certificate present")),
+                        .orElseThrow(() -> new DeploymentException("No connector tls cert trust certificate present")),
                 appConfig.getConnectorTlsCertTustStorePwd());
     }
 

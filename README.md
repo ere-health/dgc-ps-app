@@ -118,22 +118,21 @@ In regard to file and directory paths, configure the values for the environment 
 
 | Environment variable | Description | Example |
 | ----- | ----- | ----- |
-| `AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service | `https://192.168.1.1/AuthSignatureService` |
-| `AUTH_SIGNATURE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service | `https://192.168.1.1/AuthSignatureService` |
-| `CARD_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the card SOAP-service | `https://192.168.1.1/CardService` |
-| `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service | `https://192.168.1.1/CertificateService` | 
-| `EVENT_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the event SOAP-service | `https://192.168.1.1/EventService` |
-| `CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate.Client certificate that will be used to access auth signature SOAP-service | `files/path/to/certificate.p12` |
+| `CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate that will be used to connect to the connector; may be empty | `files/path/to/certificate.p12` |
 | `CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD` | Password for accessing the certificate that is configured in `CONNECTOR_CERT_AUTH_STORE_FILE` | `changeit` |
-| `CONNECTOR_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |
-| `CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to get an IDP-token | `client123` |
-| `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used to get an IDP-token and in signature service | `12345` |
-| `CONNECTOR_MANDANT_ID` | Mandant that will be used to get an IDP-token and in signature service | `MANDANT1234` |
-| `CONNECTOR_CARD_HANDLE` | Card handle that will be used to get an IDP-token and in signature SOAP-service | `SMB-C-123` |
-| `CONNECTOR_USER_ID` | User id that will be used for the signature service | `user123` |
-| `IDP_BASE_URL` | Base URL of the identity provider | `https://id.ru.impfnachweis.info/auth/realms/ubirch-certify/` |
+| `CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to access the connector | `client123` |
+| `CONNECTOR_MANDANT_ID` | Mandant that will be used for the connector | `MANDANT1234` |
+| `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
+| `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector | `SMB-C-123` |
+| `CONNECTOR_USER_ID` | User id that will be used for the connector | `user123` |
+| `IDP_BASE_URL` | Base URL for the IDP | `https://id.impfnachweis.info/auth/realms/bmg-ti-certify` |
+| `IDP_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |
 | `IDP_AUTH_REQUEST_REDIRECT_URL` | Redirect URL that will be called by the IDP; should be `connector://authenticated` | `connector://authenticated` |
 | `DIGITAL_GREEN_CERTIFICATE_SERVICE_ISSUERAPIURL` | URL of the public digital green certificate service | `https://api.ru.impfnachweis.info` |
+| `EVENT_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the event SOAP-service | `https://192.168.1.1/EventService` |
+| `CARD_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the card SOAP-service | `https://192.168.1.1/CardService` |
+| `AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service | `https://192.168.1.1/AuthSignatureService` |
+| `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service | `https://192.168.1.1/CertificateService` |
 
 #### Environment Variables for tests
 
