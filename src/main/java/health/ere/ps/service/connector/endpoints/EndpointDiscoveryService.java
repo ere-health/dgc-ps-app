@@ -1,5 +1,8 @@
 package health.ere.ps.service.connector.endpoints;
 
+import health.ere.ps.config.AppConfig;
+import health.ere.ps.exception.common.security.SecretsManagerException;
+import health.ere.ps.service.common.security.SecretsManagerService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -8,6 +11,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,10 +32,18 @@ public class EndpointDiscoveryService {
 
     private final String cardServiceEndpoint;
 
-    public EndpointDiscoveryService(@ConfigProperty(name = "connector.base-uri", defaultValue = "") String connectorBaseUri) throws IOException, ParserConfigurationException {
+    @Inject
+    public EndpointDiscoveryService(AppConfig appConfig, SecretsManagerService secretsManagerService,
+                                    @ConfigProperty(name = "connector.base-uri", defaultValue = "") String connectorBaseUri) throws IOException, ParserConfigurationException, SecretsManagerException {
         // code copied from IdpClient.java
-        // TODO support for client cert
-        Invocation invocation = ClientBuilder.newClient()
+
+        SSLContext sslContext = appConfig.getIdpConnectorTlsCertTrustStore().length() > 0 ? secretsManagerService.createSSLContext(appConfig.getIdpConnectorTlsCertTrustStore(),
+                appConfig.getIdpConnectorTlsCertTustStorePwd(),
+                SecretsManagerService.SslContextType.TLS,
+                SecretsManagerService.KeyStoreType.PKCS12) : null;
+
+        Invocation invocation = (sslContext != null ? ClientBuilder.newBuilder()
+                .sslContext(sslContext) : ClientBuilder.newBuilder()).build()
                 .target(connectorBaseUri)
                 .path("/connector.sds")
                 .request("application/xml")
