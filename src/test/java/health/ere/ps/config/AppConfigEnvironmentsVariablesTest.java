@@ -1,10 +1,8 @@
 package health.ere.ps.config;
 
 import health.ere.ps.EnvironmentQuarkusTestProfile;
-import health.ere.ps.LocalOfflineQuarkusTestProfile;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
