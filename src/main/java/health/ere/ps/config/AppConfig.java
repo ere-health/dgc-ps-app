@@ -57,7 +57,7 @@ public class AppConfig {
     @ConfigProperty(name = "connector.user.id")
     String userId;
 
-    @ConfigProperty(name = "connector.client.id")
+    @ConfigProperty(name = "idp.client.id")
     String clientId;
 
     @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
