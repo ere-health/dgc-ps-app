@@ -60,9 +60,6 @@ public class AppConfig {
     @ConfigProperty(name = "connector.client.id")
     String clientId;
 
-    @ConfigProperty(name = "auth-signature.endpoint.address")
-    String authSignatureEndpointAddress;
-
     @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
     String authSignatureServiceEndpointAddress;
 
@@ -126,10 +123,6 @@ public class AppConfig {
 
     public String getDigitalGreenCertificateServiceIssuerAPI() {
         return digitalGreenCertificateServiceIssuerAPI;
-    }
-
-    public String getAuthSignatureEndpointAddress() {
-        return authSignatureEndpointAddress;
     }
 
     public String getAuthSignatureServiceEndpointAddress() {

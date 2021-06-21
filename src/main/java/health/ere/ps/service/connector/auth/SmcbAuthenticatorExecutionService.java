@@ -34,11 +34,11 @@ public class SmcbAuthenticatorExecutionService {
     @PostConstruct
     void init() throws SecretsManagerException {
         authSignatureService = new AuthSignatureService(getClass().getResource(
-                "/AuthSignatureService_v7_4_1.wsdl")).getAuthSignatureServicePort();
+                "/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
         BindingProvider bp = (BindingProvider) authSignatureService;
 
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                appConfig.getAuthSignatureEndpointAddress());
+                appConfig.getAuthSignatureServiceEndpointAddress());
 
         secretsManagerService.configureSSLTransportContext(
                 appConfig.getConnectorTlsCertTrustStore()
