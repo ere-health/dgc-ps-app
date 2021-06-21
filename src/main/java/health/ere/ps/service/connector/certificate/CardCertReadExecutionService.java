@@ -50,7 +50,7 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        appConfig.getCardServiceEndpointAddress());
+        appConfig.getCertificateServiceEndpointAddress());
         
         if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
             String path = appConfig.getConnectorTlsCertTrustStore().get();
