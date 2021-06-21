@@ -65,14 +65,14 @@ class DigitalGreenCertificateServiceIntegrationTest {
     private DigitalGreenCertificateService digitalGreenCertificateService;
 
     @Inject
-    RequestBearerTokenEventObserver requestBearerTokenEventObserver;
+    private RequestBearerTokenEventObserver requestBearerTokenEventObserver;
 
     // mock service to disable the @Observes annotation
     @InjectMock
-    IdPService idPService;
+    private IdPService idPService;
 
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
-    String issuerApiUrl;
+    private String issuerApiUrl;
 
     private WireMockServer wireMockServer;
 
