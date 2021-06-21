@@ -196,6 +196,14 @@ public class SecretsManagerService {
         return sc;
     }
 
+    public SSLContext createSSLContext(String trustStoreFile, String keyStorePassword, SslContextType sslContextType,
+                                       KeyStoreType keyStoreType) throws IOException, SecretsManagerException {
+
+        try (FileInputStream fileInputStream = new FileInputStream(trustStoreFile)) {
+            return createSSLContext(fileInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType);
+        }
+    }
+
     public Key generateRandomKey(String keyGenAlgorithm) throws SecretsManagerException {
         //Creating a KeyGenerator object
         KeyGenerator keyGen = null;
