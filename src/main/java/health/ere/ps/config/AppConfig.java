@@ -51,6 +51,12 @@ public class AppConfig {
     @ConfigProperty(name = "event-service.endpointAddress")
     String eventServiceEndpointAddress;
 
+    @ConfigProperty(name = "connector.base-uri")
+    String connectorBaseUri;
+
+    @ConfigProperty(name = "connector.verify-hostname")
+    String connectorVerifyHostname;
+
     public String getIdpConnectorTlsCertTrustStore() {
 
         return idpConnectorTlsCertTrustStore;
@@ -115,5 +121,13 @@ public class AppConfig {
 
     public void setMandantId(String mandantId) {
         this.mandantId = mandantId;
+    }
+
+    public String getConnectorBaseUri() {
+        return connectorBaseUri;
+    }
+
+    public boolean isConnectorVerifyHostname() {
+        return !"false".equals(connectorVerifyHostname);
     }
 }
