@@ -35,11 +35,13 @@ class ConnectorCardsServiceTest {
     @BeforeEach
     void configureSecureTransport() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        secureSoapTransportConfigurer.configureSecureTransport(
-                appConfig.getEventServiceEndpointAddress(),
-                SecretsManagerService.SslContextType.TLS,
-                appConfig.getIdpConnectorTlsCertTrustStore(),
-                appConfig.getIdpConnectorTlsCertTustStorePwd());
+        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+            secureSoapTransportConfigurer.configureSecureTransport(
+                    appConfig.getEventServiceEndpointAddress(),
+                    SecretsManagerService.SslContextType.TLS,
+                    appConfig.getConnectorTlsCertTrustStore().get(),
+                    appConfig.getConnectorTlsCertTustStorePwd());
+        }
     }
 
     @Test

@@ -27,7 +27,6 @@ import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
-import health.ere.ps.ssl.SSLUtilities;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -93,11 +92,13 @@ public class IdpClientTest {
     @BeforeEach
     void configureSecureTransport() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        secureSoapTransportConfigurer.configureSecureTransport(
-                appConfig.getEventServiceEndpointAddress(),
-                SecretsManagerService.SslContextType.TLS,
-                appConfig.getIdpConnectorTlsCertTrustStore(),
-                appConfig.getIdpConnectorTlsCertTustStorePwd());
+        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+            secureSoapTransportConfigurer.configureSecureTransport(
+                    appConfig.getEventServiceEndpointAddress(),
+                    SecretsManagerService.SslContextType.TLS,
+                    appConfig.getConnectorTlsCertTrustStore().get(),
+                    appConfig.getConnectorTlsCertTustStorePwd());
+        }
     }
 
 

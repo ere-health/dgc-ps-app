@@ -5,15 +5,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.Optional;
 
 @ApplicationScoped
 public class AppConfig {
-	
-	@ConfigProperty(name = "idp.connector.cert.auth.store.file")
-    String idpConnectorTlsCertTrustStore;
 
-    @ConfigProperty(name = "idp.connector.cert.auth.store.file.password")
-    String idpConnectorTlsCertTustStorePwd;
+    /**
+     * Certificate to authenticate at the connector.
+     */
+    @ConfigProperty(name = "connector.cert.auth.store.file")
+    Optional<String> connectorTlsCertTrustStore;
+
+    /**
+     * Password of the certificate to authenticate at the connector.
+     * The default value is a empty sting, so that the password must not be set.
+     */
+    @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "")
+    String connectorTlsCertTustStorePwd;
 
     @ConfigProperty(name = "idp.client.id")
     String clientId;
@@ -45,20 +53,23 @@ public class AppConfig {
     @ConfigProperty(name = "signature-service.context.userId")
     String signatureServiceContextUserId;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificate")
-    String titusClientCertificate;
-
     @ConfigProperty(name = "event-service.endpointAddress")
     String eventServiceEndpointAddress;
 
-    public String getIdpConnectorTlsCertTrustStore() {
+    @ConfigProperty(name = "idp.base.url")
+    String idpBaseUrl;
 
-        return idpConnectorTlsCertTrustStore;
+    @ConfigProperty(name = "idp.auth.request.redirect.url")
+    String redirectUrl;
+
+
+    public Optional<String> getConnectorTlsCertTrustStore() {
+
+        return connectorTlsCertTrustStore;
     }
 
-    public String getIdpConnectorTlsCertTustStorePwd() {
-		return StringUtils.defaultString(
-			idpConnectorTlsCertTustStorePwd).trim();
+    public String getConnectorTlsCertTustStorePwd() {
+        return StringUtils.defaultString(connectorTlsCertTustStorePwd).trim();
     }
 
     public String getClientId() {
@@ -105,10 +116,6 @@ public class AppConfig {
         return eventServiceEndpointAddress;
     }
 
-    public String getTitusClientCertificate() {
-        return titusClientCertificate;
-    }
-
     public String getMandantId() {
         return this.mandantId;
     }
@@ -116,4 +123,14 @@ public class AppConfig {
     public void setMandantId(String mandantId) {
         this.mandantId = mandantId;
     }
+
+
+    public String getIdpBaseUrl() {
+        return idpBaseUrl;
+    }
+
+    public String getRedirectUrl() {
+        return redirectUrl;
+    }
+
 }

@@ -62,9 +62,9 @@ class IdPServiceTest {
 
     @BeforeEach
     void setConfigValues() {
-        idpService.clientId = CLIENT_ID;
-        idpService.idpBaseUrl = IDP_BASE_URL;
-        idpService.redirectUrl = REDIRECT_URL;
+        when(appConfig.getClientId()).thenReturn(CLIENT_ID);
+        when(appConfig.getIdpBaseUrl()).thenReturn(IDP_BASE_URL);
+        when(appConfig.getRedirectUrl()).thenReturn(REDIRECT_URL);
     }
 
     @Test
@@ -158,7 +158,6 @@ class IdPServiceTest {
         verify(requestBearerTokenFromIdpEvent).getCallContext();
         verifyNoMoreInteractions(requestBearerTokenFromIdpEvent);
         verifyNoInteractions(x509Certificate);
-        verifyNoInteractions(appConfig);
         verifyNoInteractions(connectorCardsService);
 
         InOrder inOrder = inOrder(idpClient, cardCertificateReaderService);

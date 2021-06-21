@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         @SetEnvironmentVariable(
                 key = "_ENV_TEST_IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS", value = "foobarbaz"),
         @SetEnvironmentVariable(
-                key = "_ENV_TEST_IDP_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD", value = "tcpassword"),
+                key = "_ENV_TEST_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD", value = "tcpassword"),
 })
 @QuarkusTest
 @TestProfile(EnvironmentQuarkusTestProfile.class)
@@ -31,7 +31,7 @@ class AppConfigEnvironmentsVariablesTest {
     @Test
     void propertiesShouldBeFromEnvironmentVariables() {
         assertEquals("foobarbaz", config.getIdpConnectorAuthSignatureEndpointAddress());
-        assertEquals("tcpassword", config.getIdpConnectorTlsCertTustStorePwd());
+        assertEquals("tcpassword", config.getConnectorTlsCertTustStorePwd());
     }
 
 }
