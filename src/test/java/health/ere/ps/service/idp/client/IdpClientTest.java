@@ -1,7 +1,5 @@
 package health.ere.ps.service.idp.client;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -9,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.Optional;
 import java.util.logging.LogManager;
 
 import javax.inject.Inject;
@@ -27,8 +24,9 @@ import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
-import health.ere.ps.ssl.SSLUtilities;
 import io.quarkus.test.junit.QuarkusTest;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
 public class IdpClientTest {
@@ -48,28 +46,7 @@ public class IdpClientTest {
     @Inject
     SecureSoapTransportConfigurer secureSoapTransportConfigurer;
 
-    @ConfigProperty(name = "idp.client.id")
-    String clientId;
-
-    @ConfigProperty(name = "idp.connector.client.system.id")
-    String clientSystem;
-
-    @ConfigProperty(name = "idp.connector.mandant.id")
-    String mandantId;
-
-    @ConfigProperty(name = "idp.connector.workplace.id")
-    String workplace;
-
-//    @ConfigProperty(name = "idp.connector.card.handle")
-//    String cardHandle;
-
-    @ConfigProperty(name = "idp.base.url")
-    String idpBaseUrl;
-
     String discoveryDocumentUrl;
-
-    @ConfigProperty(name = "idp.auth.request.redirect.url")
-    String redirectUrl;
 
     @BeforeAll
     public static void init() {
@@ -93,11 +70,13 @@ public class IdpClientTest {
     @BeforeEach
     void configureSecureTransport() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        secureSoapTransportConfigurer.configureSecureTransport(
-                appConfig.getEventServiceEndpointAddress(),
-                SecretsManagerService.SslContextType.TLS,
-                appConfig.getIdpConnectorTlsCertTrustStore(),
-                appConfig.getIdpConnectorTlsCertTustStorePwd());
+        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+            secureSoapTransportConfigurer.configureSecureTransport(
+                    appConfig.getEventServiceEndpointAddress(),
+                    SecretsManagerService.SslContextType.TLS,
+                    appConfig.getConnectorTlsCertTrustStore().get(),
+                    appConfig.getConnectorTlsCertTustStorePwd());
+        }
     }
 
 
@@ -107,21 +86,25 @@ public class IdpClientTest {
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
             ConnectorCardsException {
 
-        discoveryDocumentUrl = idpBaseUrl + IdpHttpClientService.DISCOVERY_DOCUMENT_URI;
+        discoveryDocumentUrl = appConfig.getIdpBaseUrl() + IdpHttpClientService.DISCOVERY_DOCUMENT_URI;
 
-        idpClient.init(clientId, redirectUrl, discoveryDocumentUrl, true);
+        idpClient.init(appConfig.getClientId(), appConfig.getRedirectUrl(), discoveryDocumentUrl, true);
         idpClient.initializeClient();
 
-        Optional<String> cardHandle = connectorCardsService.getConnectorCardHandle(
-                ConnectorCardsService.CardHandleType.SMC_B);
+        String cardHandle = connectorCardsService.getConnectorCardHandle(
+                ConnectorCardsService.CardHandleType.SMC_B).orElse(null);
+        assertNotNull(cardHandle);
 
-        X509Certificate x509Certificate = cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId,
-                clientSystem, workplace, cardHandle.get());
+        X509Certificate x509Certificate = cardCertificateReaderService.retrieveSmcbCardCertificate(
+                appConfig.getMandantId(),
+                appConfig.getClientSystemId(),
+                appConfig.getWorkplaceId(),
+                cardHandle);
 
         IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));
 
-        Assertions.assertNotNull(idpTokenResult, "Idp Token result present.");
-        Assertions.assertNotNull(idpTokenResult.getAccessToken(), "Access Token present");
-        Assertions.assertNotNull(idpTokenResult.getIdToken(), "Id Token present");
+        assertNotNull(idpTokenResult, "Idp Token result present.");
+        assertNotNull(idpTokenResult.getAccessToken(), "Access Token present");
+        assertNotNull(idpTokenResult.getIdToken(), "Id Token present");
     }
 }

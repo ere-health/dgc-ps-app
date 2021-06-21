@@ -2,17 +2,13 @@ package health.ere.ps.service.connector.certificate;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.crypto.CryptoException;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
 import javax.inject.Inject;
 
@@ -34,8 +30,8 @@ class CardCertificateReaderServiceTest {
     void test_Successful_ReadCardCertificate_API_Call() throws ConnectorCardCertificateReadException {
         Assertions.assertTrue(ArrayUtils.isNotEmpty(
                 cardCertificateReaderService.readCardCertificate(appConfig.getClientId(),
-                        appConfig.getClientSystem(),
-                        appConfig.getWorkplace(), appConfig.getCardHandle())),
+                        appConfig.getClientSystemId(),
+                        appConfig.getWorkplaceId(), appConfig.getCardHandle())),
                 "Smart card certificate was retrieved");
     }
 
@@ -46,8 +42,8 @@ class CardCertificateReaderServiceTest {
             CryptoException {
         byte[] base64_Decoded_Asn1_DER_Format_CertBytes =
                 cardCertificateReaderService.readCardCertificate(appConfig.getClientId(),
-                        appConfig.getClientSystem(),
-                        appConfig.getWorkplace(), appConfig.getCardHandle());
+                        appConfig.getClientSystemId(),
+                        appConfig.getWorkplaceId(), appConfig.getCardHandle());
         Assertions.assertTrue(ArrayUtils.isNotEmpty(base64_Decoded_Asn1_DER_Format_CertBytes),
                 "Smart card certificate was retrieved");
 

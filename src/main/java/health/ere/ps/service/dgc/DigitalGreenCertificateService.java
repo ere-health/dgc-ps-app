@@ -1,5 +1,6 @@
 package health.ere.ps.service.dgc;
 
+import health.ere.ps.config.AppConfig;
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
@@ -14,7 +15,6 @@ import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.ssl.SSLUtilities;
 import io.quarkus.runtime.StartupEvent;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -40,8 +40,8 @@ import java.util.logging.Logger;
 public class DigitalGreenCertificateService {
     private static final Logger LOG = Logger.getLogger(DigitalGreenCertificateService.class.getName());
 
-    @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl", defaultValue = "")
-    String issuerAPIUrl;
+    @Inject
+    AppConfig appConfig;
 
     Client client;
 
@@ -159,7 +159,7 @@ public class DigitalGreenCertificateService {
 
         Entity<CertificateRequest> entity = Entity.entity(requestData, "application/vnd.dgc.v1+json");
         // entity = Entity.entity("{\r\n  \"ver\": \"1.0.0\",\r\n  \"nam\": {\r\n    \"fn\": \"d'Ars\u00F8ns - van Halen\",\r\n    \"gn\": \"Fran\u00E7ois-Joan\",\r\n    \"fnt\": \"DARSONS<VAN<HALEN\",\r\n    \"gnt\": \"FRANCOIS<JOAN\"\r\n  },\r\n  \"dob\": \"2009-02-28\",\r\n  \"v\": [\r\n    {\r\n      \"id\": \"123456\",\r\n      \"tg\": \"840539006\",\r\n      \"vp\": \"1119349007\",\r\n      \"mp\": \"EU/1/20/1528\",\r\n      \"ma\": \"ORG-100030215\",\r\n      \"dn\": 2,\r\n      \"sd\": 2,\r\n      \"dt\": \"2021-04-21\",\r\n      \"co\": \"NL\",\r\n      \"is\": \"Ministry of Public Health, Welfare and Sport\",\r\n      \"ci\": \"urn:uvci:01:NL:PlA8UWS60Z4RZXVALl6GAZ\"\r\n    }\r\n  ]\r\n}", "application/vnd.dgc.v1+json");
-        Response response = client.target(issuerAPIUrl)
+        Response response = client.target(appConfig.getDigitalGreenCertificateServiceIssuerAPI())
                 .path("/api/certify/v2/issue")
                 .request("application/pdf")
                 .header("Authorization", "Bearer " + getToken(callContext))
