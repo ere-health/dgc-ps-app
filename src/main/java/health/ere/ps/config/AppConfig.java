@@ -53,6 +53,12 @@ public class AppConfig {
     @ConfigProperty(name = "signature-service.context.userId")
     String signatureServiceContextUserId;
 
+    @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
+    String authSignatureServiceEndpointAddress;
+
+    @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
+    String authSignatureServiceSmbcCardHandle;
+
     @ConfigProperty(name = "event-service.endpointAddress")
     String eventServiceEndpointAddress;
 
@@ -62,6 +68,11 @@ public class AppConfig {
     @ConfigProperty(name = "idp.auth.request.redirect.url")
     String redirectUrl;
 
+    @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
+    String cardServiceEndpointAddress;
+
+    @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
+    String digitalGreenCertificateServiceIssuerAPI;
 
     public Optional<String> getConnectorTlsCertTrustStore() {
 
@@ -124,6 +135,13 @@ public class AppConfig {
         this.mandantId = mandantId;
     }
 
+    public String getAuthSignatureServiceEndpointAddress() {
+        return authSignatureServiceEndpointAddress;
+    }
+
+    public String getAuthSignatureServiceSmbcCardHandle() {
+        return authSignatureServiceSmbcCardHandle;
+    }
 
     public String getIdpBaseUrl() {
         return idpBaseUrl;
@@ -131,6 +149,14 @@ public class AppConfig {
 
     public String getRedirectUrl() {
         return redirectUrl;
+    }
+
+    public String getCardServiceEndpointAddress() {
+        return cardServiceEndpointAddress;
+    }
+
+    public String getDigitalGreenCertificateServiceIssuerAPI() {
+        return digitalGreenCertificateServiceIssuerAPI;
     }
 
 }

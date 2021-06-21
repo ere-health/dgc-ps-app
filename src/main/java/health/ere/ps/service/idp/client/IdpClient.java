@@ -44,7 +44,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -106,27 +105,6 @@ public class IdpClient implements IIdpClient {
     @Inject
     AppConfig appConfig;
 
-    @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
-    String authSignatureServiceEndpointAddress;
-
-    @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
-    String authSignatureServiceSmbcCardHandle;
-
-    @ConfigProperty(name = "signature-service.context.mandantId", defaultValue = "")
-    String signatureServiceContextMandantId;
-
-    @ConfigProperty(name = "signature-service.context.clientSystemId", defaultValue = "")
-    String signatureServiceContextClientSystemId;
-
-    @ConfigProperty(name = "signature-service.context.workplaceId", defaultValue = "")
-    String signatureServiceContextWorkplaceId;
-
-    @ConfigProperty(name = "signature-service.context.userId", defaultValue = "")
-    String signatureServiceContextUserId;
-
-    @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
-    String cardServiceEndpointAddress;
-
     SSLContext customSSLContext = null;
 
     private String clientId;
@@ -160,7 +138,7 @@ public class IdpClient implements IIdpClient {
             authSignatureService = new AuthSignatureService(getClass().getResource("/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
             /* Set endpoint to configured endpoint */
             BindingProvider bp = (BindingProvider) authSignatureService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, authSignatureServiceEndpointAddress);
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, appConfig.getAuthSignatureServiceEndpointAddress());
             if (customSSLContext != null) {
                 bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                         customSSLContext.getSocketFactory());
@@ -169,7 +147,7 @@ public class IdpClient implements IIdpClient {
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, cardServiceEndpointAddress);
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, appConfig.getCardServiceEndpointAddress());
             if (customSSLContext != null) {
                 bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                         customSSLContext.getSocketFactory());
@@ -202,10 +180,10 @@ public class IdpClient implements IIdpClient {
      */
     ContextType createContextType() {
         ContextType contextType = new ContextType();
-        contextType.setMandantId(signatureServiceContextMandantId);
-        contextType.setClientSystemId(signatureServiceContextClientSystemId);
-        contextType.setWorkplaceId(signatureServiceContextWorkplaceId);
-        contextType.setUserId(signatureServiceContextUserId);
+        contextType.setMandantId(appConfig.getSignatureServiceContextMandantId());
+        contextType.setClientSystemId(appConfig.getSignatureServiceContextClientSystemId());
+        contextType.setWorkplaceId(appConfig.getSignatureServiceContextWorkplaceId());
+        contextType.setUserId(appConfig.getSignatureServiceContextUserId());
         return contextType;
     }
 
@@ -251,7 +229,10 @@ public class IdpClient implements IIdpClient {
         assertThatIdpIdentityIsValid(idpIdentity);
         return login(idpIdentity.getCertificate(),
             Errors.rethrow().wrap((Throwing.Function<Pair<String, String>, String>) jwtPair -> {
-                final JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(authSignatureService, authSignatureServiceSmbcCardHandle, createContextType());
+                final JsonWebSignatureWithExternalAuthentification jws =
+                        new JsonWebSignatureWithExternalAuthentification(authSignatureService,
+                                appConfig.getAuthSignatureServiceSmbcCardHandle(),
+                                createContextType());
                 jws.setPayload(new String(Base64.getUrlDecoder().decode(jwtPair.getRight())));
                 Optional.ofNullable(jwtPair.getLeft())
                     .map(b64Header -> new String(Base64.getUrlDecoder().decode(b64Header)))
@@ -307,7 +288,9 @@ public class IdpClient implements IIdpClient {
             ImpfnachweisAuthenticationRequest authenticationRequest = new ImpfnachweisAuthenticationRequest();
             authenticationRequest.setAuthenticationEndpointUrl(impfnachweisAuthorizationResponse.getLocation());
             
-            JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(authSignatureService, authSignatureServiceSmbcCardHandle, createContextType());
+            JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(
+                    authSignatureService, appConfig.getAuthSignatureServiceSmbcCardHandle(), createContextType()
+            );
             byte[] signedChallenge;
             try {
                 signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
@@ -322,7 +305,9 @@ public class IdpClient implements IIdpClient {
                             Holder<Status> status = new Holder<>();
                             Holder<PinResultEnum> pinResultEnum = new Holder<>();
                             Holder<BigInteger> error = new Holder<>();
-                            cardService.verifyPin(createContextType(), authSignatureServiceSmbcCardHandle, "PIN.SMC", status, pinResultEnum, error);
+                            cardService.verifyPin(createContextType(),
+                                    appConfig.getAuthSignatureServiceSmbcCardHandle(),
+                                    "PIN.SMC", status, pinResultEnum, error);
                             // try again
                             signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
                         } catch (Exception e1) {
