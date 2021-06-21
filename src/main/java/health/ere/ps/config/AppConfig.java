@@ -75,9 +75,6 @@ public class AppConfig {
     @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
     String authSignatureServiceEndpointAddress;
 
-    @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
-    String authSignatureServiceSmbcCardHandle;
-
     @ConfigProperty(name = "event-service.endpointAddress")
     String eventServiceEndpointAddress;
 
@@ -156,10 +153,6 @@ public class AppConfig {
 
     public String getAuthSignatureServiceEndpointAddress() {
         return authSignatureServiceEndpointAddress;
-    }
-
-    public String getAuthSignatureServiceSmbcCardHandle() {
-        return authSignatureServiceSmbcCardHandle;
     }
 
     public String getIdpBaseUrl() {

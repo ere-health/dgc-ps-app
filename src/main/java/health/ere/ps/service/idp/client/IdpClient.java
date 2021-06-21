@@ -231,7 +231,7 @@ public class IdpClient implements IIdpClient {
             Errors.rethrow().wrap((Throwing.Function<Pair<String, String>, String>) jwtPair -> {
                 final JsonWebSignatureWithExternalAuthentification jws =
                         new JsonWebSignatureWithExternalAuthentification(authSignatureService,
-                                appConfig.getAuthSignatureServiceSmbcCardHandle(),
+                                appConfig.getCardHandle(),
                                 createContextType());
                 jws.setPayload(new String(Base64.getUrlDecoder().decode(jwtPair.getRight())));
                 Optional.ofNullable(jwtPair.getLeft())
@@ -289,7 +289,7 @@ public class IdpClient implements IIdpClient {
             authenticationRequest.setAuthenticationEndpointUrl(impfnachweisAuthorizationResponse.getLocation());
             
             JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(
-                    authSignatureService, appConfig.getAuthSignatureServiceSmbcCardHandle(), createContextType()
+                    authSignatureService, appConfig.getCardHandle(), createContextType()
             );
             byte[] signedChallenge;
             try {
@@ -306,7 +306,7 @@ public class IdpClient implements IIdpClient {
                             Holder<PinResultEnum> pinResultEnum = new Holder<>();
                             Holder<BigInteger> error = new Holder<>();
                             cardService.verifyPin(createContextType(),
-                                    appConfig.getAuthSignatureServiceSmbcCardHandle(),
+                                    appConfig.getCardHandle(),
                                     "PIN.SMC", status, pinResultEnum, error);
                             // try again
                             signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
