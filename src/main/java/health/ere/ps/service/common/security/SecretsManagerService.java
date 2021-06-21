@@ -1,7 +1,16 @@
 package health.ere.ps.service.common.security;
 
+import health.ere.ps.exception.common.security.SecretsManagerException;
+import health.ere.ps.service.idp.crypto.CryptoLoader;
+import health.ere.ps.ssl.SSLUtilities;
 import org.bouncycastle.crypto.CryptoException;
 
+import javax.crypto.KeyGenerator;
+import javax.enterprise.context.ApplicationScoped;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.xml.ws.BindingProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,17 +31,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.crypto.KeyGenerator;
-import javax.enterprise.context.ApplicationScoped;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.xml.ws.BindingProvider;
-
-import health.ere.ps.exception.common.security.SecretsManagerException;
-import health.ere.ps.service.idp.crypto.CryptoLoader;
-import health.ere.ps.ssl.SSLUtilities;
 
 @ApplicationScoped
 public class SecretsManagerService {
@@ -196,29 +194,6 @@ public class SecretsManagerService {
         }
 
         return sc;
-    }
-
-    public static SSLContext setUpCustomSSLContext(InputStream p12Certificate) {
-        return setUpCustomSSLContext(p12Certificate, "00");
-    }
-
-    public static SSLContext setUpCustomSSLContext(InputStream p12Certificate, String password) {
-        try {
-            SSLContext sc = SSLContext.getInstance("TLS");
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-
-            KeyStore ks = KeyStore.getInstance("PKCS12");
-            // Download this file from the titus backend
-            // https://frontend.titus.ti-dienste.de/#/platform/mandant
-            ks.load(p12Certificate, password.toCharArray());
-            kmf.init(ks, password.toCharArray());
-            sc.init(kmf.getKeyManagers(), new TrustManager[]{new SSLUtilities.FakeX509TrustManager()}, null);
-            return sc;
-        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException
-                | UnrecoverableKeyException | KeyManagementException e) {
-            log.log(Level.SEVERE, "Could not set up custom SSLContext", e);
-            throw new RuntimeException(e);
-        }
     }
 
     public Key generateRandomKey(String keyGenAlgorithm) throws SecretsManagerException {

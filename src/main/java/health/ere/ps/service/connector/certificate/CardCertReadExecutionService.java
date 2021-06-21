@@ -9,24 +9,16 @@ import de.gematik.ws.conn.certificateservicecommon.v2.CertRefEnum;
 import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
-
+import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
+import health.ere.ps.service.common.security.SecretsManagerService;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
-
-import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
-import health.ere.ps.service.common.security.SecretsManagerService;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class CardCertReadExecutionService {
@@ -60,24 +52,8 @@ public class CardCertReadExecutionService {
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
         certificateServiceEndpointAddress);
-        
-        if (titusClientCertificate != null && !("".equals(titusClientCertificate))
-            && !("!".equals(titusClientCertificate))) {
-            try(InputStream is = new FileInputStream(titusClientCertificate)) {
-                log.info(CardCertReadExecutionService.class.getSimpleName()+" uses titus client certifcate: "+titusClientCertificate);
-                setUpCustomSSLContext(is);
-            } catch(FileNotFoundException e) {
-                log.log(Level.SEVERE, "Could find file", e);
-            }
-        }
-    }
-
-    public void setUpCustomSSLContext(InputStream p12Certificate) {
-        SSLContext customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, titusClientCertificatePassword);
-        BindingProvider bp = (BindingProvider) certificateService;
-
-        bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-               customSSLContext.getSocketFactory());
+        secretsManagerService.configureSSLTransportContext(titusClientCertificate, titusClientCertificatePassword,
+                SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
     }
 
     /**

@@ -105,6 +105,9 @@ public class IdpClient implements IIdpClient {
     AuthenticatorClient authenticatorClient;
 
     @Inject
+    SecretsManagerService secretsManagerService;
+
+    @Inject
     Logger logger;
 
     @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
@@ -134,8 +137,6 @@ public class IdpClient implements IIdpClient {
     @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
     String cardServiceEndpointAddress;
 
-    SSLContext customSSLContext = null;
-
     private String clientId;
     private String redirectUrl;
     private String discoveryDocumentUrl;
@@ -155,42 +156,23 @@ public class IdpClient implements IIdpClient {
     @PostConstruct
     public void initAuthSignatureService() {
         try {
-            if (titusClientCertificate != null && !("".equals(titusClientCertificate))
-                    && !("!".equals(titusClientCertificate))) {
-                try {
-                    setUpCustomSSLContext(new FileInputStream(titusClientCertificate), titusClientCertificatePassword);
-                } catch(FileNotFoundException e) {
-                    logger.error("Could not find titus file", e);
-                }
-            }
 
             authSignatureService = new AuthSignatureService(getClass().getResource("/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
             /* Set endpoint to configured endpoint */
             BindingProvider bp = (BindingProvider) authSignatureService;
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, authSignatureServiceEndpointAddress);
-            if (customSSLContext != null) {
-                bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-                        customSSLContext.getSocketFactory());
-            }
+            secretsManagerService.configureSSLTransportContext(titusClientCertificate, titusClientCertificatePassword,
+                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
 
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, cardServiceEndpointAddress);
-            if (customSSLContext != null) {
-                bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-                        customSSLContext.getSocketFactory());
-            } 
+            secretsManagerService.configureSSLTransportContext(titusClientCertificate, titusClientCertificatePassword,
+                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
         } catch(Exception ex) {
             logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
         }
-    }
-
-    public void setUpCustomSSLContext(InputStream p12Certificate) {
-        setUpCustomSSLContext(p12Certificate);
-    }
-    public void setUpCustomSSLContext(InputStream p12Certificate, String password) {
-        customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, password);
     }
 
     public void init(String clientId, String redirectUrl, String discoveryDocumentUrl,
