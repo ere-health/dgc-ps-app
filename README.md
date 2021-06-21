@@ -104,13 +104,37 @@ docker run --rm -p 127.0.0.1:8080:8080 ere.health/dgc:latest
 may be used.
 
 ### Environment Variables
-#### Development Mode
-For dev mode purposes, the environment variables referenced in the application.properties file 
-are located in a file named .env. This file should be located in the root project folder 
-(ere-ps-app).
 
-In regards to file and directory paths, configure the values for the environment variables in the
-.env file to reference paths on your local computer.
+For configuration purposes, the environment variables referenced in the `application.properties` file
+are located in a file named `.env`. This file should be located in the root project folder
+(dgc-ps-app).
+See https://quarkus.io/guides/config-reference#environment_variables for additional information.
+
+If needed and the `.env` file is not present, create a copy of the file `.env.example` with name `.env`.
+In regard to file and directory paths, configure the values for the environment variables in the
+`.env` file to reference paths on your local computer.
 
 > Important! Configure the .env file to be ignored and not checked into the source code repository.
 
+| Environment variable | Description | Example |
+| ----- | ----- | ----- |
+| `IDP_CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate that will be used to connect to the connector; may be empty | `files/path/to/certificate.p12` |
+| `IDP_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD` | Password for accessing the certificate that is configured in `IDP_CONNECTOR_CERT_AUTH_STORE_FILE` | `changeit` |
+| `IDP_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |
+| `IDP_AUTH_REQUEST_REDIRECT_URL` | Redirect URL that will be called by the IDP; should be `connector://authenticated` | `connector://authenticated` |
+| `IDP_CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to get an IDP-token | `client123` |
+| `IDP_CONNECTOR_MANDANT_ID` | Mandant that will be used to get an IDP-token | `MANDANT1234` |
+| `IDP_CONNECTOR_WORKPLACE_ID` | Workplace id that will be used to get an IDP-token | `12345` |
+| `IDP_CONNECTOR_CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service | `https://192.168.1.1/CertificateService` | 
+| `IDP_CONNECTOR_CARD_HANDLE` | Card handle that will be used to get an IDP-token | `SMB-C-123` |
+| `IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service | `https://192.168.1.1/AuthSignatureService` |
+| `SIGNATURE_SERVICE_CONTEXT_MANDANTID` | Mandant that will be used in the signature service | `MANDANT2345` |
+| `SIGNATURE_SERVICE_CONTEXT_CLIENTSYSTEMID` | Client system id that will be used for the signature service | `client234` |
+| `SIGNATURE_SERVICE_CONTEXT_WORKPLACEID` | Workplace id that will be used for the signature service | `23456` |
+| `SIGNATURE_SERVICE_CONTEXT_USERID` | User id that will be used for the signature service | `user123` |
+| `CONNECTOR_SIMULATOR_TITUSCLIENTCERTIFICATE` | Client certificate that will be used to access auth signature SOAP-service | `files/path/to/certificate.p12` |
+| `CONNECTOR_SIMULATOR_TITUSCLIENTCERTIFICATEPASSWORD` | Password for accessing the certificate that is configured in `CONNECTOR_SIMULATOR_TITUSCLIENTCERTIFICATE` | `changeit` |
+| `EVENT_SERVICE_ENDPOINTADDRESS` | Endpoint for the event SOAP-service | `https://192.168.1.1/EventService` |
+| `CARD_SERVICE_ENDPOINTADDRESS` | Endpoint for the card SOAP-service | `https://192.168.1.1/CardService` |
+| `AUTH_SIGNATURE_SERVICE_ENDPOINTADDRESS` | Endpoint for the auth signature SOAP-service | `https://192.168.1.1/AuthSignatureService` |
+| `AUTH_SIGNATURE_SERVICE_SMBCCARDHANDLE` | Card handle that will be used for the auth signature SOAP-service | `SMB-C123` |
