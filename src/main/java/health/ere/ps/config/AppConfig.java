@@ -7,6 +7,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.Optional;
 
+/**
+ * Configurations of the application.
+ */
 @ApplicationScoped
 public class AppConfig {
 
@@ -23,20 +26,36 @@ public class AppConfig {
     @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "")
     String connectorTlsCertTustStorePwd;
 
-    @ConfigProperty(name = "idp.client.id")
-    String clientId;
-
-    @ConfigProperty(name = "idp.connector.client.system.id")
+    /**
+     * Id of the client system, it can be group of systems. may required to call the connector.
+     * see ConnectorContext.xsd in gematik specification.
+     */
+    @ConfigProperty(name = "connector.client.system.id")
     String clientSystem;
 
-    @ConfigProperty(name = "idp.connector.mandant.id")
+    /**
+     * Id of the workspace. may required to call the connector.
+     * See ConnectorContext.xsd in gematik specification.
+     */
+    @ConfigProperty(name = "connector.mandant.id")
     String mandantId;
 
-    @ConfigProperty(name = "idp.connector.workplace.id")
+    /**
+     * Id of the mandant.
+     * See ConnectorContext.xsd in gematik specification.
+     */
+    @ConfigProperty(name = "connector.workplace.id")
     String workplace;
 
-    @ConfigProperty(name = "idp.connector.card.handle")
+    /**
+     * Card handle for the connector.
+     * See ConnectorCommons.xsd in gematik specification.
+     */
+    @ConfigProperty(name = "connector.card.handle")
     String cardHandle;
+
+    @ConfigProperty(name = "idp.client.id")
+    String clientId;
 
     @ConfigProperty(name = "idp.connector.auth-signature.endpoint.address")
     String idpConnectorAuthSignatureEndpointAddress;
