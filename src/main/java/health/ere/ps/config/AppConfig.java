@@ -72,7 +72,7 @@ public class AppConfig {
     @ConfigProperty(name = "certificate-service.endpoint.address")
     String certificateServiceEndpointAddress;
 
-   @ConfigProperty(name = "event-service.endpointAddress")
+   @ConfigProperty(name = "event-service.endpoint.address")
     String eventServiceEndpointAddress;
 
     @ConfigProperty(name = "idp.base.url")
