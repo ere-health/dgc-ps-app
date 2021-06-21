@@ -3,7 +3,9 @@ package health.ere.ps.service.connector.endpoints;
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.common.security.SecretsManagerService;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,9 +21,15 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class EndpointDiscoveryService {
+    private static final Logger LOG = Logger.getLogger(EndpointDiscoveryService.class.getName());
+
+    private final String connectorBaseUri;
+
     private final String signatureServiceEndpoint;
 
     private final String eventServiceEndpoint;
@@ -35,6 +43,9 @@ public class EndpointDiscoveryService {
     @Inject
     public EndpointDiscoveryService(AppConfig appConfig, SecretsManagerService secretsManagerService,
                                     @ConfigProperty(name = "connector.base-uri", defaultValue = "") String connectorBaseUri) throws IOException, ParserConfigurationException, SecretsManagerException {
+
+        this.connectorBaseUri = connectorBaseUri;
+
         // code copied from IdpClient.java
 
         SSLContext sslContext = appConfig.getIdpConnectorTlsCertTrustStore().length() > 0 ? secretsManagerService.createSSLContext(appConfig.getIdpConnectorTlsCertTrustStore(),
@@ -75,7 +86,10 @@ public class EndpointDiscoveryService {
             for (int i = 0, n = serviceNodeList.getLength(); i < n; ++i) {
                 Node node = serviceNodeList.item(i);
 
-                // TODO exception handling
+                if (!node.hasAttributes() || node.getAttributes().getNamedItem("Name") == null) {
+                    break;
+                }
+
                 switch (node.getAttributes().getNamedItem("Name").getTextContent()) {
                     case "SignatureService": {
                         signatureServiceEndpoint = getEndpoint(node);
@@ -101,7 +115,7 @@ public class EndpointDiscoveryService {
             }
 
         } catch (SAXException | IllegalArgumentException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Could not parse connector.sds", e);
         }
 
         this.signatureServiceEndpoint = signatureServiceEndpoint;
@@ -131,16 +145,30 @@ public class EndpointDiscoveryService {
         return cardServiceEndpoint;
     }
 
-    private static String getEndpoint(Node serviceNode) {
-        // TODO check for correct base url
-        // TODO exception handling
-        NodeList versionNodes = ((Element) serviceNode).getElementsByTagName("Versions").item(0).getChildNodes();
+    private String getEndpoint(Node serviceNode) {
+        NodeList versionsNode = ((Element) serviceNode).getElementsByTagName("Versions");
+
+        if (versionsNode.getLength() == 0) {
+            throw new IllegalArgumentException("No version tags found");
+        }
+
+        NodeList versionNodes = versionsNode.item(0).getChildNodes();
 
         for (int i = 0, n = versionNodes.getLength(); i < n; ++i) {
             Element element = (Element) versionNodes.item(i);
 
-            // TODO exception handling
-            return element.getElementsByTagName("EndpointTLS").item(0).getAttributes().getNamedItem("Location").getTextContent();
+            NodeList endpointList = element.getElementsByTagName("EndpointTLS");
+
+            if (endpointList.getLength() != 1 || !endpointList.item(0).hasAttributes()
+                    || endpointList.item(0).getAttributes().getNamedItem("Location") == null) {
+                continue;
+            }
+
+            String location = endpointList.item(0).getAttributes().getNamedItem("Location").getTextContent();
+
+            if (location.startsWith(connectorBaseUri)) {
+                return location;
+            }
         }
 
         throw new IllegalArgumentException("Invalid service node");
