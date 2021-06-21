@@ -52,7 +52,6 @@ class DigitalGreenCertificateServiceTest {
     @Spy
     private DigitalGreenCertificateService digitalGreenCertificateService;
 
-    @InjectMocks
     @Spy
     private AppConfig appConfig;
 
@@ -80,6 +79,7 @@ class DigitalGreenCertificateServiceTest {
 
     @Test
     void issuePdfWithCertificateServiceException() {
+        when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn("");
         issuePdfWithCertificateServiceException(401, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100401);
         issuePdfWithCertificateServiceException(403, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100403);
         issuePdfWithCertificateServiceException(400, DigitalGreenCertificateInvalidParametersException.class, 100400);

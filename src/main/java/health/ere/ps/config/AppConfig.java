@@ -31,7 +31,7 @@ public class AppConfig {
      * see ConnectorContext.xsd in gematik specification.
      */
     @ConfigProperty(name = "connector.client.system.id")
-    String clientSystem;
+    String clientSystemId;
 
     /**
      * Id of the workspace. may required to call the connector.
@@ -54,23 +54,15 @@ public class AppConfig {
     @ConfigProperty(name = "connector.card.handle")
     String cardHandle;
 
+    @ConfigProperty(name = "connector.user.id")
+    String userId;
+
     @ConfigProperty(name = "idp.client.id")
     String clientId;
 
     @ConfigProperty(name = "idp.connector.auth-signature.endpoint.address")
     String idpConnectorAuthSignatureEndpointAddress;
 
-    @ConfigProperty(name = "signature-service.context.mandantId")
-    String signatureServiceContextMandantId;
-
-    @ConfigProperty(name = "signature-service.context.clientSystemId")
-    String signatureServiceContextClientSystemId;
-
-    @ConfigProperty(name = "signature-service.context.workplaceId")
-    String signatureServiceContextWorkplaceId;
-
-    @ConfigProperty(name = "signature-service.context.userId")
-    String signatureServiceContextUserId;
 
     @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
     String authSignatureServiceEndpointAddress;
@@ -104,12 +96,12 @@ public class AppConfig {
         return clientId;
     }
 
-    public String getClientSystem() {
+    public String getClientSystemId() {
 
-        return clientSystem;
+        return clientSystemId;
     }
 
-    public String getWorkplace() {
+    public String getWorkplaceId() {
 
         return workplace;
     }
@@ -123,20 +115,8 @@ public class AppConfig {
         return idpConnectorAuthSignatureEndpointAddress;
     }
 
-    public String getSignatureServiceContextMandantId() {
-        return signatureServiceContextMandantId;
-    }
-
-    public String getSignatureServiceContextClientSystemId() {
-        return signatureServiceContextClientSystemId;
-    }
-
-    public String getSignatureServiceContextWorkplaceId() {
-        return signatureServiceContextWorkplaceId;
-    }
-
-    public String getSignatureServiceContextUserId() {
-        return signatureServiceContextUserId;
+    public String getUserId() {
+        return userId;
     }
 
     public String getEventServiceEndpointAddress() {

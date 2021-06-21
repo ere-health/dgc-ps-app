@@ -1,7 +1,5 @@
 package health.ere.ps.service.idp.client;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -9,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.Optional;
 import java.util.logging.LogManager;
 
 import javax.inject.Inject;
@@ -100,8 +97,8 @@ public class IdpClientTest {
 
         X509Certificate x509Certificate = cardCertificateReaderService.retrieveSmcbCardCertificate(
                 appConfig.getMandantId(),
-                appConfig.getClientSystem(),
-                appConfig.getWorkplace(),
+                appConfig.getClientSystemId(),
+                appConfig.getWorkplaceId(),
                 cardHandle);
 
         IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));

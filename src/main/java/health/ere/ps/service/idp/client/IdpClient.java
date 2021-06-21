@@ -8,7 +8,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
@@ -180,10 +179,10 @@ public class IdpClient implements IIdpClient {
      */
     ContextType createContextType() {
         ContextType contextType = new ContextType();
-        contextType.setMandantId(appConfig.getSignatureServiceContextMandantId());
-        contextType.setClientSystemId(appConfig.getSignatureServiceContextClientSystemId());
-        contextType.setWorkplaceId(appConfig.getSignatureServiceContextWorkplaceId());
-        contextType.setUserId(appConfig.getSignatureServiceContextUserId());
+        contextType.setMandantId(appConfig.getMandantId());
+        contextType.setClientSystemId(appConfig.getClientSystemId());
+        contextType.setWorkplaceId(appConfig.getWorkplaceId());
+        contextType.setUserId(appConfig.getUserId());
         return contextType;
     }
 

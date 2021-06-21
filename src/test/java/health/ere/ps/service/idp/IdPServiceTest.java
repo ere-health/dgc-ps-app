@@ -88,8 +88,8 @@ class IdPServiceTest {
         JsonWebToken accessToken = mock(JsonWebToken.class);
 
         when(appConfig.getMandantId()).thenReturn(mandantId);
-        when(appConfig.getClientSystem()).thenReturn(clientSystem);
-        when(appConfig.getWorkplace()).thenReturn(workplace);
+        when(appConfig.getClientSystemId()).thenReturn(clientSystem);
+        when(appConfig.getWorkplaceId()).thenReturn(workplace);
         when(connectorCardsService.getConnectorCardHandle(ConnectorCardsService.CardHandleType.SMC_B))
                 .thenReturn(Optional.of(cardHandle));
         when(cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace, cardHandle))
