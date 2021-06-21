@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SetEnvironmentVariable.SetEnvironmentVariables({
         // use the offline_test profile to not interfere with the other tests.
         @SetEnvironmentVariable(
-                key = "_ENV_TEST_IDP_CONNECTOR_AUTH_SIGNATURE_ENDPOINT_ADDRESS", value = "foobarbaz"),
+                key = "_ENV_TEST_AUTH_SIGNATURE_ENDPOINT_ADDRESS", value = "foobarbaz"),
         @SetEnvironmentVariable(
                 key = "_ENV_TEST_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD", value = "tcpassword"),
 })
@@ -30,7 +30,7 @@ class AppConfigEnvironmentsVariablesTest {
      */
     @Test
     void propertiesShouldBeFromEnvironmentVariables() {
-        assertEquals("foobarbaz", config.getIdpConnectorAuthSignatureEndpointAddress());
+        assertEquals("foobarbaz", config.getAuthSignatureEndpointAddress());
         assertEquals("tcpassword", config.getConnectorTlsCertTustStorePwd());
     }
 

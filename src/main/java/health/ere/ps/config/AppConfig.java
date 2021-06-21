@@ -45,7 +45,7 @@ public class AppConfig {
      * See ConnectorContext.xsd in gematik specification.
      */
     @ConfigProperty(name = "connector.workplace.id")
-    String workplace;
+    String workplaceId;
 
     /**
      * Card handle for the connector.
@@ -57,17 +57,22 @@ public class AppConfig {
     @ConfigProperty(name = "connector.user.id")
     String userId;
 
-    @ConfigProperty(name = "idp.client.id")
+    @ConfigProperty(name = "connector.client.id")
     String clientId;
 
-    @ConfigProperty(name = "idp.connector.auth-signature.endpoint.address")
-    String idpConnectorAuthSignatureEndpointAddress;
+    @ConfigProperty(name = "auth-signature.endpoint.address")
+    String authSignatureEndpointAddress;
 
-
-    @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
+    @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
     String authSignatureServiceEndpointAddress;
 
-    @ConfigProperty(name = "event-service.endpointAddress")
+    @ConfigProperty(name = "card-service.endpoint.address", defaultValue = "")
+    String cardServiceEndpointAddress;
+
+    @ConfigProperty(name = "certificate-service.endpoint.address")
+    String certificateServiceEndpointAddress;
+
+   @ConfigProperty(name = "event-service.endpointAddress")
     String eventServiceEndpointAddress;
 
     @ConfigProperty(name = "idp.base.url")
@@ -76,14 +81,10 @@ public class AppConfig {
     @ConfigProperty(name = "idp.auth.request.redirect.url")
     String redirectUrl;
 
-    @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
-    String cardServiceEndpointAddress;
-
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     String digitalGreenCertificateServiceIssuerAPI;
 
     public Optional<String> getConnectorTlsCertTrustStore() {
-
         return connectorTlsCertTrustStore;
     }
 
@@ -92,47 +93,27 @@ public class AppConfig {
     }
 
     public String getClientId() {
-
         return clientId;
     }
 
     public String getClientSystemId() {
-
         return clientSystemId;
     }
 
     public String getWorkplaceId() {
-
-        return workplace;
+        return workplaceId;
     }
 
     public String getCardHandle() {
-
         return cardHandle;
-    }
-
-    public String getIdpConnectorAuthSignatureEndpointAddress() {
-        return idpConnectorAuthSignatureEndpointAddress;
     }
 
     public String getUserId() {
         return userId;
     }
 
-    public String getEventServiceEndpointAddress() {
-        return eventServiceEndpointAddress;
-    }
-
     public String getMandantId() {
         return this.mandantId;
-    }
-
-    public void setMandantId(String mandantId) {
-        this.mandantId = mandantId;
-    }
-
-    public String getAuthSignatureServiceEndpointAddress() {
-        return authSignatureServiceEndpointAddress;
     }
 
     public String getIdpBaseUrl() {
@@ -143,12 +124,28 @@ public class AppConfig {
         return redirectUrl;
     }
 
+    public String getDigitalGreenCertificateServiceIssuerAPI() {
+        return digitalGreenCertificateServiceIssuerAPI;
+    }
+
+    public String getAuthSignatureEndpointAddress() {
+        return authSignatureEndpointAddress;
+    }
+
+    public String getAuthSignatureServiceEndpointAddress() {
+        return authSignatureServiceEndpointAddress;
+    }
+
     public String getCardServiceEndpointAddress() {
         return cardServiceEndpointAddress;
     }
 
-    public String getDigitalGreenCertificateServiceIssuerAPI() {
-        return digitalGreenCertificateServiceIssuerAPI;
+    public String getCertificateServiceEndpointAddress() {
+        return certificateServiceEndpointAddress;
+    }
+
+    public String getEventServiceEndpointAddress() {
+        return eventServiceEndpointAddress;
     }
 
 }
