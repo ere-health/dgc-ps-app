@@ -13,7 +13,7 @@ import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 import health.ere.ps.ssl.SSLUtilities;
-import io.quarkus.runtime.StartupEvent;
+// import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
@@ -48,9 +48,9 @@ public class DigitalGreenCertificateService {
     @Inject
     Event<RequestBearerTokenFromIdpEvent> requestBearerTokenFromIdp;
 
-    void onStart(@Observes StartupEvent ev) {               
-        LOG.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
-    }
+//    void onStart(@Observes StartupEvent ev) {               
+//        LOG.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
+//    }
 
     @PostConstruct
     public void init() {
