@@ -33,16 +33,16 @@ class AuthenticatorClientTest {
     @Inject
     Logger logger;
 
-    @ConfigProperty(name = "idp.base.url")
+    @Inject @ConfigProperty(name = "idp.base.url")
     String idpBaseUrl;
 
-    @ConfigProperty(name = "idp.client.id")
+    @Inject @ConfigProperty(name = "idp.client.id")
     String idpCientId;
     
-    @ConfigProperty(name = "idp.auth.request.url")
+    @Inject @ConfigProperty(name = "idp.auth.request.url")
     String idpAuthRequestUrl;
 
-    @ConfigProperty(name = "idp.auth.request.redirect.url")
+    @Inject @ConfigProperty(name = "idp.auth.request.redirect.url")
     String idpAuthRequestRedirectUrl;
 
     @Test

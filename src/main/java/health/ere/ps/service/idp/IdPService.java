@@ -47,7 +47,7 @@ public class IdPService {
     @Inject
     AppConfig appConfig;
 
-    @ConfigProperty(name = "idp.client.id")
+    @Inject @ConfigProperty(name = "idp.client.id")
     String clientId;
 
     @Inject
@@ -56,10 +56,10 @@ public class IdPService {
     @Inject
     SecureSoapTransportConfigurer secureSoapTransportConfigurer;
 
-    @ConfigProperty(name = "idp.base.url")
+    @Inject @ConfigProperty(name = "idp.base.url")
     String idpBaseUrl;
 
-    @ConfigProperty(name = "idp.auth.request.redirect.url")
+    @Inject @ConfigProperty(name = "idp.auth.request.redirect.url")
     String redirectUrl;
 
 

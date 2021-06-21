@@ -107,31 +107,31 @@ public class IdpClient implements IIdpClient {
     @Inject
     Logger logger;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
+    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
     String titusClientCertificate;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
+    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
     String titusClientCertificatePassword;
 
-    @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
+    @Inject @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
     String authSignatureServiceEndpointAddress;
 
-    @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
+    @Inject @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
     String authSignatureServiceSmbcCardHandle;
 
-    @ConfigProperty(name = "signature-service.context.mandantId", defaultValue = "")
+    @Inject @ConfigProperty(name = "signature-service.context.mandantId", defaultValue = "")
     String signatureServiceContextMandantId;
 
-    @ConfigProperty(name = "signature-service.context.clientSystemId", defaultValue = "")
+    @Inject @ConfigProperty(name = "signature-service.context.clientSystemId", defaultValue = "")
     String signatureServiceContextClientSystemId;
 
-    @ConfigProperty(name = "signature-service.context.workplaceId", defaultValue = "")
+    @Inject @ConfigProperty(name = "signature-service.context.workplaceId", defaultValue = "")
     String signatureServiceContextWorkplaceId;
 
-    @ConfigProperty(name = "signature-service.context.userId", defaultValue = "")
+    @Inject @ConfigProperty(name = "signature-service.context.userId", defaultValue = "")
     String signatureServiceContextUserId;
 
-    @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
+    @Inject @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
     String cardServiceEndpointAddress;
 
     SSLContext customSSLContext = null;

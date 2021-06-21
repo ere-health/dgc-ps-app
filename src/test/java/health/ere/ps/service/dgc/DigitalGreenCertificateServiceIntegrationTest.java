@@ -71,7 +71,7 @@ class DigitalGreenCertificateServiceIntegrationTest {
     @InjectMock
     private IdPService idPService;
 
-    @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
+    @Inject @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     private String issuerApiUrl;
 
     private WireMockServer wireMockServer;

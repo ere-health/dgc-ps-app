@@ -5,50 +5,51 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 public class AppConfig {
 	
-	@ConfigProperty(name = "idp.connector.cert.auth.store.file")
+	@Inject @ConfigProperty(name = "idp.connector.cert.auth.store.file")
     String idpConnectorTlsCertTrustStore;
 
-    @ConfigProperty(name = "idp.connector.cert.auth.store.file.password")
+    @Inject @ConfigProperty(name = "idp.connector.cert.auth.store.file.password")
     String idpConnectorTlsCertTustStorePwd;
 
-    @ConfigProperty(name = "idp.client.id")
+    @Inject @ConfigProperty(name = "idp.client.id")
     String clientId;
 
-    @ConfigProperty(name = "idp.connector.client.system.id")
+    @Inject @ConfigProperty(name = "idp.connector.client.system.id")
     String clientSystem;
 
-    @ConfigProperty(name = "idp.connector.mandant.id")
+    @Inject @ConfigProperty(name = "idp.connector.mandant.id")
     String mandantId;
 
-    @ConfigProperty(name = "idp.connector.workplace.id")
+    @Inject @ConfigProperty(name = "idp.connector.workplace.id")
     String workplace;
 
-    @ConfigProperty(name = "idp.connector.card.handle")
+    @Inject @ConfigProperty(name = "idp.connector.card.handle")
     String cardHandle;
 
-    @ConfigProperty(name = "idp.connector.auth-signature.endpoint.address")
+    @Inject @ConfigProperty(name = "idp.connector.auth-signature.endpoint.address")
     String idpConnectorAuthSignatureEndpointAddress;
 
-    @ConfigProperty(name = "signature-service.context.mandantId")
+    @Inject @ConfigProperty(name = "signature-service.context.mandantId")
     String signatureServiceContextMandantId;
 
-    @ConfigProperty(name = "signature-service.context.clientSystemId")
+    @Inject @ConfigProperty(name = "signature-service.context.clientSystemId")
     String signatureServiceContextClientSystemId;
 
-    @ConfigProperty(name = "signature-service.context.workplaceId")
+    @Inject @ConfigProperty(name = "signature-service.context.workplaceId")
     String signatureServiceContextWorkplaceId;
 
-    @ConfigProperty(name = "signature-service.context.userId")
+    @Inject @ConfigProperty(name = "signature-service.context.userId")
     String signatureServiceContextUserId;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificate")
+    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificate")
     String titusClientCertificate;
 
-    @ConfigProperty(name = "event-service.endpointAddress")
+    @Inject @ConfigProperty(name = "event-service.endpointAddress")
     String eventServiceEndpointAddress;
 
     public String getIdpConnectorTlsCertTrustStore() {

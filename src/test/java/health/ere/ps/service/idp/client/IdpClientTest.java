@@ -48,27 +48,27 @@ public class IdpClientTest {
     @Inject
     SecureSoapTransportConfigurer secureSoapTransportConfigurer;
 
-    @ConfigProperty(name = "idp.client.id")
+    @Inject @ConfigProperty(name = "idp.client.id")
     String clientId;
 
-    @ConfigProperty(name = "idp.connector.client.system.id")
+    @Inject @ConfigProperty(name = "idp.connector.client.system.id")
     String clientSystem;
 
-    @ConfigProperty(name = "idp.connector.mandant.id")
+    @Inject @ConfigProperty(name = "idp.connector.mandant.id")
     String mandantId;
 
-    @ConfigProperty(name = "idp.connector.workplace.id")
+    @Inject @ConfigProperty(name = "idp.connector.workplace.id")
     String workplace;
 
-//    @ConfigProperty(name = "idp.connector.card.handle")
+//    @Inject @ConfigProperty(name = "idp.connector.card.handle")
 //    String cardHandle;
 
-    @ConfigProperty(name = "idp.base.url")
+    @Inject @ConfigProperty(name = "idp.base.url")
     String idpBaseUrl;
 
     String discoveryDocumentUrl;
 
-    @ConfigProperty(name = "idp.auth.request.redirect.url")
+    @Inject @ConfigProperty(name = "idp.auth.request.redirect.url")
     String redirectUrl;
 
     @BeforeAll

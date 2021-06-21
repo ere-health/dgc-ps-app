@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 public class DigitalGreenCertificateService {
     private static final Logger LOG = Logger.getLogger(DigitalGreenCertificateService.class.getName());
 
-    @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl", defaultValue = "")
+    @Inject @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     String issuerAPIUrl;
 
     Client client;

@@ -36,13 +36,13 @@ public class CardCertReadExecutionService {
     @Inject
     SecretsManagerService secretsManagerService;
     
-    @ConfigProperty(name = "idp.connector.certificate-service.endpoint.address")
+    @Inject @ConfigProperty(name = "idp.connector.certificate-service.endpoint.address")
     String certificateServiceEndpointAddress;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
+    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
     String titusClientCertificate;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
+    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
     String titusClientCertificatePassword;
 
     private CertificateServicePortType certificateService;
