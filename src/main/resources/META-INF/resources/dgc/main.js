@@ -94,6 +94,18 @@ function prefillVaccineParameters() {
     }
 }
 
+async function refreshStatus() {
+    const connector = document.getElementById("connector");
+    const parameters = document.getElementById("parameters");
+    const smcb = document.getElementById("smcb");
+    const idp = document.getElementById("idp");
+    const cert = document.getElementById("cert");
+    // ✅❌?
+    // smcb.setAttribute("style", "color: blue")
+    // smcb.setAttribute("style", "color: red")
+    // smcb.removeAttribute("style")
+}
+
 async function sendRecoveredRequest() {
     const form = document.getElementById("request-form");
 
