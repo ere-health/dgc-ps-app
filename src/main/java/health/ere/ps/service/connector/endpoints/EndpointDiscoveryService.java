@@ -3,15 +3,14 @@ package health.ere.ps.service.connector.endpoints;
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.common.security.SecretsManagerService;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.slf4j.LoggerFactory;
+import health.ere.ps.ssl.SSLUtilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
@@ -28,34 +27,42 @@ import java.util.logging.Logger;
 public class EndpointDiscoveryService {
     private static final Logger LOG = Logger.getLogger(EndpointDiscoveryService.class.getName());
 
-    private final String connectorBaseUri;
+    private String signatureServiceEndpoint;
 
-    private final String signatureServiceEndpoint;
+    private String eventServiceEndpoint;
 
-    private final String eventServiceEndpoint;
+    private String certificateServiceEndpoint;
 
-    private final String certificateServiceEndpoint;
+    private String authSignatureServiceEndpoint;
 
-    private final String authSignatureServiceEndpoint;
-
-    private final String cardServiceEndpoint;
+    private String cardServiceEndpoint;
 
     @Inject
-    public EndpointDiscoveryService(AppConfig appConfig, SecretsManagerService secretsManagerService,
-                                    @ConfigProperty(name = "connector.base-uri", defaultValue = "") String connectorBaseUri) throws IOException, ParserConfigurationException, SecretsManagerException {
+    AppConfig appConfig;
 
-        this.connectorBaseUri = connectorBaseUri;
+    @Inject
+    SecretsManagerService secretsManagerService;
 
+    @PostConstruct
+    void obtainConfiguration() throws IOException, ParserConfigurationException, SecretsManagerException {
         // code copied from IdpClient.java
 
+        // having an ssl context does not interfere with non-ssl connections
         SSLContext sslContext = appConfig.getConnectorTlsCertTrustStore().isPresent() ? secretsManagerService.createSSLContext(appConfig.getConnectorTlsCertTrustStore().get(),
                 appConfig.getConnectorTlsCertTustStorePwd(),
                 SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12) : null;
+                SecretsManagerService.KeyStoreType.PKCS12) : secretsManagerService.createAcceptAllSSLContext();
 
-        Invocation invocation = (sslContext != null ? ClientBuilder.newBuilder()
-                .sslContext(sslContext) : ClientBuilder.newBuilder()).build()
-                .target(connectorBaseUri)
+        ClientBuilder clientBuilder = ClientBuilder.newBuilder()
+                .sslContext(sslContext);
+
+        if (!appConfig.isConnectorVerifyHostname()) {
+            // disable hostname verification
+            clientBuilder = clientBuilder.hostnameVerifier(new SSLUtilities.FakeHostnameVerifier());
+        }
+
+        Invocation invocation = clientBuilder.build()
+                .target(appConfig.getConnectorBaseUri())
                 .path("/connector.sds")
                 .request("application/xml")
                 .buildGet();
@@ -166,7 +173,7 @@ public class EndpointDiscoveryService {
 
             String location = endpointList.item(0).getAttributes().getNamedItem("Location").getTextContent();
 
-            if (location.startsWith(connectorBaseUri)) {
+            if (location.startsWith(appConfig.getConnectorBaseUri())) {
                 return location;
             }
         }
