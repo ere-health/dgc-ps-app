@@ -26,6 +26,9 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This service automatically discovers the endpoints that are available at the connector.
+ */
 @ApplicationScoped
 public class EndpointDiscoveryService {
     private static final Logger LOG = Logger.getLogger(EndpointDiscoveryService.class.getName());
