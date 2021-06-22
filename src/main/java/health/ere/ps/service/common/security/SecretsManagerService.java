@@ -196,6 +196,16 @@ public class SecretsManagerService {
         return sc;
     }
 
+    /**
+     * This method created a SSLContext that accepts all certificates without performing any kind of checks!
+     *
+     * @return SSLContext without any certificate verification
+     * @throws SecretsManagerException error during SSLContext creation
+     */
+    public SSLContext createAcceptAllSSLContext() throws SecretsManagerException {
+        return createSSLContext((InputStream) null, null, SslContextType.TLS, KeyStoreType.PKCS12);
+    }
+
     public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
                                        KeyStoreType keyStoreType) throws IOException, SecretsManagerException {
 
