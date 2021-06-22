@@ -9,9 +9,9 @@ import de.gematik.ws.conn.certificateservicecommon.v2.CertRefEnum;
 import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
+import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
 import health.ere.ps.service.common.security.SecretsManagerService;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -26,16 +26,10 @@ public class CardCertReadExecutionService {
     private static Logger log = Logger.getLogger(CardCertReadExecutionService.class.getName());
 
     @Inject
+    AppConfig appConfig;
+
+    @Inject
     SecretsManagerService secretsManagerService;
-    
-    @ConfigProperty(name = "idp.connector.certificate-service.endpoint.address")
-    String certificateServiceEndpointAddress;
-
-    @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
-    String titusClientCertificate;
-
-    @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
-    String titusClientCertificatePassword;
 
     private CertificateServicePortType certificateService;
 
@@ -51,9 +45,13 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        certificateServiceEndpointAddress);
-        secretsManagerService.configureSSLTransportContext(titusClientCertificate, titusClientCertificatePassword,
-                SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
+        appConfig.getCertificateServiceEndpointAddress());
+        
+        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+            String path = appConfig.getConnectorTlsCertTrustStore().get();
+            secretsManagerService.configureSSLTransportContext(path, appConfig.getConnectorTlsCertTustStorePwd(),
+                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
+        }
     }
 
     /**

@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class V {
-    public String id = UUID.randomUUID().toString();
+    public String id;
     public String tg;
     public String vp;
     public String mp;
@@ -13,9 +13,7 @@ public class V {
     public Integer dn;
     public Integer sd;
     public LocalDate dt;
-    public String co = "DE";
-    public String is = "";
-    public String ci = "";
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

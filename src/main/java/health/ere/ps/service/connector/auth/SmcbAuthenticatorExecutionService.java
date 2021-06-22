@@ -8,17 +8,17 @@ import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 import de.gematik.ws.conn.signatureservice.v7.BinaryDocumentType;
 import de.gematik.ws.conn.signatureservice.v7.ExternalAuthenticate;
 import de.gematik.ws.conn.signatureservice.v7.ExternalAuthenticateResponse;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.Holder;
-
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import oasis.names.tc.dss._1_0.core.schema.SignatureObject;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.spi.DeploymentException;
+import javax.inject.Inject;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Holder;
 
 @ApplicationScoped
 public class SmcbAuthenticatorExecutionService {
@@ -34,14 +34,16 @@ public class SmcbAuthenticatorExecutionService {
     @PostConstruct
     void init() throws SecretsManagerException {
         authSignatureService = new AuthSignatureService(getClass().getResource(
-                "/AuthSignatureService_v7_4_1.wsdl")).getAuthSignatureServicePort();
+                "/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
         BindingProvider bp = (BindingProvider) authSignatureService;
 
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                appConfig.getIdpConnectorAuthSignatureEndpointAddress());
+                appConfig.getAuthSignatureServiceEndpointAddress());
 
-        secretsManagerService.configureSSLTransportContext(appConfig.getIdpConnectorTlsCertTrustStore(),
-                appConfig.getIdpConnectorTlsCertTustStorePwd(), SecretsManagerService.SslContextType.TLS,
+        secretsManagerService.configureSSLTransportContext(
+                appConfig.getConnectorTlsCertTrustStore()
+                        .orElseThrow(() -> new DeploymentException("No connector tsl cert trust certificate present")),
+                appConfig.getConnectorTlsCertTustStorePwd(), SecretsManagerService.SslContextType.TLS,
                 SecretsManagerService.KeyStoreType.PKCS12, bp);
     }
 
@@ -58,7 +60,7 @@ public class SmcbAuthenticatorExecutionService {
 
         response.setStatus(statusHolder.value);
         response.setSignatureObject(signatureObjectHolder.value);
-        
+
         return response;
     }
 }

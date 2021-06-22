@@ -3,13 +3,12 @@ package health.ere.ps.service.idp.client;
 import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
 
+import health.ere.ps.config.AppConfig;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import org.jose4j.jca.ProviderContext;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
@@ -17,17 +16,12 @@ import org.jose4j.lang.JoseException;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.AuthSignatureService;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.AuthSignatureServicePortType;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.FaultMessage;
-import de.gematik.ws.conn.cardservice.v8.AuthorizeSmc;
-import de.gematik.ws.conn.cardservice.v8.PinStatusEnum;
 import de.gematik.ws.conn.cardservice.wsdl.v8.CardService;
 import de.gematik.ws.conn.cardservice.wsdl.v8.CardServicePortType;
 import de.gematik.ws.conn.cardservicecommon.v2.PinResultEnum;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -46,7 +40,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -56,7 +49,6 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -64,8 +56,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.crypto.Data;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
@@ -110,32 +100,8 @@ public class IdpClient implements IIdpClient {
     @Inject
     Logger logger;
 
-    @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
-    String titusClientCertificate;
-
-    @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
-    String titusClientCertificatePassword;
-
-    @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
-    String authSignatureServiceEndpointAddress;
-
-    @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
-    String authSignatureServiceSmbcCardHandle;
-
-    @ConfigProperty(name = "signature-service.context.mandantId", defaultValue = "")
-    String signatureServiceContextMandantId;
-
-    @ConfigProperty(name = "signature-service.context.clientSystemId", defaultValue = "")
-    String signatureServiceContextClientSystemId;
-
-    @ConfigProperty(name = "signature-service.context.workplaceId", defaultValue = "")
-    String signatureServiceContextWorkplaceId;
-
-    @ConfigProperty(name = "signature-service.context.userId", defaultValue = "")
-    String signatureServiceContextUserId;
-
-    @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
-    String cardServiceEndpointAddress;
+    @Inject
+    AppConfig appConfig;
 
     private String clientId;
     private String redirectUrl;
@@ -156,20 +122,28 @@ public class IdpClient implements IIdpClient {
     @PostConstruct
     public void initAuthSignatureService() {
         try {
-
             authSignatureService = new AuthSignatureService(getClass().getResource("/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
             /* Set endpoint to configured endpoint */
             BindingProvider bp = (BindingProvider) authSignatureService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, authSignatureServiceEndpointAddress);
-            secretsManagerService.configureSSLTransportContext(titusClientCertificate, titusClientCertificatePassword,
-                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
+
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                    appConfig.getAuthSignatureServiceEndpointAddress());
+            if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+                secretsManagerService.configureSSLTransportContext(appConfig.getConnectorTlsCertTrustStore().get(),
+                        appConfig.getConnectorTlsCertTustStorePwd(), SecretsManagerService.SslContextType.TLS,
+                        SecretsManagerService.KeyStoreType.PKCS12, bp);
+            }
 
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, cardServiceEndpointAddress);
-            secretsManagerService.configureSSLTransportContext(titusClientCertificate, titusClientCertificatePassword,
-                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                    appConfig.getCardServiceEndpointAddress());
+            if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+                secretsManagerService.configureSSLTransportContext(appConfig.getConnectorTlsCertTrustStore().get(),
+                        appConfig.getConnectorTlsCertTustStorePwd(), SecretsManagerService.SslContextType.TLS,
+                        SecretsManagerService.KeyStoreType.PKCS12, bp);
+            }
         } catch(Exception ex) {
             logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
         }
@@ -191,10 +165,10 @@ public class IdpClient implements IIdpClient {
      */
     ContextType createContextType() {
         ContextType contextType = new ContextType();
-        contextType.setMandantId(signatureServiceContextMandantId);
-        contextType.setClientSystemId(signatureServiceContextClientSystemId);
-        contextType.setWorkplaceId(signatureServiceContextWorkplaceId);
-        contextType.setUserId(signatureServiceContextUserId);
+        contextType.setMandantId(appConfig.getMandantId());
+        contextType.setClientSystemId(appConfig.getClientSystemId());
+        contextType.setWorkplaceId(appConfig.getWorkplaceId());
+        contextType.setUserId(appConfig.getUserId());
         return contextType;
     }
 
@@ -240,7 +214,10 @@ public class IdpClient implements IIdpClient {
         assertThatIdpIdentityIsValid(idpIdentity);
         return login(idpIdentity.getCertificate(),
             Errors.rethrow().wrap((Throwing.Function<Pair<String, String>, String>) jwtPair -> {
-                final JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(authSignatureService, authSignatureServiceSmbcCardHandle, createContextType());
+                final JsonWebSignatureWithExternalAuthentification jws =
+                        new JsonWebSignatureWithExternalAuthentification(authSignatureService,
+                                appConfig.getCardHandle(),
+                                createContextType());
                 jws.setPayload(new String(Base64.getUrlDecoder().decode(jwtPair.getRight())));
                 Optional.ofNullable(jwtPair.getLeft())
                     .map(b64Header -> new String(Base64.getUrlDecoder().decode(b64Header)))
@@ -296,7 +273,9 @@ public class IdpClient implements IIdpClient {
             ImpfnachweisAuthenticationRequest authenticationRequest = new ImpfnachweisAuthenticationRequest();
             authenticationRequest.setAuthenticationEndpointUrl(impfnachweisAuthorizationResponse.getLocation());
             
-            JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(authSignatureService, authSignatureServiceSmbcCardHandle, createContextType());
+            JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(
+                    authSignatureService, appConfig.getCardHandle(), createContextType()
+            );
             byte[] signedChallenge;
             try {
                 signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
@@ -311,7 +290,9 @@ public class IdpClient implements IIdpClient {
                             Holder<Status> status = new Holder<>();
                             Holder<PinResultEnum> pinResultEnum = new Holder<>();
                             Holder<BigInteger> error = new Holder<>();
-                            cardService.verifyPin(createContextType(), authSignatureServiceSmbcCardHandle, "PIN.SMC", status, pinResultEnum, error);
+                            cardService.verifyPin(createContextType(),
+                                    appConfig.getCardHandle(),
+                                    "PIN.SMC", status, pinResultEnum, error);
                             // try again
                             signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
                         } catch (Exception e1) {
