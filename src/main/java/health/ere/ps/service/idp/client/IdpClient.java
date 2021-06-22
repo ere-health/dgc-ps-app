@@ -4,6 +4,7 @@ import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
 
 import health.ere.ps.config.AppConfig;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -103,6 +104,9 @@ public class IdpClient implements IIdpClient {
     @Inject
     AppConfig appConfig;
 
+    @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
+
     private String clientId;
     private String redirectUrl;
     private String discoveryDocumentUrl;
@@ -127,10 +131,10 @@ public class IdpClient implements IIdpClient {
             BindingProvider bp = (BindingProvider) authSignatureService;
 
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                    appConfig.getAuthSignatureServiceEndpointAddress());
-            if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
-                secretsManagerService.configureSSLTransportContext(appConfig.getConnectorTlsCertTrustStore().get(),
-                        appConfig.getConnectorTlsCertTustStorePwd(), SecretsManagerService.SslContextType.TLS,
+                    endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
+            if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+                secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
+                        endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
                         SecretsManagerService.KeyStoreType.PKCS12, bp);
             }
 
@@ -138,10 +142,10 @@ public class IdpClient implements IIdpClient {
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                    appConfig.getCardServiceEndpointAddress());
-            if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
-                secretsManagerService.configureSSLTransportContext(appConfig.getConnectorTlsCertTrustStore().get(),
-                        appConfig.getConnectorTlsCertTustStorePwd(), SecretsManagerService.SslContextType.TLS,
+                    endpointDiscoveryService.getCardServiceEndpointAddress());
+            if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+                secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
+                        endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
                         SecretsManagerService.KeyStoreType.PKCS12, bp);
             }
         } catch(Exception ex) {

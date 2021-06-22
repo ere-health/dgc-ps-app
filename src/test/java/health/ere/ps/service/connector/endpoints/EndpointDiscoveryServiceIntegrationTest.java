@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -23,11 +22,10 @@ import java.util.stream.Collectors;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.okXml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * Although this is an integration test, we still use mockito to inject values. This is sufficient for the current
- * implementation and allows to adjust the {@link AppConfig} parameters on a per-test-method basis.
+ * implementation.
  */
 @ExtendWith(MockitoExtension.class)
 class EndpointDiscoveryServiceIntegrationTest {
@@ -36,9 +34,6 @@ class EndpointDiscoveryServiceIntegrationTest {
     private static final int BIND_PORT = 8123;
 
     private static final String BASE_URI = "https://" + BIND_ADDRESS + ":" + BIND_PORT + "/";
-
-    @Mock
-    private AppConfig appConfig;
 
     // test the real secrets manager
     @Spy
@@ -77,20 +72,19 @@ class EndpointDiscoveryServiceIntegrationTest {
         String certificateServiceEndpoint = BASE_URI + "testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
-        when(appConfig.getConnectorTlsCertTrustStore()).thenReturn(Optional.empty());
-        when(appConfig.isConnectorVerifyHostname()).thenReturn(false);
-        when(appConfig.getConnectorBaseUri()).thenReturn(BASE_URI);
+        endpointDiscoveryService.connectorTlsCertTrustStore = Optional.empty();
+        endpointDiscoveryService.connectorVerifyHostname = "false";
+        endpointDiscoveryService.connectorBaseUri = BASE_URI;
 
         mockEndpoints(signatureServiceEndpoint, authSignatureServiceEndpoint, cardServiceEndpoint,
                 eventServiceEndpoint, certificateServiceEndpoint);
 
         endpointDiscoveryService.obtainConfiguration();
 
-        assertEquals(signatureServiceEndpoint, endpointDiscoveryService.getSignatureServiceEndpoint());
-        assertEquals(authSignatureServiceEndpoint, endpointDiscoveryService.getAuthSignatureServiceEndpoint());
-        assertEquals(cardServiceEndpoint, endpointDiscoveryService.getCardServiceEndpoint());
-        assertEquals(eventServiceEndpoint, endpointDiscoveryService.getEventServiceEndpoint());
-        assertEquals(certificateServiceEndpoint, endpointDiscoveryService.getCertificateServiceEndpoint());
+        assertEquals(authSignatureServiceEndpoint, endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
+        assertEquals(cardServiceEndpoint, endpointDiscoveryService.getCardServiceEndpointAddress());
+        assertEquals(eventServiceEndpoint, endpointDiscoveryService.getEventServiceEndpointAddress());
+        assertEquals(certificateServiceEndpoint, endpointDiscoveryService.getCertificateServiceEndpointAddress());
     }
 
     private void mockEndpoints(String signatureServiceEndpoint, String authSignatureServiceEndpoint,

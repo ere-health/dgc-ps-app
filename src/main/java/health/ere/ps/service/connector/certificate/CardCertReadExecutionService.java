@@ -9,9 +9,9 @@ import de.gematik.ws.conn.certificateservicecommon.v2.CertRefEnum;
 import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
-import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
 import health.ere.ps.service.common.security.SecretsManagerService;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -26,7 +26,7 @@ public class CardCertReadExecutionService {
     private static Logger log = Logger.getLogger(CardCertReadExecutionService.class.getName());
 
     @Inject
-    AppConfig appConfig;
+    EndpointDiscoveryService endpointDiscoveryService;
 
     @Inject
     SecretsManagerService secretsManagerService;
@@ -45,11 +45,11 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        appConfig.getCertificateServiceEndpointAddress());
+        endpointDiscoveryService.getCertificateServiceEndpointAddress());
         
-        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
-            String path = appConfig.getConnectorTlsCertTrustStore().get();
-            secretsManagerService.configureSSLTransportContext(path, appConfig.getConnectorTlsCertTustStorePwd(),
+        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+            String path = endpointDiscoveryService.getConnectorTlsCertTrustStore().get();
+            secretsManagerService.configureSSLTransportContext(path, endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
                     SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
         }
     }

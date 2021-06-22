@@ -14,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SetEnvironmentVariable.SetEnvironmentVariables({
         // use the offline_test profile to not interfere with the other tests.
         @SetEnvironmentVariable(
-                key = "_ENV_TEST_AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS", value = "foobarbaz"),
+                key = "_ENV_TEST_IDP_CLIENT_ID", value = "foobarbaz"),
         @SetEnvironmentVariable(
-                key = "_ENV_TEST_CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD", value = "tcpassword"),
+                key = "_ENV_TEST_IDP_BASE_URL", value = "somebaseurl"),
 })
 @QuarkusTest
 @TestProfile(EnvironmentQuarkusTestProfile.class)
@@ -30,8 +30,8 @@ class AppConfigEnvironmentsVariablesTest {
      */
     @Test
     void propertiesShouldBeFromEnvironmentVariables() {
-        assertEquals("foobarbaz", config.getAuthSignatureServiceEndpointAddress());
-        assertEquals("tcpassword", config.getConnectorTlsCertTustStorePwd());
+        assertEquals("foobarbaz", config.getClientId());
+        assertEquals("somebaseurl", config.getIdpBaseUrl());
     }
 
 }
