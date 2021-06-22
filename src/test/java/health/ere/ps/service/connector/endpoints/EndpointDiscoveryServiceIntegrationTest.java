@@ -25,8 +25,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.okXml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+/**
+ * Although this is an integration test, we still use mockito to inject values. This is sufficient for the current
+ * implementation and allows to adjust the {@link AppConfig} parameters on a per-test-method basis.
+ */
 @ExtendWith(MockitoExtension.class)
-class EndpointDiscoveryServiceTest {
+class EndpointDiscoveryServiceIntegrationTest {
     private static final String BIND_ADDRESS = "127.0.0.1";
 
     private static final int BIND_PORT = 8123;
