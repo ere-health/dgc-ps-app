@@ -54,8 +54,6 @@ public class DigitalGreenCertificateService {
 
     @PostConstruct
     public void init() {
-        SSLUtilities.trustAllHostnames();
-        SSLUtilities.trustAllHttpsCertificates();
         ClientBuilder clientBuilder = ClientBuilder.newBuilder();
         client = clientBuilder.build();
     }
