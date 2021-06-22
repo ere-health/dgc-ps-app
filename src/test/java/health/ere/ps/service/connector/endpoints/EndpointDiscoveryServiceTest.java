@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -63,7 +64,7 @@ class EndpointDiscoveryServiceTest {
         String certificateServiceEndpoint = BASE_URI + "testCertificateServiceEndpoint";
 
         // disable SSL context
-        when(appConfig.getIdpConnectorTlsCertTrustStore()).thenReturn("");
+        when(appConfig.getConnectorTlsCertTrustStore()).thenReturn(Optional.empty());
 
         mockEndpoints(signatureServiceEndpoint, authSignatureServiceEndpoint, cardServiceEndpoint,
                 eventServiceEndpoint, certificateServiceEndpoint);

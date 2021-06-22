@@ -48,8 +48,8 @@ public class EndpointDiscoveryService {
 
         // code copied from IdpClient.java
 
-        SSLContext sslContext = appConfig.getIdpConnectorTlsCertTrustStore().length() > 0 ? secretsManagerService.createSSLContext(appConfig.getIdpConnectorTlsCertTrustStore(),
-                appConfig.getIdpConnectorTlsCertTustStorePwd(),
+        SSLContext sslContext = appConfig.getConnectorTlsCertTrustStore().isPresent() ? secretsManagerService.createSSLContext(appConfig.getConnectorTlsCertTrustStore().get(),
+                appConfig.getConnectorTlsCertTustStorePwd(),
                 SecretsManagerService.SslContextType.TLS,
                 SecretsManagerService.KeyStoreType.PKCS12) : null;
 
