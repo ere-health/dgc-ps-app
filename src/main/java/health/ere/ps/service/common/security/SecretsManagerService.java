@@ -142,9 +142,9 @@ public class SecretsManagerService {
         return trustStore;
     }
 
-    public KeyStore initializeTrustStoreFromInputStream(InputStream keyStoreInputStream,
-                                                        KeyStoreType keyStoreType,
-                                                 char[] keyStorePassword)
+    public KeyStore getKeyStoreFromInputStream(InputStream keyStoreInputStream,
+                                               KeyStoreType keyStoreType,
+                                               char[] keyStorePassword)
             throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore trustStore = KeyStore.getInstance(keyStoreType.getKeyStoreType());
         trustStore.load(keyStoreInputStream, keyStorePassword);
