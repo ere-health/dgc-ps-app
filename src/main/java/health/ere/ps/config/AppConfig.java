@@ -14,19 +14,6 @@ import java.util.Optional;
 public class AppConfig {
 
     /**
-     * Certificate to authenticate at the connector.
-     */
-    @ConfigProperty(name = "connector.cert.auth.store.file")
-    Optional<String> connectorTlsCertTrustStore;
-
-    /**
-     * Password of the certificate to authenticate at the connector.
-     * The default value is a empty sting, so that the password must not be set.
-     */
-    @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "")
-    String connectorTlsCertTustStorePwd;
-
-    /**
      * Id of the client system, it can be group of systems. may required to call the connector.
      * see ConnectorContext.xsd in gematik specification.
      */
@@ -60,24 +47,6 @@ public class AppConfig {
     @ConfigProperty(name = "idp.client.id")
     String clientId;
 
-    @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
-    String authSignatureServiceEndpointAddress;
-
-    @ConfigProperty(name = "card-service.endpoint.address", defaultValue = "")
-    String cardServiceEndpointAddress;
-
-    @ConfigProperty(name = "certificate-service.endpoint.address")
-    String certificateServiceEndpointAddress;
-
-    @ConfigProperty(name = "event-service.endpoint.address")
-    String eventServiceEndpointAddress;
-
-    @ConfigProperty(name = "connector.base-uri")
-    String connectorBaseUri;
-
-    @ConfigProperty(name = "connector.verify-hostname")
-    String connectorVerifyHostname;
-
     @ConfigProperty(name = "idp.base.url")
     String idpBaseUrl;
 
@@ -86,14 +55,6 @@ public class AppConfig {
 
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     String digitalGreenCertificateServiceIssuerAPI;
-
-    public Optional<String> getConnectorTlsCertTrustStore() {
-        return connectorTlsCertTrustStore;
-    }
-
-    public String getConnectorTlsCertTustStorePwd() {
-        return StringUtils.defaultString(connectorTlsCertTustStorePwd).trim();
-    }
 
     public String getClientId() {
         return clientId;
@@ -129,29 +90,5 @@ public class AppConfig {
 
     public String getDigitalGreenCertificateServiceIssuerAPI() {
         return digitalGreenCertificateServiceIssuerAPI;
-    }
-
-    public String getAuthSignatureServiceEndpointAddress() {
-        return authSignatureServiceEndpointAddress;
-    }
-
-    public String getCardServiceEndpointAddress() {
-        return cardServiceEndpointAddress;
-    }
-
-    public String getCertificateServiceEndpointAddress() {
-        return certificateServiceEndpointAddress;
-    }
-
-    public String getEventServiceEndpointAddress() {
-        return eventServiceEndpointAddress;
-    }
-
-    public String getConnectorBaseUri() {
-        return connectorBaseUri;
-    }
-
-    public boolean isConnectorVerifyHostname() {
-        return !"false".equals(connectorVerifyHostname);
     }
 }
