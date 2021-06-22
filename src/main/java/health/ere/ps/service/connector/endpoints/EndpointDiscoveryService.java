@@ -3,7 +3,6 @@ package health.ere.ps.service.connector.endpoints;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.ssl.SSLUtilities;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -41,8 +40,8 @@ public class EndpointDiscoveryService {
      * Password of the certificate to authenticate at the connector.
      * The default value is a empty sting, so that the password must not be set.
      */
-    @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "")
-    String connectorTlsCertTustStorePwd;
+    @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "!")
+    String connectorTlsCertTrustStorePwd;
 
     @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
     String authSignatureServiceEndpointAddress;
@@ -71,7 +70,7 @@ public class EndpointDiscoveryService {
 
         // having an ssl context does not interfere with non-ssl connections
         SSLContext sslContext = connectorTlsCertTrustStore.isPresent() ? secretsManagerService.createSSLContext(connectorTlsCertTrustStore.get(),
-                connectorTlsCertTustStorePwd,
+                connectorTlsCertTrustStorePwd,
                 SecretsManagerService.SslContextType.TLS,
                 SecretsManagerService.KeyStoreType.PKCS12) : secretsManagerService.createAcceptAllSSLContext();
 
@@ -155,7 +154,7 @@ public class EndpointDiscoveryService {
     }
 
     public String getConnectorTlsCertTrustStorePwd() {
-        return StringUtils.defaultString(connectorTlsCertTustStorePwd).trim();
+        return connectorTlsCertTrustStorePwd;
     }
 
     private String getEndpoint(Node serviceNode) {
