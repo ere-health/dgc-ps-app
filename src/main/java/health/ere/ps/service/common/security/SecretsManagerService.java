@@ -142,24 +142,24 @@ public class SecretsManagerService {
         return trustStore;
     }
 
-    public KeyStore initializeTrustStoreFromInputStream(InputStream trustStoreInputStream,
+    public KeyStore initializeTrustStoreFromInputStream(InputStream keyStoreInputStream,
                                                         KeyStoreType keyStoreType,
                                                  char[] keyStorePassword)
             throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore trustStore = KeyStore.getInstance(keyStoreType.getKeyStoreType());
-        trustStore.load(trustStoreInputStream, keyStorePassword);
+        trustStore.load(keyStoreInputStream, keyStorePassword);
 
         return trustStore;
     }
 
-    public void configureSSLTransportContext(String trustStoreFilePath,
-                                             String trustStorePassword,
+    public void configureSSLTransportContext(String keyStoreFilePath,
+                                             String keyStorePassword,
                                              SslContextType sslContextType,
                                              KeyStoreType keyStoreType,
                                              BindingProvider bp)
             throws SecretsManagerException {
-        try(FileInputStream fileInputStream = new FileInputStream(trustStoreFilePath)) {
-            SSLContext sc = createSSLContext(fileInputStream, trustStorePassword.toCharArray(),
+        try(FileInputStream fileInputStream = new FileInputStream(keyStoreFilePath)) {
+            SSLContext sc = createSSLContext(fileInputStream, keyStorePassword.toCharArray(),
                 sslContextType, keyStoreType);
 
             bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
@@ -171,7 +171,7 @@ public class SecretsManagerService {
         }
     }
 
-    public SSLContext createSSLContext(InputStream trustStoreInputStream, char[] keyStorePassword,
+    public SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
                                     SslContextType sslContextType, KeyStoreType keyStoreType)
             throws SecretsManagerException {
         SSLContext sc;
@@ -183,7 +183,7 @@ public class SecretsManagerService {
                     KeyManagerFactory.getInstance( KeyManagerFactory.getDefaultAlgorithm() );
 
             KeyStore ks = KeyStore.getInstance(keyStoreType.getKeyStoreType());
-            ks.load(trustStoreInputStream, keyStorePassword);
+            ks.load(keyStoreInputStream, keyStorePassword);
 
             kmf.init(ks, keyStorePassword);
 
@@ -196,10 +196,10 @@ public class SecretsManagerService {
         return sc;
     }
 
-    public SSLContext createSSLContext(String trustStoreFile, String keyStorePassword, SslContextType sslContextType,
+    public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
                                        KeyStoreType keyStoreType) throws IOException, SecretsManagerException {
 
-        try (FileInputStream fileInputStream = new FileInputStream(trustStoreFile)) {
+        try (FileInputStream fileInputStream = new FileInputStream(keyStoreFile)) {
             return createSSLContext(fileInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType);
         }
     }
