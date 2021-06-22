@@ -13,7 +13,7 @@
           rel="stylesheet">
     <script type="text/javascript" src="main.js"></script>
 </head>
-<body class="home-page" onload="refreshStatus();" onhashchange="refreshStatus();">
+<body class="home-page" onload="fetchStatus();" onhashchange="fetchStatus();">
     <div class="main-content-wrapper">
         <header class="header-wrapper">
             <div class="header">
@@ -29,18 +29,30 @@
             <div class="recipe-wrapper active" id="unsigned_1">
                 <div class="title-rezept-button">
                     <h2>COVID-19 Zertifikat Service Installationstatus</h2>
-                    <button id="sign-recipe" onclick="refreshStatus();" class="open-modal jet-btn">
+                    <button id="sign-recipe" onclick="fetchStatus();" class="open-modal jet-btn">
                         Status aktualisieren
                     </button>
                 </div>
+                <div id="loader" class="hidden">
+                    <div class="loader"></div>
+                    <span>Loading ...</span>
+                </div>
+                <div class="check">Check <span id="connector" style="color: red">&quest;</span>:
+                    connector is reachable
+                </div>
+                <div class="check">Check <span id="parameters" style="color: red">&quest;</span>:
+                    mandant/client/workspace parameters are correctly set up
+                </div>
+                <div class="check">Check <span id="card" style="color: red">&quest;</span>:
+                    SMC-B card handle is valid and correctly set up
+                </div>
+                <div class="check">Check <span id="idp" style="color: red">&quest;</span>:
+                    route to the IDP is correctly set up
+                </div>
+                <div class="check">Check <span id="cert" style="color: red">&quest;</span>:
+                    route to the certificate service is correctly set up
+                </div>
             </div>
-            <section class="recipe-body dgn-body">
-                <div>Check: connector is reachable <span id="connector">?</span></div>
-                <div>Check: mandant/client/workspace parameters are correctly set up <span id="parameters">?</span></div>
-                <div>Check: SMC-B card handle is valid and correctly set up <span id="smcb">?</span></div>
-                <div>Check: route to the IDP is correctly set up <span id="idp">?</span></div>
-                <div>Check: route to the certificate service is correctly set up <span id="cert">?</span></div>
-            </section>
         </section>
     </div>
 </body>

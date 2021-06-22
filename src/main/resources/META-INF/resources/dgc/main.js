@@ -94,16 +94,63 @@ function prefillVaccineParameters() {
     }
 }
 
-async function refreshStatus() {
+/**
+ * Fetch the status from the backend and update the installation page fields by id with each state.
+ * @return {Promise<void>}
+ */
+async function fetchStatus() {
     const connector = document.getElementById("connector");
     const parameters = document.getElementById("parameters");
-    const smcb = document.getElementById("smcb");
+    const card = document.getElementById("card");
     const idp = document.getElementById("idp");
     const cert = document.getElementById("cert");
-    // ✅❌?
-    // smcb.setAttribute("style", "color: blue")
-    // smcb.setAttribute("style", "color: red")
-    // smcb.removeAttribute("style")
+    const loader = document.getElementById("loader");
+
+    /**
+     * @param {HTMLElement} element the element to set the state.
+     * @param {HealthState} state the state to set (OK, FAIL, UNKNOWN)
+     */
+    function setState(element, state) {
+        switch (state) {
+            case "OK": {
+                // I choose blue because red–green color blindness
+                element.setAttribute("style", "color: blue")
+                element.innerHTML = "&check;"
+                break;
+            }
+            case "FAIL": {
+                element.setAttribute("style", "color: red")
+                element.innerHTML = "&cross;"
+                break;
+            }
+            case "UNKNOWN":
+            default:
+                element.setAttribute("style", "color: red")
+                element.innerHTML = "&quest;"
+                break;
+        }
+    }
+    loader.classList.remove("hidden")
+
+    try {
+        const response = await fetch("../api/certify/v2/status", {
+            method: "GET",
+        });
+        /**
+         * @type {HealthStatus}
+         */
+        let data = await response.json();
+        setState(card, data.cardState);
+        setState(idp, data.identityProviderRouteState);
+        setState(cert, data.certificateServiceRouteState);
+        setState(parameters, data.parameterState);
+        setState(connector, data.connectorState);
+    } catch (e) {
+        console.error(e);
+        showError(e.message);
+    } finally {
+        loader.classList.add("hidden")
+    }
 }
 
 async function sendRecoveredRequest() {
@@ -162,7 +209,7 @@ async function sendRequest(path, requestData) {
     try {
         const response = await fetch(path, {
             method: "POST",
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
         });
 
@@ -171,7 +218,7 @@ async function sendRequest(path, requestData) {
         if (response.status === 200 && contentType === 'application/pdf') {
             const buffer = await response.arrayBuffer();
 
-            const blob = new Blob([buffer], {"type": "application/pdf"});
+            const blob = new Blob([buffer], { "type": "application/pdf" });
             window.location = URL.createObjectURL(blob);
         } else if (response.status >= 400 && contentType === 'application/json') {
             const error = await response.json();
