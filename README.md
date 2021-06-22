@@ -125,14 +125,16 @@ In regard to file and directory paths, configure the values for the environment 
 | `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
 | `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector | `SMB-C-123` |
 | `CONNECTOR_USER_ID` | User id that will be used for the connector | `user123` |
+| `CONNECTOR_BASE_URI` | Base URI for the connector (protocol+host+port) | `https://192.168.1.1` |
+| `CONNECTOR_VERIFY_HOSTNAME` | Set to `false` to disable host name verification when using TLS for the connector | `true` |
 | `IDP_BASE_URL` | Base URL for the IDP | `https://id.impfnachweis.info/auth/realms/bmg-ti-certify` |
 | `IDP_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |
 | `IDP_AUTH_REQUEST_REDIRECT_URL` | Redirect URL that will be called by the IDP; should be `connector://authenticated` | `connector://authenticated` |
 | `DIGITAL_GREEN_CERTIFICATE_SERVICE_ISSUERAPIURL` | URL of the public digital green certificate service | `https://api.ru.impfnachweis.info` |
-| `EVENT_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the event SOAP-service | `https://192.168.1.1/EventService` |
-| `CARD_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the card SOAP-service | `https://192.168.1.1/CardService` |
-| `AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service | `https://192.168.1.1/AuthSignatureService` |
-| `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service | `https://192.168.1.1/CertificateService` |
+| `EVENT_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the event SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/EventService` |
+| `CARD_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the card SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CardService` |
+| `AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/AuthSignatureService` |
+| `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CertificateService` |
 
 #### Environment Variables for tests
 
