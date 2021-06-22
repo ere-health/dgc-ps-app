@@ -93,13 +93,13 @@ public class EndpointDiscoveryService {
                     .newDocumentBuilder()
                     .parse(inputStream);
 
-            NodeList nodeList = document.getElementsByTagName("ServiceInformation");
+            Node serviceInformationNode = getNodeWithTag(document.getDocumentElement(), "ServiceInformation");
 
-            if (nodeList.getLength() != 1) {
+            if (serviceInformationNode == null) {
                 throw new IllegalArgumentException("Could not find single 'ServiceInformation'-tag");
             }
 
-            NodeList serviceNodeList = nodeList.item(0).getChildNodes();
+            NodeList serviceNodeList = serviceInformationNode.getChildNodes();
 
             for (int i = 0, n = serviceNodeList.getLength(); i < n; ++i) {
                 Node node = serviceNodeList.item(i);
@@ -158,25 +158,23 @@ public class EndpointDiscoveryService {
     }
 
     private String getEndpoint(Node serviceNode) {
-        NodeList versionsNode = ((Element) serviceNode).getElementsByTagName("Versions");
+        Node versionsNode = getNodeWithTag(serviceNode, "Versions");
 
-        if (versionsNode.getLength() == 0) {
+        if (versionsNode == null) {
             throw new IllegalArgumentException("No version tags found");
         }
 
-        NodeList versionNodes = versionsNode.item(0).getChildNodes();
+        NodeList versionNodes = versionsNode.getChildNodes();
 
         for (int i = 0, n = versionNodes.getLength(); i < n; ++i) {
-            Element element = (Element) versionNodes.item(i);
+            Node endpointNode = getNodeWithTag(versionNodes.item(i), "EndpointTLS");
 
-            NodeList endpointList = element.getElementsByTagName("EndpointTLS");
-
-            if (endpointList.getLength() != 1 || !endpointList.item(0).hasAttributes()
-                    || endpointList.item(0).getAttributes().getNamedItem("Location") == null) {
+            if (endpointNode == null || !endpointNode.hasAttributes()
+                    || endpointNode.getAttributes().getNamedItem("Location") == null) {
                 continue;
             }
 
-            String location = endpointList.item(0).getAttributes().getNamedItem("Location").getTextContent();
+            String location = endpointNode.getAttributes().getNamedItem("Location").getTextContent();
 
             if (location.startsWith(connectorBaseUri)) {
                 return location;
@@ -184,5 +182,20 @@ public class EndpointDiscoveryService {
         }
 
         throw new IllegalArgumentException("Invalid service node");
+    }
+
+    private static Node getNodeWithTag(Node node, String tagName) {
+        NodeList nodeList = node.getChildNodes();
+
+        for (int i = 0, n = nodeList.getLength(); i < n; ++i) {
+            Node childNode = nodeList.item(i);
+
+            // ignore namespace entirely
+            if (tagName.equals(childNode.getNodeName()) || childNode.getNodeName().endsWith(":" + tagName)) {
+                return childNode;
+            }
+        }
+
+        return null;
     }
 }

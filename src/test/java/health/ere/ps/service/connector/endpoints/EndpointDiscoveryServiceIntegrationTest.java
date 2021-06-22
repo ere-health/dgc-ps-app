@@ -2,7 +2,6 @@ package health.ere.ps.service.connector.endpoints;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import org.junit.jupiter.api.AfterEach;
@@ -91,9 +90,10 @@ class EndpointDiscoveryServiceIntegrationTest {
                                String cardServiceEndpoint, String eventServiceEndpoint,
                                String certificateServiceEndpoint) {
 
-        // TODO add some namespaces
-        wireMockServer.stubFor(get("/connector.sds").willReturn(okXml("<ConnectorServices>" +
-                "<ServiceInformation>" +
+        wireMockServer.stubFor(get("/connector.sds").willReturn(okXml("<ConnectorServices " +
+                "xmlns=\"http://localhost/ns0/v0.1\" " +
+                "xmlns:ns10=\"http://localhost/ns10/v1.23\">" +
+                "<ns10:ServiceInformation>" +
                 Map.of("SignatureService", signatureServiceEndpoint,
                         "AuthSignatureService", authSignatureServiceEndpoint,
                         "CardService", cardServiceEndpoint,
@@ -101,13 +101,13 @@ class EndpointDiscoveryServiceIntegrationTest {
                         "CertificateService", certificateServiceEndpoint)
                         .entrySet()
                         .stream()
-                        .map(entry -> "<Service Name=\"" + entry.getKey() + "\">" +
-                                "<Versions><Version>" +
-                                "<EndpointTLS Location=\"" + entry.getValue() + "\"/>" +
-                                "</Version></Versions>" +
-                                "</Service>")
+                        .map(entry -> "<ns10:Service Name=\"" + entry.getKey() + "\">" +
+                                "<ns10:Versions><ns10:Version>" +
+                                "<ns10:EndpointTLS Location=\"" + entry.getValue() + "\"/>" +
+                                "</ns10:Version></ns10:Versions>" +
+                                "</ns10:Service>")
                         .collect(Collectors.joining()) +
-                "</ServiceInformation>" +
+                "</ns10:ServiceInformation>" +
                 "</ConnectorServices>")));
     }
 }
