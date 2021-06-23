@@ -28,6 +28,7 @@ import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import health.ere.ps.service.idp.client.IdpClient;
 import health.ere.ps.service.idp.client.IdpHttpClientService;
 
@@ -46,6 +47,9 @@ public class IdPService {
     AppConfig appConfig;
 
     @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
+
+    @Inject
     ConnectorCardsService connectorCardsService;
 
     @Inject
@@ -57,12 +61,13 @@ public class IdPService {
     @PostConstruct
     void init() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        secureSoapTransportConfigurer.configureSecureTransport(
-                appConfig.getEventServiceEndpointAddress(),
-                SecretsManagerService.SslContextType.TLS,
-                appConfig.getConnectorTlsCertTrustStore()
-                        .orElseThrow(() -> new DeploymentException("No connector tls cert trust certificate present")),
-                appConfig.getConnectorTlsCertTustStorePwd());
+        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+            secureSoapTransportConfigurer.configureSecureTransport(
+                    endpointDiscoveryService.getEventServiceEndpointAddress(),
+                    SecretsManagerService.SslContextType.TLS,
+                    endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
+                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
+        }
     }
 
     public void requestBearerToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {
