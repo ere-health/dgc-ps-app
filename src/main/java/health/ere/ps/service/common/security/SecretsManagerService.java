@@ -154,6 +154,19 @@ public class SecretsManagerService {
         return trustStore;
     }
 
+    /**
+     * Configures the SSL transport for the given {@link BindingProvider}.
+     * <p>
+     * ATTENTION: if the trust store file path is null, all server certificates are accepted!
+     *
+     * @param keyStoreFilePath   file path with keystore content; if it is null, no client certificate will be used; prefix with 'jks:' for JKS stores
+     * @param keyStorePassword   password to access the client certificate
+     * @param sslContextType     type of ssl context; should be TLS
+     * @param trustStoreFilePath file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores
+     * @param trustStorePassword password to access the trust store
+     * @param bp                 BindingProvider for which the ssl context is set up
+     * @throws SecretsManagerException will be thrown in case of invalid parameters
+     */
     public void configureSSLTransportContext(String keyStoreFilePath,
                                              String keyStorePassword,
                                              SslContextType sslContextType,
@@ -175,17 +188,19 @@ public class SecretsManagerService {
     }
 
     /**
+     * Create a SSLContext with optional clientcertificate and optional trust store.
+     * <p>
      * ATTENTION: if the trust store inputstream is null, all server certificates are accepted!
      *
-     * @param keyStoreInputStream if the stream is null, no
-     * @param keyStorePassword
-     * @param sslContextType
-     * @param keyStoreType
-     * @param trustStoreInputStream ATTENTION:
-     * @param trustStorePassword
-     * @param trustStoreType
-     * @return
-     * @throws SecretsManagerException
+     * @param keyStoreInputStream   inputstream with keystore content; if the stream is null, no client certificate will be used
+     * @param keyStorePassword      password to access the client certificate
+     * @param sslContextType        type of ssl context; should be TLS
+     * @param keyStoreType          type of the keystore with the client certificate
+     * @param trustStoreInputStream inputstream with trust store content; ATTENTION: if the stream is null, all server certificates are accepted without any validation
+     * @param trustStorePassword    password to access the trust store
+     * @param trustStoreType        type of the trust store with the server certificate
+     * @return SSLContext
+     * @throws SecretsManagerException will be thrown in case of invalid parameters
      */
     private SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
                                     SslContextType sslContextType, KeyStoreType keyStoreType,
@@ -238,6 +253,20 @@ public class SecretsManagerService {
         return sc;
     }
 
+    /**
+     * Create a SSLContext with optional clientcertificate and optional trust store.
+     * <p>
+     * ATTENTION: if the trust store inputstream is null, all server certificates are accepted!
+     *
+     * @param keyStoreFile       file path with keystore content; if it is null, no client certificate will be used; prefix with 'jks:' for JKS stores
+     * @param keyStorePassword   password to access the client certificate
+     * @param sslContextType     type of ssl context; should be TLS
+     * @param trustStoreFile     file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores
+     * @param trustStorePassword password to access the trust store
+     * @return SSLContext
+     * @throws IOException             on accessing the file paths
+     * @throws SecretsManagerException will be thrown in case of invalid parameters
+     */
     public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
                                        String trustStoreFile, String trustStorePassword) throws IOException,
             SecretsManagerException {
