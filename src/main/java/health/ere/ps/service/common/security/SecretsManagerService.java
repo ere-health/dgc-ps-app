@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 @ApplicationScoped
 public class SecretsManagerService {
 
-    private static Logger log = Logger.getLogger(SecretsManagerService.class.getName());
+    private static Logger LOG = Logger.getLogger(SecretsManagerService.class.getName());
 
     public enum SslContextType {
         SSL("SSL"), TLS("TLS");
@@ -183,7 +183,7 @@ public class SecretsManagerService {
 
         } catch (IOException e) {
             // throw new SecretsManagerException("SSL transport configuration error.", e);
-            log.log(Level.SEVERE, "Could not configure SecretsManagerService", e);
+            LOG.log(Level.SEVERE, "Could not configure SecretsManagerService", e);
         }
     }
 
@@ -242,6 +242,7 @@ public class SecretsManagerService {
                 // we have no choice but to trust all certificates if none is supplied since the connectors
                 // do not have a 'properly' signed certificate
                 trustManagers = new TrustManager[]{new SSLUtilities.FakeX509TrustManager()};
+                LOG.log(Level.WARNING, "Created SSLContext will accept all server certificates without validation");
             }
 
             sc.init(keyManagers, trustManagers, null );
