@@ -133,7 +133,6 @@ class EndpointDiscoveryServiceIntegrationTest {
         // mocking with empty strings causes the location to be discarded
         mockEndpoints("", "", "", "");
 
-
         endpointDiscoveryService.obtainConfiguration();
 
         assertEquals(authSignatureServiceEndpoint, endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
