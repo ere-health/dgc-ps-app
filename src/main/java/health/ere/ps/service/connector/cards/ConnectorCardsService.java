@@ -13,7 +13,6 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -61,10 +60,10 @@ public class ConnectorCardsService implements SoapClient {
     @PostConstruct
     void init() {
         contextType = new ContextType();
-        contextType.setMandantId(appConfig.getSignatureServiceContextMandantId());
-        contextType.setClientSystemId(appConfig.getSignatureServiceContextClientSystemId());
-        contextType.setWorkplaceId(appConfig.getSignatureServiceContextWorkplaceId());
-        contextType.setUserId(appConfig.getSignatureServiceContextUserId());
+        contextType.setMandantId(appConfig.getMandantId());
+        contextType.setClientSystemId(appConfig.getClientSystemId());
+        contextType.setWorkplaceId(appConfig.getWorkplaceId());
+        contextType.setUserId(appConfig.getUserId());
 
         eventService = new EventService(getClass().getResource(
                 "/EventService.wsdl")).getEventServicePort();

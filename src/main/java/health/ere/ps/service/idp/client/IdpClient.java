@@ -3,13 +3,12 @@ package health.ere.ps.service.idp.client;
 import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
 
+import health.ere.ps.config.AppConfig;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import org.jose4j.jca.ProviderContext;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
@@ -17,8 +16,6 @@ import org.jose4j.lang.JoseException;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.AuthSignatureService;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.AuthSignatureServicePortType;
 import de.gematik.ws.conn.authsignatureservice.wsdl.v7.FaultMessage;
-import de.gematik.ws.conn.cardservice.v8.AuthorizeSmc;
-import de.gematik.ws.conn.cardservice.v8.PinStatusEnum;
 import de.gematik.ws.conn.cardservice.wsdl.v8.CardService;
 import de.gematik.ws.conn.cardservice.wsdl.v8.CardServicePortType;
 import de.gematik.ws.conn.cardservicecommon.v2.PinResultEnum;
@@ -46,7 +43,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -64,8 +60,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.crypto.Data;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
@@ -107,32 +101,8 @@ public class IdpClient implements IIdpClient {
     @Inject
     Logger logger;
 
-    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
-    String titusClientCertificate;
-
-    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
-    String titusClientCertificatePassword;
-
-    @Inject @ConfigProperty(name = "auth-signature-service.endpointAddress", defaultValue = "")
-    String authSignatureServiceEndpointAddress;
-
-    @Inject @ConfigProperty(name = "auth-signature-service.smbcCardHandle", defaultValue = "")
-    String authSignatureServiceSmbcCardHandle;
-
-    @Inject @ConfigProperty(name = "signature-service.context.mandantId", defaultValue = "")
-    String signatureServiceContextMandantId;
-
-    @Inject @ConfigProperty(name = "signature-service.context.clientSystemId", defaultValue = "")
-    String signatureServiceContextClientSystemId;
-
-    @Inject @ConfigProperty(name = "signature-service.context.workplaceId", defaultValue = "")
-    String signatureServiceContextWorkplaceId;
-
-    @Inject @ConfigProperty(name = "signature-service.context.userId", defaultValue = "")
-    String signatureServiceContextUserId;
-
-    @Inject @ConfigProperty(name = "card-service.endpointAddress", defaultValue = "")
-    String cardServiceEndpointAddress;
+    @Inject
+    AppConfig appConfig;
 
     SSLContext customSSLContext = null;
 
@@ -155,19 +125,19 @@ public class IdpClient implements IIdpClient {
     @PostConstruct
     public void initAuthSignatureService() {
         try {
-            if (titusClientCertificate != null && !("".equals(titusClientCertificate))
-                    && !("!".equals(titusClientCertificate))) {
+            if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
                 try {
-                    setUpCustomSSLContext(new FileInputStream(titusClientCertificate), titusClientCertificatePassword);
+                    setUpCustomSSLContext(new FileInputStream(appConfig.getConnectorTlsCertTrustStore().get()),
+                            appConfig.getConnectorTlsCertTustStorePwd());
                 } catch(FileNotFoundException e) {
-                    logger.error("Could not find titus file", e);
+                    logger.error("Could not setup custom ssl connection", e);
                 }
             }
 
             authSignatureService = new AuthSignatureService(getClass().getResource("/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
             /* Set endpoint to configured endpoint */
             BindingProvider bp = (BindingProvider) authSignatureService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, authSignatureServiceEndpointAddress);
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, appConfig.getAuthSignatureServiceEndpointAddress());
             if (customSSLContext != null) {
                 bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                         customSSLContext.getSocketFactory());
@@ -176,7 +146,7 @@ public class IdpClient implements IIdpClient {
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, cardServiceEndpointAddress);
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, appConfig.getCardServiceEndpointAddress());
             if (customSSLContext != null) {
                 bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                         customSSLContext.getSocketFactory());
@@ -209,10 +179,10 @@ public class IdpClient implements IIdpClient {
      */
     ContextType createContextType() {
         ContextType contextType = new ContextType();
-        contextType.setMandantId(signatureServiceContextMandantId);
-        contextType.setClientSystemId(signatureServiceContextClientSystemId);
-        contextType.setWorkplaceId(signatureServiceContextWorkplaceId);
-        contextType.setUserId(signatureServiceContextUserId);
+        contextType.setMandantId(appConfig.getMandantId());
+        contextType.setClientSystemId(appConfig.getClientSystemId());
+        contextType.setWorkplaceId(appConfig.getWorkplaceId());
+        contextType.setUserId(appConfig.getUserId());
         return contextType;
     }
 
@@ -258,7 +228,10 @@ public class IdpClient implements IIdpClient {
         assertThatIdpIdentityIsValid(idpIdentity);
         return login(idpIdentity.getCertificate(),
             Errors.rethrow().wrap((Throwing.Function<Pair<String, String>, String>) jwtPair -> {
-                final JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(authSignatureService, authSignatureServiceSmbcCardHandle, createContextType());
+                final JsonWebSignatureWithExternalAuthentification jws =
+                        new JsonWebSignatureWithExternalAuthentification(authSignatureService,
+                                appConfig.getCardHandle(),
+                                createContextType());
                 jws.setPayload(new String(Base64.getUrlDecoder().decode(jwtPair.getRight())));
                 Optional.ofNullable(jwtPair.getLeft())
                     .map(b64Header -> new String(Base64.getUrlDecoder().decode(b64Header)))
@@ -314,7 +287,9 @@ public class IdpClient implements IIdpClient {
             ImpfnachweisAuthenticationRequest authenticationRequest = new ImpfnachweisAuthenticationRequest();
             authenticationRequest.setAuthenticationEndpointUrl(impfnachweisAuthorizationResponse.getLocation());
             
-            JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(authSignatureService, authSignatureServiceSmbcCardHandle, createContextType());
+            JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(
+                    authSignatureService, appConfig.getCardHandle(), createContextType()
+            );
             byte[] signedChallenge;
             try {
                 signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
@@ -329,7 +304,9 @@ public class IdpClient implements IIdpClient {
                             Holder<Status> status = new Holder<>();
                             Holder<PinResultEnum> pinResultEnum = new Holder<>();
                             Holder<BigInteger> error = new Holder<>();
-                            cardService.verifyPin(createContextType(), authSignatureServiceSmbcCardHandle, "PIN.SMC", status, pinResultEnum, error);
+                            cardService.verifyPin(createContextType(),
+                                    appConfig.getCardHandle(),
+                                    "PIN.SMC", status, pinResultEnum, error);
                             // try again
                             signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
                         } catch (Exception e1) {

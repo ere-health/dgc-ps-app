@@ -1,5 +1,6 @@
 package health.ere.ps.service.dgc;
 
+import health.ere.ps.config.AppConfig;
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
@@ -51,6 +52,9 @@ class DigitalGreenCertificateServiceTest {
     @Spy
     private DigitalGreenCertificateService digitalGreenCertificateService;
 
+    @Spy
+    private AppConfig appConfig;
+
     @Test
     void issuePdf() throws IOException {
         InputStream inputStream = mock(InputStream.class);
@@ -75,6 +79,7 @@ class DigitalGreenCertificateServiceTest {
 
     @Test
     void issuePdfWithCertificateServiceException() {
+        when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn("");
         issuePdfWithCertificateServiceException(401, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100401);
         issuePdfWithCertificateServiceException(403, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100403);
         issuePdfWithCertificateServiceException(400, DigitalGreenCertificateInvalidParametersException.class, 100400);
@@ -97,8 +102,8 @@ class DigitalGreenCertificateServiceTest {
 
         Invocation.Builder builder = mock(Invocation.Builder.class);
 
-        digitalGreenCertificateService.issuerAPIUrl = issuerAPIUrl;
         digitalGreenCertificateService.client = client;
+        when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn(issuerAPIUrl);
         when(client.target(issuerAPIUrl)).thenReturn(webTarget);
         when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
         when(webTarget.request("application/pdf")).thenReturn(builder);
@@ -257,8 +262,8 @@ class DigitalGreenCertificateServiceTest {
 
         Response response = mock(Response.class);
 
-        digitalGreenCertificateService.issuerAPIUrl = issuerAPIUrl;
         digitalGreenCertificateService.client = client;
+        when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn(issuerAPIUrl);
         when(client.target(issuerAPIUrl)).thenReturn(webTarget);
         when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
         when(webTarget.request("application/pdf")).thenReturn(builder1);

@@ -10,7 +10,7 @@ import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import health.ere.ps.config.AppConfig;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,16 +34,7 @@ public class CardCertReadExecutionService {
     private static Logger log = Logger.getLogger(CardCertReadExecutionService.class.getName());
 
     @Inject
-    SecretsManagerService secretsManagerService;
-    
-    @Inject @ConfigProperty(name = "idp.connector.certificate-service.endpoint.address")
-    String certificateServiceEndpointAddress;
-
-    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificate", defaultValue = "!")
-    String titusClientCertificate;
-
-    @Inject @ConfigProperty(name = "connector.simulator.titusClientCertificatePassword", defaultValue = "!")
-    String titusClientCertificatePassword;
+    AppConfig appConfig;
 
     private CertificateServicePortType certificateService;
 
@@ -59,21 +50,21 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        certificateServiceEndpointAddress);
+        appConfig.getCertificateServiceEndpointAddress());
         
-        if (titusClientCertificate != null && !("".equals(titusClientCertificate))
-            && !("!".equals(titusClientCertificate))) {
-            try(InputStream is = new FileInputStream(titusClientCertificate)) {
-                log.info(CardCertReadExecutionService.class.getSimpleName()+" uses titus client certifcate: "+titusClientCertificate);
-                setUpCustomSSLContext(is);
+        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+            String path = appConfig.getConnectorTlsCertTrustStore().get();
+            try(InputStream is = new FileInputStream(path)) {
+                log.info(CardCertReadExecutionService.class.getSimpleName() + " uses use custom connector certificate: "+ path);
+                setUpCustomSSLContext(is, appConfig.getConnectorTlsCertTustStorePwd());
             } catch(FileNotFoundException e) {
-                log.log(Level.SEVERE, "Could find file", e);
+                log.log(Level.SEVERE, "Could find custom connector certificate file", e);
             }
         }
     }
 
-    public void setUpCustomSSLContext(InputStream p12Certificate) {
-        SSLContext customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, titusClientCertificatePassword);
+    public void setUpCustomSSLContext(InputStream p12Certificate, String password) {
+        SSLContext customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, password);
         BindingProvider bp = (BindingProvider) certificateService;
 
         bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",

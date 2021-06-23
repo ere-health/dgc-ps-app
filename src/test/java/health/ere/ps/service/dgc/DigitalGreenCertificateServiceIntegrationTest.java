@@ -3,6 +3,7 @@ package health.ere.ps.service.dgc;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
+import health.ere.ps.config.AppConfig;
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.PersonName;
@@ -14,7 +15,6 @@ import health.ere.ps.service.idp.IdPService;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectMock;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,8 +71,8 @@ class DigitalGreenCertificateServiceIntegrationTest {
     @InjectMock
     private IdPService idPService;
 
-    @Inject @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
-    private String issuerApiUrl;
+    @Inject
+    AppConfig appConfig;
 
     private WireMockServer wireMockServer;
 
@@ -82,7 +82,7 @@ class DigitalGreenCertificateServiceIntegrationTest {
     @BeforeEach
     void startup() throws Exception {
 
-        URL url = new URL(issuerApiUrl);
+        URL url = new URL(appConfig.getDigitalGreenCertificateServiceIssuerAPI());
 
         if (!"localhost".equals(url.getHost())) {
             throw new RuntimeException("Testing is only possible for localhost urls");

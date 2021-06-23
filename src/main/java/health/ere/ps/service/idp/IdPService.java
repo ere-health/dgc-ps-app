@@ -2,7 +2,6 @@ package health.ere.ps.service.idp;
 
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.idp.crypto.PkiIdentity;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.security.cert.X509Certificate;
 import java.util.Optional;
@@ -13,8 +12,8 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.DeploymentException;
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
 
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
@@ -25,7 +24,6 @@ import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
 import health.ere.ps.exception.idp.IdpJoseException;
 import health.ere.ps.model.idp.client.IdpTokenResult;
-import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
@@ -37,31 +35,21 @@ import health.ere.ps.service.idp.client.IdpHttpClientService;
 public class IdPService {
 
     private static final Logger log = Logger.getLogger(IdPService.class.getName());
-    
+
     @Inject
     IdpClient idpClient;
 
     @Inject
     CardCertificateReaderService cardCertificateReaderService;
-    
+
     @Inject
     AppConfig appConfig;
-
-    @Inject @ConfigProperty(name = "idp.client.id")
-    String clientId;
 
     @Inject
     ConnectorCardsService connectorCardsService;
 
     @Inject
     SecureSoapTransportConfigurer secureSoapTransportConfigurer;
-
-    @Inject @ConfigProperty(name = "idp.base.url")
-    String idpBaseUrl;
-
-    @Inject @ConfigProperty(name = "idp.auth.request.redirect.url")
-    String redirectUrl;
-
 
     @Inject
     Event<Exception> exceptionEvent;
@@ -72,14 +60,15 @@ public class IdPService {
         secureSoapTransportConfigurer.configureSecureTransport(
                 appConfig.getEventServiceEndpointAddress(),
                 SecretsManagerService.SslContextType.TLS,
-                appConfig.getIdpConnectorTlsCertTrustStore(),
-                appConfig.getIdpConnectorTlsCertTustStorePwd());
+                appConfig.getConnectorTlsCertTrustStore()
+                        .orElseThrow(() -> new DeploymentException("No connector tls cert trust certificate present")),
+                appConfig.getConnectorTlsCertTustStorePwd());
     }
-    
+
     public void requestBearerToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {
         try {
-            String discoveryDocumentUrl = idpBaseUrl + IdpHttpClientService.DISCOVERY_DOCUMENT_URI;
-            idpClient.init(clientId, redirectUrl, discoveryDocumentUrl, true);
+            String discoveryDocumentUrl = appConfig.getIdpBaseUrl() + IdpHttpClientService.DISCOVERY_DOCUMENT_URI;
+            idpClient.init(appConfig.getClientId(), appConfig.getRedirectUrl(), discoveryDocumentUrl, true);
             idpClient.initializeClient();
 
             CallContext callContext = requestBearerTokenFromIdpEvent.getCallContext();
@@ -94,14 +83,14 @@ public class IdPService {
 
             if (callContext == null) {
                 mandantId = appConfig.getMandantId();
-                clientSystem = appConfig.getClientSystem();
-                workplace = appConfig.getWorkplace();
+                clientSystem = appConfig.getClientSystemId();
+                workplace = appConfig.getWorkplaceId();
                 cardHandle = connectorCardsService.getConnectorCardHandle(
                         ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
             } else {
                 mandantId = Optional.ofNullable(callContext.getMandantId()).orElseGet(appConfig::getMandantId);
-                clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElseGet(appConfig::getClientSystem);
-                workplace = Optional.ofNullable(callContext.getWorkplace()).orElseGet(appConfig::getWorkplace);
+                clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElseGet(appConfig::getClientSystemId);
+                workplace = Optional.ofNullable(callContext.getWorkplace()).orElseGet(appConfig::getWorkplaceId);
                 if (callContext.getCardHandle() != null) {
                     cardHandle = callContext.getCardHandle();
                 }  else {
