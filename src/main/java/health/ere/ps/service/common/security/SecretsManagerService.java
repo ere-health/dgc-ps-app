@@ -246,9 +246,13 @@ public class SecretsManagerService {
                                        KeyStoreType trustStoreType) throws IOException, SecretsManagerException {
 
         if (keyStoreFile == null) {
-            try (FileInputStream trustStoreInputStream = new FileInputStream(trustStoreFile)) {
-                return createSSLContext(null, null, sslContextType, null,
-                        trustStoreInputStream, trustStorePassword.toCharArray(), trustStoreType);
+            if (trustStoreFile == null) {
+                return createSSLContext((InputStream) null, null, sslContextType, null, null, null, null);
+            } else {
+                try (FileInputStream trustStoreInputStream = new FileInputStream(trustStoreFile)) {
+                    return createSSLContext(null, null, sslContextType, null,
+                            trustStoreInputStream, trustStorePassword.toCharArray(), trustStoreType);
+                }
             }
         } else {
             if (trustStoreFile == null) {
