@@ -60,8 +60,6 @@ class EndpointDiscoveryServiceIntegrationTest {
 
     @Test
     void obtainConfiguration() throws IOException, ParserConfigurationException, SecretsManagerException {
-        String signatureServiceEndpoint = BASE_URI + "testSignatureService";
-
         String authSignatureServiceEndpoint = BASE_URI + "testAuthSignatureServiceEndpoint";
 
         String cardServiceEndpoint = BASE_URI + "testCardServiceEndpoint";
@@ -75,8 +73,14 @@ class EndpointDiscoveryServiceIntegrationTest {
         endpointDiscoveryService.connectorVerifyHostname = "false";
         endpointDiscoveryService.connectorBaseUri = BASE_URI;
 
-        mockEndpoints(signatureServiceEndpoint, authSignatureServiceEndpoint, cardServiceEndpoint,
-                eventServiceEndpoint, certificateServiceEndpoint);
+        // setup fallbacks to check prioritizing
+        endpointDiscoveryService.fallbackAuthSignatureServiceEndpointAddress = Optional.of(authSignatureServiceEndpoint + "changed");
+        endpointDiscoveryService.fallbackCardServiceEndpointAddress = Optional.of(cardServiceEndpoint + "changed");
+        endpointDiscoveryService.fallbackCertificateServiceEndpointAddress = Optional.of(certificateServiceEndpoint + "changed");
+        endpointDiscoveryService.fallbackEventServiceEndpointAddress = Optional.of(eventServiceEndpoint + "changed");
+
+        mockEndpoints(authSignatureServiceEndpoint, cardServiceEndpoint, eventServiceEndpoint,
+                certificateServiceEndpoint);
 
         endpointDiscoveryService.obtainConfiguration();
 
@@ -86,7 +90,39 @@ class EndpointDiscoveryServiceIntegrationTest {
         assertEquals(certificateServiceEndpoint, endpointDiscoveryService.getCertificateServiceEndpointAddress());
     }
 
-    private void mockEndpoints(String signatureServiceEndpoint, String authSignatureServiceEndpoint,
+    @Test
+    void obtainConfigurationWithFallbackEndpoints() throws SecretsManagerException, IOException, ParserConfigurationException {
+        String authSignatureServiceEndpoint = BASE_URI + "testAuthSignatureServiceEndpoint";
+
+        String cardServiceEndpoint = BASE_URI + "testCardServiceEndpoint";
+
+        String eventServiceEndpoint = BASE_URI + "testEventServiceEndpoint";
+
+        String certificateServiceEndpoint = BASE_URI + "testCertificateServiceEndpoint";
+
+        // disable client ssl certificate SSL context
+        endpointDiscoveryService.connectorTlsCertTrustStore = Optional.empty();
+        endpointDiscoveryService.connectorVerifyHostname = "false";
+        endpointDiscoveryService.connectorBaseUri = BASE_URI;
+
+        // setup fallbacks
+        endpointDiscoveryService.fallbackAuthSignatureServiceEndpointAddress = Optional.of(authSignatureServiceEndpoint);
+        endpointDiscoveryService.fallbackCardServiceEndpointAddress = Optional.of(cardServiceEndpoint);
+        endpointDiscoveryService.fallbackCertificateServiceEndpointAddress = Optional.of(certificateServiceEndpoint);
+        endpointDiscoveryService.fallbackEventServiceEndpointAddress = Optional.of(eventServiceEndpoint);
+
+        // mocking with empty strings causes the location to be discarded
+        mockEndpoints("", "", "", "");
+
+        endpointDiscoveryService.obtainConfiguration();
+
+        assertEquals(authSignatureServiceEndpoint, endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
+        assertEquals(cardServiceEndpoint, endpointDiscoveryService.getCardServiceEndpointAddress());
+        assertEquals(eventServiceEndpoint, endpointDiscoveryService.getEventServiceEndpointAddress());
+        assertEquals(certificateServiceEndpoint, endpointDiscoveryService.getCertificateServiceEndpointAddress());
+    }
+
+    private void mockEndpoints(String authSignatureServiceEndpoint,
                                String cardServiceEndpoint, String eventServiceEndpoint,
                                String certificateServiceEndpoint) {
 
@@ -94,8 +130,7 @@ class EndpointDiscoveryServiceIntegrationTest {
                 "xmlns=\"http://localhost/ns0/v0.1\" " +
                 "xmlns:ns10=\"http://localhost/ns10/v1.23\">" +
                 "<ns10:ServiceInformation>" +
-                Map.of("SignatureService", signatureServiceEndpoint,
-                        "AuthSignatureService", authSignatureServiceEndpoint,
+                Map.of("AuthSignatureService", authSignatureServiceEndpoint,
                         "CardService", cardServiceEndpoint,
                         "EventService", eventServiceEndpoint,
                         "CertificateService", certificateServiceEndpoint)
