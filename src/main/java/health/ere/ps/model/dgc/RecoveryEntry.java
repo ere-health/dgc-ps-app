@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.time.LocalDate;
 import java.util.Objects;
 
 /**
@@ -21,18 +20,18 @@ public class RecoveryEntry {
 
     @JsonProperty("fr")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate fr = null;
+    private String fr = null;
 
     @JsonProperty("is")
     private String is = null;
 
     @JsonProperty("df")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate df = null;
+    private String df = null;
 
     @JsonProperty("du")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate du = null;
+    private String du = null;
 
     /**
      * Identifier of the health professional location (i.e. BSNR or similar identifer). It will be used in the construction of the DGCI (digitial green certificate identifier). Due to the specification of the DGCI only the use of uppercase letters and numbers 0-9 are allowed.
@@ -74,11 +73,11 @@ public class RecoveryEntry {
     @JsonProperty("fr")
     @NotNull
     @Valid
-    public LocalDate getFr() {
+    public String getFr() {
         return fr;
     }
 
-    public void setFr(LocalDate fr) {
+    public void setFr(String fr) {
         this.fr = fr;
     }
 
@@ -106,11 +105,11 @@ public class RecoveryEntry {
     @JsonProperty("df")
     @NotNull
     @Valid
-    public LocalDate getDf() {
+    public String getDf() {
         return df;
     }
 
-    public void setDf(LocalDate df) {
+    public void setDf(String df) {
         this.df = df;
     }
 
@@ -122,11 +121,11 @@ public class RecoveryEntry {
     @JsonProperty("du")
     @NotNull
     @Valid
-    public LocalDate getDu() {
+    public String getDu() {
         return du;
     }
 
-    public void setDu(LocalDate du) {
+    public void setDu(String du) {
         this.du = du;
     }
 

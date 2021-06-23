@@ -1,8 +1,6 @@
 package health.ere.ps.model.dgc;
 
-import java.time.LocalDate;
 import java.util.Objects;
-import java.util.UUID;
 
 public class V {
     public String id;
@@ -12,7 +10,8 @@ public class V {
     public String ma;
     public Integer dn;
     public Integer sd;
-    public LocalDate dt;
+
+    public String dt;
 
     @Override
     public boolean equals(Object o) {

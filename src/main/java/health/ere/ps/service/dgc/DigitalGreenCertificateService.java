@@ -30,7 +30,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -84,9 +83,9 @@ public class DigitalGreenCertificateService {
      * @param dt vaccination date
      * @return bytes of certificate pdf
      */
-    public byte[] issueVaccinationCertificatePdf(String fn, String gn, LocalDate dob,
+    public byte[] issueVaccinationCertificatePdf(String fn, String gn, String dob,
                                                  String id, String tg, String vp, String mp, String ma, Integer dn,
-                                                 Integer sd, LocalDate dt, CallContext callContext) {
+                                                 Integer sd, String dt, CallContext callContext) {
 
         VaccinationCertificateRequest vaccinationCertificateRequest = new VaccinationCertificateRequest();
 
@@ -124,8 +123,8 @@ public class DigitalGreenCertificateService {
      * @param callContext optional call context that specifies the tenant
      * @return bytes of certificate pdf
      */
-    public byte[] issueRecoveryCertificatePdf(String fn, String gn, LocalDate dob, String id, String tg, LocalDate fr,
-                                              String is, LocalDate df, LocalDate du, CallContext callContext) {
+    public byte[] issueRecoveryCertificatePdf(String fn, String gn, String dob, String id, String tg, String fr,
+                                              String is, String df, String du, CallContext callContext) {
 
         RecoveryCertificateRequest recoveryCertificateRequest = new RecoveryCertificateRequest();
 

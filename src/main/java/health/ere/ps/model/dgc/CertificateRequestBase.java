@@ -1,12 +1,11 @@
 package health.ere.ps.model.dgc;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Common Digital Green Certificate (DGC) request data containing the name and date of birth of the person receiving the certificate.
@@ -24,8 +23,7 @@ public class CertificateRequestBase implements CertificateRequest {
      * Date of Birth of the person addressed in the DGC. ISO 8601 date format restricted to range 1900-2099
      */
     @JsonProperty("dob")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate dob = null;
+    private String dob = null;
 
     /**
      * Name of the person which receives the certificate.
@@ -50,11 +48,11 @@ public class CertificateRequestBase implements CertificateRequest {
     @JsonProperty("dob")
     @NotNull
     @Valid
-    public LocalDate getDob() {
+    public String getDob() {
         return dob;
     }
 
-    public void setDob(LocalDate dob) {
+    public void setDob(String dob) {
         this.dob = dob;
     }
 
