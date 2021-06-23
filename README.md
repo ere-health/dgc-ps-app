@@ -130,7 +130,7 @@ In regard to file and directory paths, configure the values for the environment 
 | `IDP_BASE_URL` | Base URL for the IDP | `https://id.impfnachweis.info/auth/realms/bmg-ti-certify` |
 | `IDP_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |
 | `IDP_AUTH_REQUEST_REDIRECT_URL` | Redirect URL that will be called by the IDP; should be `connector://authenticated` | `connector://authenticated` |
-| `DIGITAL_GREEN_CERTIFICATE_SERVICE_ISSUERAPIURL` | URL of the public digital green certificate service | `https://api.ru.impfnachweis.info` |
+| `DIGITAL_GREEN_CERTIFICATE_SERVICE_ISSUERAPIURL` | URL of the public digital green certificate service | `https://api.impfnachweis.info` |
 | `EVENT_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the event SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/EventService` |
 | `CARD_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the card SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CardService` |
 | `AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/AuthSignatureService` |
