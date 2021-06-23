@@ -120,7 +120,7 @@ In regard to file and directory paths, configure the values for the environment 
 | ----- | ----- | ----- |
 | `CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate that will be used to connect to the connector; may be empty; * | `p12:files/path/to/certificate.p12` |
 | `CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD` | Password for accessing the certificate that is configured in `CONNECTOR_CERT_AUTH_STORE_FILE` | `changeit` |
-| `CONNECTOR_CERT_TRUST_STORE_FILE` | File path to the certificate trust store that will be used to connect to the connector; may be empty; **Attention**: if not supplied **ANY** tls certificate will be accepted which makes the connection to the connector vulnerable to MITM attacks; * | `jks:files/keystore` |
+| `CONNECTOR_CERT_TRUST_STORE_FILE` | File path to the certificate trust store that will be used to connect to the connector; may be empty; **Attention**: if not supplied, **ANY** tls certificate will be accepted which makes the connection to the connector vulnerable to MITM attacks; * | `jks:files/keystore` |
 | `CONNECTOR_CERT_TRUST_STORE_FILE_PASSWORD` | Password for accessing the trust store that is configured in `CONNECTOR_CERT_TRUST_STORE_FILE` | `changeitaswell` |
 | `CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to access the connector | `client123` |
 | `CONNECTOR_MANDANT_ID` | Mandant that will be used for the connector | `MANDANT1234` |
