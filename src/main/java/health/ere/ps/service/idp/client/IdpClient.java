@@ -4,6 +4,7 @@ import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
 
 import health.ere.ps.config.AppConfig;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,9 +23,6 @@ import de.gematik.ws.conn.cardservicecommon.v2.PinResultEnum;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -52,7 +50,6 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -99,12 +96,16 @@ public class IdpClient implements IIdpClient {
     AuthenticatorClient authenticatorClient;
 
     @Inject
+    SecretsManagerService secretsManagerService;
+
+    @Inject
     Logger logger;
 
     @Inject
     AppConfig appConfig;
 
-    SSLContext customSSLContext = null;
+    @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
 
     private String clientId;
     private String redirectUrl;
@@ -125,42 +126,31 @@ public class IdpClient implements IIdpClient {
     @PostConstruct
     public void initAuthSignatureService() {
         try {
-            if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
-                try {
-                    setUpCustomSSLContext(new FileInputStream(appConfig.getConnectorTlsCertTrustStore().get()),
-                            appConfig.getConnectorTlsCertTustStorePwd());
-                } catch(FileNotFoundException e) {
-                    logger.error("Could not setup custom ssl connection", e);
-                }
-            }
-
             authSignatureService = new AuthSignatureService(getClass().getResource("/AuthSignatureService.wsdl")).getAuthSignatureServicePort();
             /* Set endpoint to configured endpoint */
             BindingProvider bp = (BindingProvider) authSignatureService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, appConfig.getAuthSignatureServiceEndpointAddress());
-            if (customSSLContext != null) {
-                bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-                        customSSLContext.getSocketFactory());
+
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                    endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
+            if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+                secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
+                        endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
+                        SecretsManagerService.KeyStoreType.PKCS12, bp);
             }
 
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
-            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, appConfig.getCardServiceEndpointAddress());
-            if (customSSLContext != null) {
-                bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-                        customSSLContext.getSocketFactory());
-            } 
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                    endpointDiscoveryService.getCardServiceEndpointAddress());
+            if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+                secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
+                        endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
+                        SecretsManagerService.KeyStoreType.PKCS12, bp);
+            }
         } catch(Exception ex) {
             logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
         }
-    }
-
-    public void setUpCustomSSLContext(InputStream p12Certificate) {
-        setUpCustomSSLContext(p12Certificate);
-    }
-    public void setUpCustomSSLContext(InputStream p12Certificate, String password) {
-        customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, password);
     }
 
     public void init(String clientId, String redirectUrl, String discoveryDocumentUrl,

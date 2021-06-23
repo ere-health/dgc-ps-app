@@ -9,24 +9,16 @@ import de.gematik.ws.conn.certificateservicecommon.v2.CertRefEnum;
 import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
-
-import health.ere.ps.config.AppConfig;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
+import health.ere.ps.service.common.security.SecretsManagerService;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
-
-import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
-import health.ere.ps.service.common.security.SecretsManagerService;
+import java.util.logging.Logger;
 
 @ApplicationScoped
 public class CardCertReadExecutionService {
@@ -34,7 +26,10 @@ public class CardCertReadExecutionService {
     private static Logger log = Logger.getLogger(CardCertReadExecutionService.class.getName());
 
     @Inject
-    AppConfig appConfig;
+    EndpointDiscoveryService endpointDiscoveryService;
+
+    @Inject
+    SecretsManagerService secretsManagerService;
 
     private CertificateServicePortType certificateService;
 
@@ -50,25 +45,13 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        appConfig.getCertificateServiceEndpointAddress());
+        endpointDiscoveryService.getCertificateServiceEndpointAddress());
         
-        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
-            String path = appConfig.getConnectorTlsCertTrustStore().get();
-            try(InputStream is = new FileInputStream(path)) {
-                log.info(CardCertReadExecutionService.class.getSimpleName() + " uses use custom connector certificate: "+ path);
-                setUpCustomSSLContext(is, appConfig.getConnectorTlsCertTustStorePwd());
-            } catch(FileNotFoundException e) {
-                log.log(Level.SEVERE, "Could find custom connector certificate file", e);
-            }
+        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
+            String path = endpointDiscoveryService.getConnectorTlsCertTrustStore().get();
+            secretsManagerService.configureSSLTransportContext(path, endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
         }
-    }
-
-    public void setUpCustomSSLContext(InputStream p12Certificate, String password) {
-        SSLContext customSSLContext = SecretsManagerService.setUpCustomSSLContext(p12Certificate, password);
-        BindingProvider bp = (BindingProvider) certificateService;
-
-        bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-               customSSLContext.getSocketFactory());
     }
 
     /**
