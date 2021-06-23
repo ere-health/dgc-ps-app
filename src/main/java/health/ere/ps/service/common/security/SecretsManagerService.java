@@ -318,6 +318,13 @@ public class SecretsManagerService {
         return key;
     }
 
+    /**
+     * Get the keystore type from a path string. If the path string has no (known) prefix, {@see KeyStoreType.PKCS12}
+     * will be returned.
+     *
+     * @param path path from which the keystore type is to be extracted
+     * @return key store type
+     */
     private static KeyStoreType getKeyStoreType(String path) {
         if (path.startsWith("jks:")) {
             return KeyStoreType.JKS;
