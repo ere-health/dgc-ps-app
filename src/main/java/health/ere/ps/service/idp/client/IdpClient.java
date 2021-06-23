@@ -132,22 +132,32 @@ public class IdpClient implements IIdpClient {
 
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
-            if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-                secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
-                        endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
-                        SecretsManagerService.KeyStoreType.PKCS12, bp);
-            }
+
+            secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
+                    endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
+                    SecretsManagerService.SslContextType.TLS,
+                    SecretsManagerService.KeyStoreType.PKCS12,
+                    endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
+                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                    SecretsManagerService.KeyStoreType.JKS,
+                    bp);
+
 
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointDiscoveryService.getCardServiceEndpointAddress());
-            if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-                secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
-                        endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
-                        SecretsManagerService.KeyStoreType.PKCS12, bp);
-            }
+
+            secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
+                    endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
+                    SecretsManagerService.SslContextType.TLS,
+                    SecretsManagerService.KeyStoreType.PKCS12,
+                    endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
+                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                    SecretsManagerService.KeyStoreType.JKS,
+                    bp);
+
         } catch(Exception ex) {
             logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
         }

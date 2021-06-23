@@ -34,13 +34,26 @@ public class EndpointDiscoveryService {
      * Certificate to authenticate at the connector.
      */
     @ConfigProperty(name = "connector.cert.auth.store.file")
-    Optional<String> connectorTlsCertTrustStore;
+    Optional<String> connectorTlsCertAuthStoreFile;
 
     /**
      * Password of the certificate to authenticate at the connector.
      * The default value is a empty sting, so that the password must not be set.
      */
     @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "!")
+    String connectorTlsCertAuthStorePwd;
+
+    /**
+     * Certificate to validate with the connector.
+     */
+    @ConfigProperty(name = "connector.cert.trust.store.file")
+    Optional<String> connectorTlsCertTrustStoreFile;
+
+    /**
+     * Password of the certificate to authenticate at the connector.
+     * The default value is a empty sting, so that the password must not be set.
+     */
+    @ConfigProperty(name = "connector.cert.trust.store.file.password", defaultValue = "!")
     String connectorTlsCertTrustStorePwd;
 
     @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
@@ -69,10 +82,13 @@ public class EndpointDiscoveryService {
         // code copied from IdpClient.java
 
         // having an ssl context does not interfere with non-ssl connections
-        SSLContext sslContext = connectorTlsCertTrustStore.isPresent() ? secretsManagerService.createSSLContext(connectorTlsCertTrustStore.get(),
-                connectorTlsCertTrustStorePwd,
+        SSLContext sslContext = secretsManagerService.createSSLContext(connectorTlsCertAuthStoreFile.orElse(null),
+                connectorTlsCertAuthStorePwd,
                 SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12) : secretsManagerService.createAcceptAllSSLContext();
+                SecretsManagerService.KeyStoreType.PKCS12,
+                connectorTlsCertTrustStoreFile.orElse(null),
+                connectorTlsCertTrustStorePwd,
+                SecretsManagerService.KeyStoreType.JKS);
 
         ClientBuilder clientBuilder = ClientBuilder.newBuilder()
                 .sslContext(sslContext);
@@ -149,8 +165,16 @@ public class EndpointDiscoveryService {
         return eventServiceEndpointAddress;
     }
 
-    public Optional<String> getConnectorTlsCertTrustStore() {
-        return connectorTlsCertTrustStore;
+    public Optional<String> getConnectorTlsCertAuthStoreFile() {
+        return connectorTlsCertAuthStoreFile;
+    }
+
+    public String getConnectorTlsCertAuthStorePwd() {
+        return connectorTlsCertAuthStorePwd;
+    }
+
+    public Optional<String> getConnectorTlsCertTrustStoreFile() {
+        return connectorTlsCertTrustStoreFile;
     }
 
     public String getConnectorTlsCertTrustStorePwd() {

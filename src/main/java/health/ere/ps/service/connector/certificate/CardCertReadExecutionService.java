@@ -45,13 +45,16 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        endpointDiscoveryService.getCertificateServiceEndpointAddress());
-        
-        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-            String path = endpointDiscoveryService.getConnectorTlsCertTrustStore().get();
-            secretsManagerService.configureSSLTransportContext(path, endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
-        }
+                endpointDiscoveryService.getCertificateServiceEndpointAddress());
+
+        secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
+                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                SecretsManagerService.SslContextType.TLS,
+                SecretsManagerService.KeyStoreType.PKCS12,
+                endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
+                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                SecretsManagerService.KeyStoreType.JKS,
+                bp);
     }
 
     /**

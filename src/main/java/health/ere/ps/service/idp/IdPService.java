@@ -61,13 +61,14 @@ public class IdPService {
     @PostConstruct
     void init() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-            secureSoapTransportConfigurer.configureSecureTransport(
-                    endpointDiscoveryService.getEventServiceEndpointAddress(),
-                    SecretsManagerService.SslContextType.TLS,
-                    endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
-                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
-        }
+
+        secureSoapTransportConfigurer.configureSecureTransport(
+                endpointDiscoveryService.getEventServiceEndpointAddress(),
+                SecretsManagerService.SslContextType.TLS,
+                endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
+                endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
+                endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
+                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
     }
 
     public void requestBearerToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {

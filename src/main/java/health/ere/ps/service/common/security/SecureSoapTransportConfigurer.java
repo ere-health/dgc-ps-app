@@ -21,17 +21,18 @@ public class SecureSoapTransportConfigurer {
 
     public void configureSecureTransport(String endpointAddress,
                                          SecretsManagerService.SslContextType sslContextType,
+                                         String tlsCertKeyStore,
+                                         String tlsCertKeyStorePassword,
                                          String tlsCertTrustStore,
                                          String tlsCertTrustStorePassword) throws SecretsManagerException {
-        if (bindingProvider != null && StringUtils.isNotBlank(endpointAddress) &&
-                StringUtils.isNotBlank(tlsCertTrustStore) &&
-                StringUtils.isNotBlank(tlsCertTrustStorePassword)) {
+        if (bindingProvider != null && StringUtils.isNotBlank(endpointAddress)) {
             bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointAddress);
 
-            secretsManagerService.configureSSLTransportContext(tlsCertTrustStore,
-                    tlsCertTrustStorePassword, sslContextType,
-                    SecretsManagerService.KeyStoreType.PKCS12, bindingProvider);
+            secretsManagerService.configureSSLTransportContext(tlsCertKeyStore,
+                    tlsCertKeyStorePassword, sslContextType,
+                    SecretsManagerService.KeyStoreType.PKCS12, tlsCertTrustStore, tlsCertTrustStorePassword,
+                    SecretsManagerService.KeyStoreType.JKS, bindingProvider);
         }
     }
 }

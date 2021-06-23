@@ -41,10 +41,12 @@ public class SmcbAuthenticatorExecutionService {
                 endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
 
         secretsManagerService.configureSSLTransportContext(
-                endpointDiscoveryService.getConnectorTlsCertTrustStore()
-                        .orElseThrow(() -> new DeploymentException("No connector tsl cert trust certificate present")),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12, bp);
+                endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
+                endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(), SecretsManagerService.SslContextType.TLS,
+                SecretsManagerService.KeyStoreType.PKCS12,
+                endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
+                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.KeyStoreType.JKS,
+                bp);
     }
 
     public ExternalAuthenticateResponse doExternalAuthenticate(String cardHandle, ContextType contextType,

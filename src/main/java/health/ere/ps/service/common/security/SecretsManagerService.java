@@ -7,9 +7,11 @@ import org.bouncycastle.crypto.CryptoException;
 
 import javax.crypto.KeyGenerator;
 import javax.enterprise.context.ApplicationScoped;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.xml.ws.BindingProvider;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +39,7 @@ public class SecretsManagerService {
 
     private static Logger log = Logger.getLogger(SecretsManagerService.class.getName());
 
+    // TODO: remove enum
     public enum SslContextType {
         SSL("SSL"), TLS("TLS");
 
@@ -156,11 +159,14 @@ public class SecretsManagerService {
                                              String keyStorePassword,
                                              SslContextType sslContextType,
                                              KeyStoreType keyStoreType,
+                                             String trustStoreFilePath,
+                                             String trustStorePassword,
+                                             KeyStoreType trustStoreType,
                                              BindingProvider bp)
             throws SecretsManagerException {
-        try(FileInputStream fileInputStream = new FileInputStream(keyStoreFilePath)) {
-            SSLContext sc = createSSLContext(fileInputStream, keyStorePassword.toCharArray(),
-                sslContextType, keyStoreType);
+        try {
+            SSLContext sc = createSSLContext(keyStoreFilePath, keyStorePassword, sslContextType, keyStoreType,
+                    trustStoreFilePath, trustStorePassword, trustStoreType);
 
             bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                     sc.getSocketFactory());
@@ -171,23 +177,62 @@ public class SecretsManagerService {
         }
     }
 
-    public SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
-                                    SslContextType sslContextType, KeyStoreType keyStoreType)
+    /**
+     * ATTENTION: if the trust store inputstream is null, all server certificates are accepted!
+     *
+     * @param keyStoreInputStream if the stream is null, no
+     * @param keyStorePassword
+     * @param sslContextType
+     * @param keyStoreType
+     * @param trustStoreInputStream ATTENTION:
+     * @param trustStorePassword
+     * @param trustStoreType
+     * @return
+     * @throws SecretsManagerException
+     */
+    private SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
+                                    SslContextType sslContextType, KeyStoreType keyStoreType,
+                                       InputStream trustStoreInputStream, char[] trustStorePassword,
+                                       KeyStoreType trustStoreType)
             throws SecretsManagerException {
         SSLContext sc;
 
         try {
             sc = SSLContext.getInstance(sslContextType.getSslContextType());
 
-            KeyManagerFactory kmf =
-                    KeyManagerFactory.getInstance( KeyManagerFactory.getDefaultAlgorithm() );
+            KeyManager[] keyManagers;
 
-            KeyStore ks = KeyStore.getInstance(keyStoreType.getKeyStoreType());
-            ks.load(keyStoreInputStream, keyStorePassword);
+            if (keyStoreInputStream != null) {
 
-            kmf.init(ks, keyStorePassword);
+                KeyManagerFactory kmf =
+                        KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
-            sc.init( kmf.getKeyManagers(), new TrustManager[]{new SSLUtilities.FakeX509TrustManager()}, null );
+                KeyStore ks = getKeyStoreFromInputStream(keyStoreInputStream, keyStoreType, keyStorePassword);
+
+                kmf.init(ks, keyStorePassword);
+
+                keyManagers = kmf.getKeyManagers();
+            } else {
+                keyManagers = null;
+            }
+
+            TrustManager[] trustManagers;
+
+            if (trustStoreInputStream != null) {
+                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
+                KeyStore trustKeyStore = getKeyStoreFromInputStream(trustStoreInputStream, trustStoreType,
+                        trustStorePassword);
+
+                trustManagerFactory.init(trustKeyStore);
+                trustManagers = trustManagerFactory.getTrustManagers();
+            } else {
+                // we have no choice but to trust all certificates if none is supplied since the connectors
+                // do not have a 'properly' signed certificate
+                trustManagers = new TrustManager[]{new SSLUtilities.FakeX509TrustManager()};
+            }
+
+            sc.init(keyManagers, trustManagers, null );
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException
                 | UnrecoverableKeyException | KeyManagementException e) {
             throw new SecretsManagerException("SSL context creation error.", e);
@@ -196,22 +241,29 @@ public class SecretsManagerService {
         return sc;
     }
 
-    /**
-     * This method created a SSLContext that accepts all certificates without performing any kind of checks!
-     *
-     * @return SSLContext without any certificate verification
-     * @throws SecretsManagerException error during SSLContext creation
-     */
-    public SSLContext createAcceptAllSSLContext() throws SecretsManagerException {
-        return createSSLContext((InputStream) null, null, SslContextType.TLS, KeyStoreType.PKCS12);
-    }
-
     public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
-                                       KeyStoreType keyStoreType) throws IOException, SecretsManagerException {
+                                       KeyStoreType keyStoreType, String trustStoreFile, String trustStorePassword,
+                                       KeyStoreType trustStoreType) throws IOException, SecretsManagerException {
 
-        try (FileInputStream fileInputStream = new FileInputStream(keyStoreFile)) {
-            return createSSLContext(fileInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType);
+        if (keyStoreFile == null) {
+            try (FileInputStream trustStoreInputStream = new FileInputStream(trustStoreFile)) {
+                return createSSLContext(null, null, sslContextType, null,
+                        trustStoreInputStream, trustStorePassword.toCharArray(), trustStoreType);
+            }
+        } else {
+            if (trustStoreFile == null) {
+                try (FileInputStream keyStoreInputStream = new FileInputStream(keyStoreFile)) {
+                    return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType, null, null, null);
+                }
+            } else {
+                try (FileInputStream keyStoreInputStream = new FileInputStream(keyStoreFile); FileInputStream trustStoreInputStream = new FileInputStream(trustStoreFile)) {
+                    return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType,
+                            keyStoreType, trustStoreInputStream, trustStorePassword.toCharArray(), trustStoreType);
+                }
+            }
         }
+        // support for null keystore
+
     }
 
     public Key generateRandomKey(String keyGenAlgorithm) throws SecretsManagerException {
