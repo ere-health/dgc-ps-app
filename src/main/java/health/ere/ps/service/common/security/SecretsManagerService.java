@@ -39,7 +39,6 @@ public class SecretsManagerService {
 
     private static Logger log = Logger.getLogger(SecretsManagerService.class.getName());
 
-    // TODO: remove enum
     public enum SslContextType {
         SSL("SSL"), TLS("TLS");
 
@@ -158,15 +157,13 @@ public class SecretsManagerService {
     public void configureSSLTransportContext(String keyStoreFilePath,
                                              String keyStorePassword,
                                              SslContextType sslContextType,
-                                             KeyStoreType keyStoreType,
                                              String trustStoreFilePath,
                                              String trustStorePassword,
-                                             KeyStoreType trustStoreType,
                                              BindingProvider bp)
             throws SecretsManagerException {
         try {
-            SSLContext sc = createSSLContext(keyStoreFilePath, keyStorePassword, sslContextType, keyStoreType,
-                    trustStoreFilePath, trustStorePassword, trustStoreType);
+            SSLContext sc = createSSLContext(keyStoreFilePath, keyStorePassword, sslContextType,
+                    trustStoreFilePath, trustStorePassword);
 
             bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
                     sc.getSocketFactory());
@@ -242,32 +239,32 @@ public class SecretsManagerService {
     }
 
     public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
-                                       KeyStoreType keyStoreType, String trustStoreFile, String trustStorePassword,
-                                       KeyStoreType trustStoreType) throws IOException, SecretsManagerException {
+                                       String trustStoreFile, String trustStorePassword) throws IOException,
+            SecretsManagerException {
 
         if (keyStoreFile == null) {
             if (trustStoreFile == null) {
                 return createSSLContext((InputStream) null, null, sslContextType, null, null, null, null);
             } else {
-                try (FileInputStream trustStoreInputStream = new FileInputStream(trustStoreFile)) {
+                try (FileInputStream trustStoreInputStream = new FileInputStream(normalizePath(trustStoreFile))) {
                     return createSSLContext(null, null, sslContextType, null,
-                            trustStoreInputStream, trustStorePassword.toCharArray(), trustStoreType);
+                            trustStoreInputStream, trustStorePassword.toCharArray(), getKeyStoreType(trustStoreFile));
                 }
             }
         } else {
             if (trustStoreFile == null) {
-                try (FileInputStream keyStoreInputStream = new FileInputStream(keyStoreFile)) {
-                    return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType, null, null, null);
+                try (FileInputStream keyStoreInputStream = new FileInputStream(normalizePath(keyStoreFile))) {
+                    return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType, getKeyStoreType(keyStoreFile), null, null, null);
                 }
             } else {
-                try (FileInputStream keyStoreInputStream = new FileInputStream(keyStoreFile); FileInputStream trustStoreInputStream = new FileInputStream(trustStoreFile)) {
+                try (FileInputStream keyStoreInputStream = new FileInputStream(normalizePath(keyStoreFile));
+                     FileInputStream trustStoreInputStream = new FileInputStream(normalizePath(trustStoreFile))) {
                     return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType,
-                            keyStoreType, trustStoreInputStream, trustStorePassword.toCharArray(), trustStoreType);
+                            getKeyStoreType(keyStoreFile), trustStoreInputStream, trustStorePassword.toCharArray(),
+                            getKeyStoreType(trustStoreFile));
                 }
             }
         }
-        // support for null keystore
-
     }
 
     public Key generateRandomKey(String keyGenAlgorithm) throws SecretsManagerException {
@@ -289,5 +286,27 @@ public class SecretsManagerService {
         Key key = keyGen.generateKey();
 
         return key;
+    }
+
+    private static KeyStoreType getKeyStoreType(String path) {
+        if (path.startsWith("jks:")) {
+            return KeyStoreType.JKS;
+        } else {
+            return KeyStoreType.PKCS12;
+        }
+    }
+
+    /**
+     * Removes the keystore type prefix (if present) from the path.
+     *
+     * @param path to be normalized path
+     * @return normalized path
+     */
+    private static String normalizePath(String path) {
+        if (path.startsWith("p12:") || path.startsWith("jks:")) {
+            return path.substring(4);
+        } else {
+            return path;
+        }
     }
 }

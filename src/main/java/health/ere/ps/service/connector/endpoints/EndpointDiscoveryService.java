@@ -93,10 +93,8 @@ public class EndpointDiscoveryService {
         SSLContext sslContext = secretsManagerService.createSSLContext(connectorTlsCertAuthStoreFile.orElse(null),
                 connectorTlsCertAuthStorePwd,
                 SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12,
                 connectorTlsCertTrustStoreFile.orElse(null),
-                connectorTlsCertTrustStorePwd,
-                SecretsManagerService.KeyStoreType.JKS);
+                connectorTlsCertTrustStorePwd);
 
         ClientBuilder clientBuilder = ClientBuilder.newBuilder()
                 .sslContext(sslContext);

@@ -136,10 +136,8 @@ public class IdpClient implements IIdpClient {
             secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
                     endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
                     SecretsManagerService.SslContextType.TLS,
-                    SecretsManagerService.KeyStoreType.PKCS12,
                     endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                     endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                    SecretsManagerService.KeyStoreType.JKS,
                     bp);
 
 
@@ -152,10 +150,8 @@ public class IdpClient implements IIdpClient {
             secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
                     endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
                     SecretsManagerService.SslContextType.TLS,
-                    SecretsManagerService.KeyStoreType.PKCS12,
                     endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                     endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                    SecretsManagerService.KeyStoreType.JKS,
                     bp);
 
         } catch(Exception ex) {

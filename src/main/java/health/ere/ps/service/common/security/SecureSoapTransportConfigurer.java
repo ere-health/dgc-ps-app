@@ -29,10 +29,8 @@ public class SecureSoapTransportConfigurer {
             bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointAddress);
 
-            secretsManagerService.configureSSLTransportContext(tlsCertKeyStore,
-                    tlsCertKeyStorePassword, sslContextType,
-                    SecretsManagerService.KeyStoreType.PKCS12, tlsCertTrustStore, tlsCertTrustStorePassword,
-                    SecretsManagerService.KeyStoreType.JKS, bindingProvider);
+            secretsManagerService.configureSSLTransportContext(tlsCertKeyStore, tlsCertKeyStorePassword, sslContextType,
+                    tlsCertTrustStore, tlsCertTrustStorePassword, bindingProvider);
         }
     }
 }

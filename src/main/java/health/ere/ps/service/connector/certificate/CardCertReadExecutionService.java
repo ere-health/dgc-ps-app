@@ -50,10 +50,8 @@ public class CardCertReadExecutionService {
         secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
                 endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
                 SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12,
                 endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                 endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                SecretsManagerService.KeyStoreType.JKS,
                 bp);
     }
 

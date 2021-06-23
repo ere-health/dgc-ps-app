@@ -85,7 +85,7 @@ class EndpointDiscoveryServiceIntegrationTest {
             File file = new File(tempDir, "test-keystore");
 
             Files.write(file.toPath(), inputStream.readAllBytes());
-            endpointDiscoveryService.connectorTlsCertTrustStoreFile = Optional.of(file.getAbsolutePath());
+            endpointDiscoveryService.connectorTlsCertTrustStoreFile = Optional.of("jks:" + file.getAbsolutePath());
         }
         endpointDiscoveryService.connectorTlsCertTrustStorePwd = "password";
 

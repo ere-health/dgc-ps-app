@@ -43,9 +43,8 @@ public class SmcbAuthenticatorExecutionService {
         secretsManagerService.configureSSLTransportContext(
                 endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
                 endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(), SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12,
                 endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.KeyStoreType.JKS,
+                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
                 bp);
     }
 
