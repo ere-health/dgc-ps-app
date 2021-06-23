@@ -77,7 +77,7 @@ async function sendVaccinationRequest() {
             }
         ]
     };
-    await sendRequest("../api/certify/v2/issue", oVacinationRequest)
+    await sendRequest("../rest/api/certify/v2/issue", oVacinationRequest)
 }
 
 function prefillVaccineParameters() {
@@ -119,7 +119,7 @@ async function sendRecoveredRequest() {
             }
         ]
     };
-    await sendRequest("../api/certify/v2/recovered", requestData);
+    await sendRequest("../rest/api/certify/v2/recovered", requestData);
 }
 
 // Copy prefillParameter
