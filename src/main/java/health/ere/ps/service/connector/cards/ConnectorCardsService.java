@@ -17,11 +17,16 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
 import javax.xml.ws.BindingProvider;
 
 import health.ere.ps.config.AppConfig;
+import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.exception.connector.ConnectorCardsException;
+import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SoapClient;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
+import health.ere.ps.ssl.SSLUtilities;
 
 
 @ApplicationScoped
@@ -56,9 +61,15 @@ public class ConnectorCardsService implements SoapClient {
             return cardHandleType;
         }
     }
+    
+    @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
+
+    @Inject
+    SecretsManagerService secretsManagerService;
 
     @PostConstruct
-    void init() {
+    void init() throws Exception {
         contextType = new ContextType();
         contextType.setMandantId(appConfig.getMandantId());
         contextType.setClientSystemId(appConfig.getClientSystemId());
@@ -67,6 +78,16 @@ public class ConnectorCardsService implements SoapClient {
 
         eventService = new EventService(getClass().getResource(
                 "/EventService.wsdl")).getEventServicePort();
+        
+        // Set endpoint to configured endpoint
+        BindingProvider bp = (BindingProvider) eventService;
+        
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+        endpointDiscoveryService.getEventServiceEndpointAddress());
+        
+        if("false".equals(endpointDiscoveryService.getConnectorVerifyHostname())) {
+        	SSLUtilities.trustAllHostnames();
+       }
     }
 
     public GetCardsResponse getConnectorCards()

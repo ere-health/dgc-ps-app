@@ -33,40 +33,40 @@ public class EndpointDiscoveryService {
     /**
      * Certificate to authenticate at the connector.
      */
-    @ConfigProperty(name = "connector.cert.auth.store.file")
+    @Inject @ConfigProperty(name = "connector.cert.auth.store.file")
     Optional<String> connectorTlsCertTrustStore;
 
     /**
      * Password of the certificate to authenticate at the connector.
      * The default value is a empty sting, so that the password must not be set.
      */
-    @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "!")
+    @Inject @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "!")
     String connectorTlsCertTrustStorePwd;
 
-    @ConfigProperty(name = "auth-signature-service.endpoint.address")
+    @Inject @ConfigProperty(name = "auth-signature-service.endpoint.address")
     Optional<String> fallbackAuthSignatureServiceEndpointAddress;
 
     private String authSignatureServiceEndpointAddress;
 
-    @ConfigProperty(name = "card-service.endpoint.address")
+    @Inject @ConfigProperty(name = "card-service.endpoint.address")
     Optional<String> fallbackCardServiceEndpointAddress;
 
     private String cardServiceEndpointAddress;
 
-    @ConfigProperty(name = "certificate-service.endpoint.address")
+    @Inject @ConfigProperty(name = "certificate-service.endpoint.address")
     Optional<String> fallbackCertificateServiceEndpointAddress;
 
     private String certificateServiceEndpointAddress;
 
-    @ConfigProperty(name = "event-service.endpoint.address")
+    @Inject @ConfigProperty(name = "event-service.endpoint.address")
     Optional<String> fallbackEventServiceEndpointAddress;
 
     private String eventServiceEndpointAddress;
 
-    @ConfigProperty(name = "connector.base-uri")
+    @Inject @ConfigProperty(name = "connector.base-uri")
     String connectorBaseUri;
 
-    @ConfigProperty(name = "connector.verify-hostname", defaultValue = "true")
+    @Inject @ConfigProperty(name = "connector.verify-hostname", defaultValue = "true")
     String connectorVerifyHostname;
 
     @Inject
@@ -199,6 +199,8 @@ public class EndpointDiscoveryService {
 
             if (location.startsWith(connectorBaseUri)) {
                 return location;
+            } else {
+            	LOG.warning(location+" does not start with: "+connectorBaseUri);
             }
         }
 
@@ -219,4 +221,12 @@ public class EndpointDiscoveryService {
 
         return null;
     }
+
+	public String getConnectorVerifyHostname() {
+		return connectorVerifyHostname;
+	}
+
+	public void setConnectorVerifyHostname(String connectorVerifyHostname) {
+		this.connectorVerifyHostname = connectorVerifyHostname;
+	}
 }

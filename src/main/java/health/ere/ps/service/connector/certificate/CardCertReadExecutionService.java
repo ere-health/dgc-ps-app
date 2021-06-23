@@ -12,10 +12,12 @@ import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
+import health.ere.ps.ssl.SSLUtilities;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import java.util.logging.Logger;
@@ -51,6 +53,8 @@ public class CardCertReadExecutionService {
             String path = endpointDiscoveryService.getConnectorTlsCertTrustStore().get();
             secretsManagerService.configureSSLTransportContext(path, endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
                     SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
+        } else if("false".equals(endpointDiscoveryService.getConnectorVerifyHostname())) {
+        	SSLUtilities.trustAllHostnames();
         }
     }
 
