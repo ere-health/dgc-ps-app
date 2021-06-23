@@ -48,7 +48,7 @@ public class CardCertReadExecutionService {
                 endpointDiscoveryService.getCertificateServiceEndpointAddress());
 
         secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
                 SecretsManagerService.SslContextType.TLS,
                 endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                 endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
