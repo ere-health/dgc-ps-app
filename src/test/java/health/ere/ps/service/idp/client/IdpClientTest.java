@@ -1,5 +1,6 @@
 package health.ere.ps.service.idp.client;
 
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -33,6 +34,9 @@ public class IdpClientTest {
 
     @Inject
     AppConfig appConfig;
+
+    @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
 
     @Inject
     IdpClient idpClient;
@@ -70,12 +74,12 @@ public class IdpClientTest {
     @BeforeEach
     void configureSecureTransport() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        if (appConfig.getConnectorTlsCertTrustStore().isPresent()) {
+        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
             secureSoapTransportConfigurer.configureSecureTransport(
-                    appConfig.getEventServiceEndpointAddress(),
+                    endpointDiscoveryService.getEventServiceEndpointAddress(),
                     SecretsManagerService.SslContextType.TLS,
-                    appConfig.getConnectorTlsCertTrustStore().get(),
-                    appConfig.getConnectorTlsCertTustStorePwd());
+                    endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
+                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
         }
     }
 

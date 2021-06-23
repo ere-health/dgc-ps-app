@@ -1,7 +1,16 @@
 package health.ere.ps.service.common.security;
 
+import health.ere.ps.exception.common.security.SecretsManagerException;
+import health.ere.ps.service.idp.crypto.CryptoLoader;
+import health.ere.ps.ssl.SSLUtilities;
 import org.bouncycastle.crypto.CryptoException;
 
+import javax.crypto.KeyGenerator;
+import javax.enterprise.context.ApplicationScoped;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.xml.ws.BindingProvider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,17 +31,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.crypto.KeyGenerator;
-import javax.enterprise.context.ApplicationScoped;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.xml.ws.BindingProvider;
-
-import health.ere.ps.exception.common.security.SecretsManagerException;
-import health.ere.ps.service.idp.crypto.CryptoLoader;
-import health.ere.ps.ssl.SSLUtilities;
 
 @ApplicationScoped
 public class SecretsManagerService {
@@ -144,24 +142,24 @@ public class SecretsManagerService {
         return trustStore;
     }
 
-    public KeyStore initializeTrustStoreFromInputStream(InputStream trustStoreInputStream,
+    public KeyStore initializeTrustStoreFromInputStream(InputStream keyStoreInputStream,
                                                         KeyStoreType keyStoreType,
                                                  char[] keyStorePassword)
             throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore trustStore = KeyStore.getInstance(keyStoreType.getKeyStoreType());
-        trustStore.load(trustStoreInputStream, keyStorePassword);
+        trustStore.load(keyStoreInputStream, keyStorePassword);
 
         return trustStore;
     }
 
-    public void configureSSLTransportContext(String trustStoreFilePath,
-                                             String trustStorePassword,
+    public void configureSSLTransportContext(String keyStoreFilePath,
+                                             String keyStorePassword,
                                              SslContextType sslContextType,
                                              KeyStoreType keyStoreType,
                                              BindingProvider bp)
             throws SecretsManagerException {
-        try(FileInputStream fileInputStream = new FileInputStream(trustStoreFilePath)) {
-            SSLContext sc = createSSLContext(fileInputStream, trustStorePassword.toCharArray(),
+        try(FileInputStream fileInputStream = new FileInputStream(keyStoreFilePath)) {
+            SSLContext sc = createSSLContext(fileInputStream, keyStorePassword.toCharArray(),
                 sslContextType, keyStoreType);
 
             bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
@@ -173,7 +171,7 @@ public class SecretsManagerService {
         }
     }
 
-    public SSLContext createSSLContext(InputStream trustStoreInputStream, char[] keyStorePassword,
+    public SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
                                     SslContextType sslContextType, KeyStoreType keyStoreType)
             throws SecretsManagerException {
         SSLContext sc;
@@ -185,7 +183,7 @@ public class SecretsManagerService {
                     KeyManagerFactory.getInstance( KeyManagerFactory.getDefaultAlgorithm() );
 
             KeyStore ks = KeyStore.getInstance(keyStoreType.getKeyStoreType());
-            ks.load(trustStoreInputStream, keyStorePassword);
+            ks.load(keyStoreInputStream, keyStorePassword);
 
             kmf.init(ks, keyStorePassword);
 
@@ -198,26 +196,21 @@ public class SecretsManagerService {
         return sc;
     }
 
-    public static SSLContext setUpCustomSSLContext(InputStream p12Certificate) {
-        return setUpCustomSSLContext(p12Certificate, "00");
+    /**
+     * This method created a SSLContext that accepts all certificates without performing any kind of checks!
+     *
+     * @return SSLContext without any certificate verification
+     * @throws SecretsManagerException error during SSLContext creation
+     */
+    public SSLContext createAcceptAllSSLContext() throws SecretsManagerException {
+        return createSSLContext((InputStream) null, null, SslContextType.TLS, KeyStoreType.PKCS12);
     }
 
-    public static SSLContext setUpCustomSSLContext(InputStream p12Certificate, String password) {
-        try {
-            SSLContext sc = SSLContext.getInstance("TLS");
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+    public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
+                                       KeyStoreType keyStoreType) throws IOException, SecretsManagerException {
 
-            KeyStore ks = KeyStore.getInstance("PKCS12");
-            // Download this file from the titus backend
-            // https://frontend.titus.ti-dienste.de/#/platform/mandant
-            ks.load(p12Certificate, password.toCharArray());
-            kmf.init(ks, password.toCharArray());
-            sc.init(kmf.getKeyManagers(), new TrustManager[]{new SSLUtilities.FakeX509TrustManager()}, null);
-            return sc;
-        } catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException
-                | UnrecoverableKeyException | KeyManagementException e) {
-            log.log(Level.SEVERE, "Could not set up custom SSLContext", e);
-            throw new RuntimeException(e);
+        try (FileInputStream fileInputStream = new FileInputStream(keyStoreFile)) {
+            return createSSLContext(fileInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType);
         }
     }
 
