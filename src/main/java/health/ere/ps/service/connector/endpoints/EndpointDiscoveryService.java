@@ -56,17 +56,25 @@ public class EndpointDiscoveryService {
     @ConfigProperty(name = "connector.cert.trust.store.file.password", defaultValue = "!")
     String connectorTlsCertTrustStorePwd;
 
-    @ConfigProperty(name = "auth-signature-service.endpoint.address", defaultValue = "")
-    String authSignatureServiceEndpointAddress;
+    @ConfigProperty(name = "auth-signature-service.endpoint.address")
+    Optional<String> fallbackAuthSignatureServiceEndpointAddress;
 
-    @ConfigProperty(name = "card-service.endpoint.address", defaultValue = "")
-    String cardServiceEndpointAddress;
+    private String authSignatureServiceEndpointAddress;
 
-    @ConfigProperty(name = "certificate-service.endpoint.address", defaultValue = "")
-    String certificateServiceEndpointAddress;
+    @ConfigProperty(name = "card-service.endpoint.address")
+    Optional<String> fallbackCardServiceEndpointAddress;
 
-    @ConfigProperty(name = "event-service.endpoint.address", defaultValue = "")
-    String eventServiceEndpointAddress;
+    private String cardServiceEndpointAddress;
+
+    @ConfigProperty(name = "certificate-service.endpoint.address")
+    Optional<String> fallbackCertificateServiceEndpointAddress;
+
+    private String certificateServiceEndpointAddress;
+
+    @ConfigProperty(name = "event-service.endpoint.address")
+    Optional<String> fallbackEventServiceEndpointAddress;
+
+    private String eventServiceEndpointAddress;
 
     @ConfigProperty(name = "connector.base-uri")
     String connectorBaseUri;
@@ -146,6 +154,19 @@ public class EndpointDiscoveryService {
 
         } catch (SAXException | IllegalArgumentException e) {
             LOG.log(Level.SEVERE, "Could not parse connector.sds", e);
+        }
+
+        if (authSignatureServiceEndpointAddress == null) {
+            authSignatureServiceEndpointAddress = fallbackAuthSignatureServiceEndpointAddress.orElseThrow();
+        }
+        if (cardServiceEndpointAddress == null) {
+            cardServiceEndpointAddress = fallbackCardServiceEndpointAddress.orElseThrow();
+        }
+        if (eventServiceEndpointAddress == null) {
+            eventServiceEndpointAddress = fallbackEventServiceEndpointAddress.orElseThrow();
+        }
+        if (certificateServiceEndpointAddress == null) {
+            certificateServiceEndpointAddress = fallbackCertificateServiceEndpointAddress.orElseThrow();
         }
     }
 
