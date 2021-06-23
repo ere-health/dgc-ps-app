@@ -88,6 +88,7 @@ public class ConnectorCardsService implements SoapClient {
                 SecretsManagerService.SslContextType.TLS,
                 endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                 endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                endpointDiscoveryService.isConnectorVerifyHostnames(),
                 bp);
     }
 

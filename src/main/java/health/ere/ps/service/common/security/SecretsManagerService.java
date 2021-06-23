@@ -1,5 +1,6 @@
 package health.ere.ps.service.common.security;
 
+import com.sun.xml.ws.developer.JAXWSProperties;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.idp.crypto.CryptoLoader;
 import health.ere.ps.ssl.SSLUtilities;
@@ -164,6 +165,7 @@ public class SecretsManagerService {
      * @param sslContextType     type of ssl context; should be TLS
      * @param trustStoreFilePath file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores
      * @param trustStorePassword password to access the trust store
+     * @param verifyHostnames    set to false to disable hostname verification; ATTENTION: this may lead to MITM attacks
      * @param bp                 BindingProvider for which the ssl context is set up
      * @throws SecretsManagerException will be thrown in case of invalid parameters
      */
@@ -172,15 +174,18 @@ public class SecretsManagerService {
                                              SslContextType sslContextType,
                                              String trustStoreFilePath,
                                              String trustStorePassword,
+                                             boolean verifyHostnames,
                                              BindingProvider bp)
             throws SecretsManagerException {
         try {
             SSLContext sc = createSSLContext(keyStoreFilePath, keyStorePassword, sslContextType,
                     trustStoreFilePath, trustStorePassword);
 
-            bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-                    sc.getSocketFactory());
+            bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, sc.getSocketFactory());
 
+            if (!verifyHostnames) {
+                bp.getRequestContext().put(JAXWSProperties.HOSTNAME_VERIFIER, new SSLUtilities.FakeHostnameVerifier());
+            }
         } catch (IOException e) {
             // throw new SecretsManagerException("SSL transport configuration error.", e);
             LOG.log(Level.SEVERE, "Could not configure SecretsManagerService", e);

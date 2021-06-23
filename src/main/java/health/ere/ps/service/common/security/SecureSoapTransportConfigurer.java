@@ -24,13 +24,14 @@ public class SecureSoapTransportConfigurer {
                                          String tlsCertKeyStore,
                                          String tlsCertKeyStorePassword,
                                          String tlsCertTrustStore,
-                                         String tlsCertTrustStorePassword) throws SecretsManagerException {
+                                         String tlsCertTrustStorePassword,
+                                         boolean verifyHostnames) throws SecretsManagerException {
         if (bindingProvider != null && StringUtils.isNotBlank(endpointAddress)) {
             bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointAddress);
 
             secretsManagerService.configureSSLTransportContext(tlsCertKeyStore, tlsCertKeyStorePassword, sslContextType,
-                    tlsCertTrustStore, tlsCertTrustStorePassword, bindingProvider);
+                    tlsCertTrustStore, tlsCertTrustStorePassword, verifyHostnames, bindingProvider);
         }
     }
 }

@@ -99,7 +99,7 @@ public class EndpointDiscoveryService {
         ClientBuilder clientBuilder = ClientBuilder.newBuilder()
                 .sslContext(sslContext);
 
-        if ("false".equals(connectorVerifyHostname)) {
+        if (!isConnectorVerifyHostnames()) {
             // disable hostname verification
             clientBuilder = clientBuilder.hostnameVerifier(new SSLUtilities.FakeHostnameVerifier());
         }
@@ -198,6 +198,10 @@ public class EndpointDiscoveryService {
 
     public String getConnectorTlsCertTrustStorePwd() {
         return connectorTlsCertTrustStorePwd;
+    }
+
+    public boolean isConnectorVerifyHostnames() {
+        return !("false".equals(connectorVerifyHostname));
     }
 
     private String getEndpoint(Node serviceNode) {

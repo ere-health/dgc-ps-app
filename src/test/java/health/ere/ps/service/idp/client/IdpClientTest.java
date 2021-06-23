@@ -81,7 +81,8 @@ public class IdpClientTest {
                 endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
                 endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
                 endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
+                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                endpointDiscoveryService.isConnectorVerifyHostnames());
     }
 
 

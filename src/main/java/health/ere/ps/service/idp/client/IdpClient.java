@@ -138,6 +138,7 @@ public class IdpClient implements IIdpClient {
                     SecretsManagerService.SslContextType.TLS,
                     endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                     endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                    endpointDiscoveryService.isConnectorVerifyHostnames(),
                     bp);
 
 
@@ -152,6 +153,7 @@ public class IdpClient implements IIdpClient {
                     SecretsManagerService.SslContextType.TLS,
                     endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
                     endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
+                    endpointDiscoveryService.isConnectorVerifyHostnames(),
                     bp);
 
         } catch(Exception ex) {
