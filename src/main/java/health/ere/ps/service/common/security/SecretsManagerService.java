@@ -289,12 +289,18 @@ public class SecretsManagerService {
                 try (InputStream trustStoreInputStream = createInputStream(trustStoreFile)) {
                     return createSSLContext(null, null, sslContextType, null,
                             trustStoreInputStream, trustStorePassword.toCharArray(), getKeyStoreType(trustStoreFile));
+                } catch(FileNotFoundException ex) {
+                    LOG.warning("trustStoreFile: "+trustStoreFile+" was not found. Returning default ssl context");
+                    return createSSLContext(null, null, sslContextType, null, null, null, null);
                 }
             }
         } else {
             if (trustStoreFile == null) {
                 try (InputStream keyStoreInputStream = createInputStream(keyStoreFile)) {
                     return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType, getKeyStoreType(keyStoreFile), null, null, null);
+                } catch(FileNotFoundException ex) {
+                    LOG.warning("keyStoreFile: "+keyStoreFile+" was not found. Returning default ssl context");
+                    return createSSLContext(null, null, sslContextType, null, null, null, null);
                 }
             } else {
                 try (InputStream keyStoreInputStream = createInputStream(keyStoreFile);
@@ -302,6 +308,9 @@ public class SecretsManagerService {
                     return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType,
                             getKeyStoreType(keyStoreFile), trustStoreInputStream, trustStorePassword.toCharArray(),
                             getKeyStoreType(trustStoreFile));
+                } catch(FileNotFoundException ex) {
+                    LOG.warning("keyStoreFile: "+keyStoreFile+" or trustStoreFile: "+trustStoreFile+" was not found. Returning default ssl context");
+                    return createSSLContext(null, null, sslContextType, null, null, null, null);
                 }
             }
         }
