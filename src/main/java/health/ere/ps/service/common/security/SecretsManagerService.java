@@ -269,10 +269,10 @@ public class SecretsManagerService {
      * <p>
      * ATTENTION: if the trust store inputstream is null, all server certificates are accepted!
      *
-     * @param keyStoreFile       file path with keystore content; if it is null, no client certificate will be used; prefix with 'jks:' for JKS stores
+     * @param keyStoreFile       file path with keystore content; if it is null, no client certificate will be used; prefix with 'jks:' for JKS stores; some data-urls are supported
      * @param keyStorePassword   password to access the client certificate
      * @param sslContextType     type of ssl context; should be TLS
-     * @param trustStoreFile     file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores
+     * @param trustStoreFile     file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores; some data-urls are supported
      * @param trustStorePassword password to access the trust store
      * @return SSLContext
      * @throws IOException             on accessing the file paths

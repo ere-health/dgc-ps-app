@@ -139,7 +139,8 @@ In regard to file and directory paths, configure the values for the environment 
 | `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CertificateService` |
 
 _Hint *_: the file path may be prefixed with either `p12:` or `jks:` to indicate the key store type; if no prefix is
-supplied, `p12:` will be assumed.
+supplied, `p12:` will be assumed. Some data-urls are supported as well:
+* `data:application/x-pkcs12;base64,`
 
 #### Environment Variables for tests
 
