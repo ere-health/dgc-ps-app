@@ -1,5 +1,6 @@
 package health.ere.ps.service.connector.cards;
 
+import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +15,6 @@ import javax.inject.Inject;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.exception.connector.ConnectorCardsException;
 import health.ere.ps.service.common.security.SecretsManagerService;
-import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -35,13 +35,9 @@ class ConnectorCardsServiceTest {
     @BeforeEach
     void configureSecureTransport() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-            secureSoapTransportConfigurer.configureSecureTransport(
-                    endpointDiscoveryService.getEventServiceEndpointAddress(),
-                    SecretsManagerService.SslContextType.TLS,
-                    endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
-                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
-        }
+
+        secureSoapTransportConfigurer.configureSecureTransport(
+                endpointDiscoveryService.getEventServiceEndpointAddress());
     }
 
     @Test

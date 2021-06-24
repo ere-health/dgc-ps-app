@@ -17,6 +17,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -34,13 +35,26 @@ public class EndpointDiscoveryService {
      * Certificate to authenticate at the connector.
      */
     @Inject @ConfigProperty(name = "connector.cert.auth.store.file")
-    Optional<String> connectorTlsCertTrustStore;
+    Optional<String> connectorTlsCertAuthStoreFile;
 
     /**
      * Password of the certificate to authenticate at the connector.
      * The default value is a empty sting, so that the password must not be set.
      */
     @Inject @ConfigProperty(name = "connector.cert.auth.store.file.password", defaultValue = "!")
+    String connectorTlsCertAuthStorePwd;
+
+    /**
+     * Certificate to validate with the connector.
+     */
+    @ConfigProperty(name = "connector.cert.trust.store.file")
+    Optional<String> connectorTlsCertTrustStoreFile;
+
+    /**
+     * Password of the certificate to authenticate at the connector.
+     * The default value is a empty sting, so that the password must not be set.
+     */
+    @ConfigProperty(name = "connector.cert.trust.store.file.password", defaultValue = "!")
     String connectorTlsCertTrustStorePwd;
 
     @Inject @ConfigProperty(name = "auth-signature-service.endpoint.address")
@@ -77,15 +91,16 @@ public class EndpointDiscoveryService {
         // code copied from IdpClient.java
 
         // having an ssl context does not interfere with non-ssl connections
-        SSLContext sslContext = connectorTlsCertTrustStore.isPresent() ? secretsManagerService.createSSLContext(connectorTlsCertTrustStore.get(),
-                connectorTlsCertTrustStorePwd,
+        SSLContext sslContext = secretsManagerService.createSSLContext(connectorTlsCertAuthStoreFile.orElse(null),
+                connectorTlsCertAuthStorePwd,
                 SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12) : secretsManagerService.createAcceptAllSSLContext();
+                connectorTlsCertTrustStoreFile.orElse(null),
+                connectorTlsCertTrustStorePwd);
 
         ClientBuilder clientBuilder = ClientBuilder.newBuilder()
                 .sslContext(sslContext);
 
-        if ("false".equals(connectorVerifyHostname)) {
+        if (!isConnectorVerifyHostnames()) {
             // disable hostname verification
             clientBuilder = clientBuilder.hostnameVerifier(new SSLUtilities.FakeHostnameVerifier());
         }
@@ -170,12 +185,34 @@ public class EndpointDiscoveryService {
         return eventServiceEndpointAddress;
     }
 
-    public Optional<String> getConnectorTlsCertTrustStore() {
-        return connectorTlsCertTrustStore;
+    public Optional<String> getConnectorTlsCertAuthStoreFile() {
+        return connectorTlsCertAuthStoreFile;
+    }
+
+    public String getConnectorTlsCertAuthStorePwd() {
+        return connectorTlsCertAuthStorePwd;
+    }
+
+    public Optional<String> getConnectorTlsCertTrustStoreFile() {
+        return connectorTlsCertTrustStoreFile;
     }
 
     public String getConnectorTlsCertTrustStorePwd() {
         return connectorTlsCertTrustStorePwd;
+    }
+
+    public boolean isConnectorVerifyHostnames() {
+        return !("false".equals(connectorVerifyHostname));
+    }
+
+    public void configureSSLTransportContext(BindingProvider bindingProvider) throws SecretsManagerException {
+        secretsManagerService.configureSSLTransportContext(
+                connectorTlsCertAuthStoreFile.orElse(null),
+                connectorTlsCertAuthStorePwd, SecretsManagerService.SslContextType.TLS,
+                connectorTlsCertTrustStoreFile.orElse(null),
+                connectorTlsCertTrustStorePwd,
+                isConnectorVerifyHostnames(),
+                bindingProvider);
     }
 
     private String getEndpoint(Node serviceNode) {

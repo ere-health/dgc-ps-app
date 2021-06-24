@@ -10,14 +10,11 @@ import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
-import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
-import health.ere.ps.ssl.SSLUtilities;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import java.util.logging.Logger;
@@ -29,9 +26,6 @@ public class CardCertReadExecutionService {
 
     @Inject
     EndpointDiscoveryService endpointDiscoveryService;
-
-    @Inject
-    SecretsManagerService secretsManagerService;
 
     private CertificateServicePortType certificateService;
 
@@ -47,15 +41,8 @@ public class CardCertReadExecutionService {
         BindingProvider bp = (BindingProvider) certificateService;
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-        endpointDiscoveryService.getCertificateServiceEndpointAddress());
-        
-        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-            String path = endpointDiscoveryService.getConnectorTlsCertTrustStore().get();
-            secretsManagerService.configureSSLTransportContext(path, endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                    SecretsManagerService.SslContextType.TLS, SecretsManagerService.KeyStoreType.PKCS12, bp);
-        } else if("false".equals(endpointDiscoveryService.getConnectorVerifyHostname())) {
-        	SSLUtilities.trustAllHostnames();
-        }
+                endpointDiscoveryService.getCertificateServiceEndpointAddress());
+        endpointDiscoveryService.configureSSLTransportContext(bp);
     }
 
     /**
@@ -80,7 +67,7 @@ public class CardCertReadExecutionService {
             certificateService.readCardCertificate(cardHandle, contextType, certRefList,
                     statusHolder, certHolder);
         } catch (FaultMessage faultMessage) {
-            new ConnectorCardCertificateReadException("Exception reading aut certificate",
+            throw new ConnectorCardCertificateReadException("Exception reading aut certificate",
                     faultMessage);
         }
 

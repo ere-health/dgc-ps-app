@@ -1,5 +1,6 @@
 package health.ere.ps.service.idp.client;
 
+import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,6 @@ import health.ere.ps.exception.idp.IdpJoseException;
 import health.ere.ps.model.idp.client.IdpTokenResult;
 import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.service.common.security.SecretsManagerService;
-import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
 import io.quarkus.test.junit.QuarkusTest;
@@ -74,13 +74,9 @@ public class IdpClientTest {
     @BeforeEach
     void configureSecureTransport() throws SecretsManagerException {
         secureSoapTransportConfigurer.init(connectorCardsService);
-        if (endpointDiscoveryService.getConnectorTlsCertTrustStore().isPresent()) {
-            secureSoapTransportConfigurer.configureSecureTransport(
-                    endpointDiscoveryService.getEventServiceEndpointAddress(),
-                    SecretsManagerService.SslContextType.TLS,
-                    endpointDiscoveryService.getConnectorTlsCertTrustStore().get(),
-                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd());
-        }
+
+        secureSoapTransportConfigurer.configureSecureTransport(
+                endpointDiscoveryService.getEventServiceEndpointAddress());
     }
 
 
