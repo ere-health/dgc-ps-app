@@ -6,6 +6,7 @@ import de.gematik.ws.conn.eventservice.v7.GetCardsResponse;
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.model.dgc.InstallationStatus;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,9 @@ public class StatusService {
 
     @Inject
     ConnectorCardsService connectorCardsService;
+
+    @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
 
     @Inject
     AppConfig appConfig;
@@ -65,6 +70,14 @@ public class StatusService {
                         )
                 )
         ).join();
+
+        Map<String, String> connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
+                "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
+                "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
+                "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
+
+        installationStatus.setConnectorUrls(connectorUrls);
+
         return installationStatus;
     }
 
