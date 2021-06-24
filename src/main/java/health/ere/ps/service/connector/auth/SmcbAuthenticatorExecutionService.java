@@ -9,22 +9,17 @@ import de.gematik.ws.conn.signatureservice.v7.BinaryDocumentType;
 import de.gematik.ws.conn.signatureservice.v7.ExternalAuthenticate;
 import de.gematik.ws.conn.signatureservice.v7.ExternalAuthenticateResponse;
 import health.ere.ps.exception.common.security.SecretsManagerException;
-import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import oasis.names.tc.dss._1_0.core.schema.SignatureObject;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.spi.DeploymentException;
 import javax.inject.Inject;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
 @ApplicationScoped
 public class SmcbAuthenticatorExecutionService {
-
-    @Inject
-    SecretsManagerService secretsManagerService;
 
     @Inject
     EndpointDiscoveryService endpointDiscoveryService;
@@ -39,12 +34,7 @@ public class SmcbAuthenticatorExecutionService {
 
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                 endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
-
-        secretsManagerService.configureSSLTransportContext(
-                endpointDiscoveryService.getConnectorTlsCertTrustStore()
-                        .orElseThrow(() -> new DeploymentException("No connector tsl cert trust certificate present")),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(), SecretsManagerService.SslContextType.TLS,
-                SecretsManagerService.KeyStoreType.PKCS12, bp);
+        endpointDiscoveryService.configureSSLTransportContext(bp);
     }
 
     public ExternalAuthenticateResponse doExternalAuthenticate(String cardHandle, ContextType contextType,

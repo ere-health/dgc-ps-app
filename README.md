@@ -118,8 +118,10 @@ In regard to file and directory paths, configure the values for the environment 
 
 | Environment variable | Description | Example |
 | ----- | ----- | ----- |
-| `CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate that will be used to connect to the connector; may be empty | `files/path/to/certificate.p12` |
+| `CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate that will be used to connect to the connector; may be empty; * | `p12:files/path/to/certificate.p12` |
 | `CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD` | Password for accessing the certificate that is configured in `CONNECTOR_CERT_AUTH_STORE_FILE` | `changeit` |
+| `CONNECTOR_CERT_TRUST_STORE_FILE` | File path to the certificate trust store that will be used to connect to the connector; may be empty; **Attention**: if not supplied, **ANY** tls certificate will be accepted which makes the connection to the connector vulnerable to MITM attacks; * | `jks:files/keystore` |
+| `CONNECTOR_CERT_TRUST_STORE_FILE_PASSWORD` | Password for accessing the trust store that is configured in `CONNECTOR_CERT_TRUST_STORE_FILE` | `changeitaswell` |
 | `CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to access the connector | `client123` |
 | `CONNECTOR_MANDANT_ID` | Mandant that will be used for the connector | `MANDANT1234` |
 | `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
@@ -130,11 +132,14 @@ In regard to file and directory paths, configure the values for the environment 
 | `IDP_BASE_URL` | Base URL for the IDP | `https://id.impfnachweis.info/auth/realms/bmg-ti-certify` |
 | `IDP_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |
 | `IDP_AUTH_REQUEST_REDIRECT_URL` | Redirect URL that will be called by the IDP; should be `connector://authenticated` | `connector://authenticated` |
-| `DIGITAL_GREEN_CERTIFICATE_SERVICE_ISSUERAPIURL` | URL of the public digital green certificate service | `https://api.ru.impfnachweis.info` |
+| `DIGITAL_GREEN_CERTIFICATE_SERVICE_ISSUERAPIURL` | URL of the public digital green certificate service | `https://api.impfnachweis.info` |
 | `EVENT_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the event SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/EventService` |
 | `CARD_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the card SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CardService` |
 | `AUTH_SIGNATURE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the auth signature SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/AuthSignatureService` |
 | `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CertificateService` |
+
+_Hint *_: the file path may be prefixed with either `p12:` or `jks:` to indicate the key store type; if no prefix is
+supplied, `p12:` will be assumed.
 
 #### Environment Variables for tests
 

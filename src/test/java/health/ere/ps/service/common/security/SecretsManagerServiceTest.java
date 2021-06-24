@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -18,14 +17,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.util.Base64;
-import java.util.logging.Level;
 
 import javax.inject.Inject;
 
 import health.ere.ps.exception.common.security.SecretsManagerException;
-import health.ere.ps.model.idp.crypto.PkiIdentity;
 import health.ere.ps.model.idp.crypto.PkiKeyResolver;
 import io.quarkus.test.junit.QuarkusTest;
 
@@ -77,7 +72,7 @@ class SecretsManagerServiceTest {
 
         try(InputStream is = getClass().getResourceAsStream("/certs/" + TITUS_IDP_TRUST_STORE)) {
             KeyStore ks =
-                    secretsManagerService.initializeTrustStoreFromInputStream(is,
+                    secretsManagerService.getKeyStoreFromInputStream(is,
                             SecretsManagerService.KeyStoreType.PKCS12, "00".toCharArray());
             ksSize = ks.size();
         }

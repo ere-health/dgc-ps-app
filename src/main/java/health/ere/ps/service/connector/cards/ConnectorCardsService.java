@@ -9,6 +9,8 @@ import de.gematik.ws.conn.eventservice.wsdl.v7.EventService;
 import de.gematik.ws.conn.eventservice.wsdl.v7.EventServicePortType;
 import de.gematik.ws.conn.eventservice.wsdl.v7.FaultMessage;
 
+import health.ere.ps.exception.common.security.SecretsManagerException;
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
@@ -29,6 +31,9 @@ public class ConnectorCardsService implements SoapClient {
 
     @Inject
     AppConfig appConfig;
+
+    @Inject
+    EndpointDiscoveryService endpointDiscoveryService;
 
     private ContextType contextType;
     private EventServicePortType eventService;
@@ -58,7 +63,7 @@ public class ConnectorCardsService implements SoapClient {
     }
 
     @PostConstruct
-    void init() {
+    void init() throws SecretsManagerException {
         contextType = new ContextType();
         contextType.setMandantId(appConfig.getMandantId());
         contextType.setClientSystemId(appConfig.getClientSystemId());
@@ -67,6 +72,13 @@ public class ConnectorCardsService implements SoapClient {
 
         eventService = new EventService(getClass().getResource(
                 "/EventService.wsdl")).getEventServicePort();
+
+        // Set endpoint to configured endpoint; copied from CardCertReadExecutionService
+        BindingProvider bp = (BindingProvider) eventService;
+
+        bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                endpointDiscoveryService.getEventServiceEndpointAddress());
+        endpointDiscoveryService.configureSSLTransportContext(bp);
     }
 
     public GetCardsResponse getConnectorCards()

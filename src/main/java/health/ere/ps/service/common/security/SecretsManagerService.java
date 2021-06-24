@@ -1,5 +1,6 @@
 package health.ere.ps.service.common.security;
 
+import com.sun.xml.ws.developer.JAXWSProperties;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.idp.crypto.CryptoLoader;
 import health.ere.ps.ssl.SSLUtilities;
@@ -7,9 +8,11 @@ import org.bouncycastle.crypto.CryptoException;
 
 import javax.crypto.KeyGenerator;
 import javax.enterprise.context.ApplicationScoped;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.xml.ws.BindingProvider;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,7 +38,7 @@ import java.util.logging.Logger;
 @ApplicationScoped
 public class SecretsManagerService {
 
-    private static Logger log = Logger.getLogger(SecretsManagerService.class.getName());
+    private static Logger LOG = Logger.getLogger(SecretsManagerService.class.getName());
 
     public enum SslContextType {
         SSL("SSL"), TLS("TLS");
@@ -142,9 +145,9 @@ public class SecretsManagerService {
         return trustStore;
     }
 
-    public KeyStore initializeTrustStoreFromInputStream(InputStream keyStoreInputStream,
-                                                        KeyStoreType keyStoreType,
-                                                 char[] keyStorePassword)
+    public KeyStore getKeyStoreFromInputStream(InputStream keyStoreInputStream,
+                                               KeyStoreType keyStoreType,
+                                               char[] keyStorePassword)
             throws KeyStoreException, CertificateException, IOException, NoSuchAlgorithmException {
         KeyStore trustStore = KeyStore.getInstance(keyStoreType.getKeyStoreType());
         trustStore.load(keyStoreInputStream, keyStorePassword);
@@ -152,42 +155,102 @@ public class SecretsManagerService {
         return trustStore;
     }
 
+    /**
+     * Configures the SSL transport for the given {@link BindingProvider}.
+     * <p>
+     * ATTENTION: if the trust store file path is null, all server certificates are accepted!
+     *
+     * @param keyStoreFilePath   file path with keystore content; if it is null, no client certificate will be used; prefix with 'jks:' for JKS stores
+     * @param keyStorePassword   password to access the client certificate
+     * @param sslContextType     type of ssl context; should be TLS
+     * @param trustStoreFilePath file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores
+     * @param trustStorePassword password to access the trust store
+     * @param verifyHostnames    set to false to disable hostname verification; ATTENTION: this may lead to MITM attacks
+     * @param bp                 BindingProvider for which the ssl context is set up
+     * @throws SecretsManagerException will be thrown in case of invalid parameters
+     */
     public void configureSSLTransportContext(String keyStoreFilePath,
                                              String keyStorePassword,
                                              SslContextType sslContextType,
-                                             KeyStoreType keyStoreType,
+                                             String trustStoreFilePath,
+                                             String trustStorePassword,
+                                             boolean verifyHostnames,
                                              BindingProvider bp)
             throws SecretsManagerException {
-        try(FileInputStream fileInputStream = new FileInputStream(keyStoreFilePath)) {
-            SSLContext sc = createSSLContext(fileInputStream, keyStorePassword.toCharArray(),
-                sslContextType, keyStoreType);
+        try {
+            SSLContext sc = createSSLContext(keyStoreFilePath, keyStorePassword, sslContextType,
+                    trustStoreFilePath, trustStorePassword);
 
-            bp.getRequestContext().put("com.sun.xml.ws.transport.https.client.SSLSocketFactory",
-                    sc.getSocketFactory());
+            bp.getRequestContext().put(JAXWSProperties.SSL_SOCKET_FACTORY, sc.getSocketFactory());
 
+            if (!verifyHostnames) {
+                bp.getRequestContext().put(JAXWSProperties.HOSTNAME_VERIFIER, new SSLUtilities.FakeHostnameVerifier());
+            }
         } catch (IOException e) {
             // throw new SecretsManagerException("SSL transport configuration error.", e);
-            log.log(Level.SEVERE, "Could not configure SecretsManagerService", e);
+            LOG.log(Level.SEVERE, "Could not configure SecretsManagerService", e);
         }
     }
 
-    public SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
-                                    SslContextType sslContextType, KeyStoreType keyStoreType)
+    /**
+     * Create a SSLContext with optional clientcertificate and optional trust store.
+     * <p>
+     * ATTENTION: if the trust store inputstream is null, all server certificates are accepted!
+     *
+     * @param keyStoreInputStream   inputstream with keystore content; if the stream is null, no client certificate will be used
+     * @param keyStorePassword      password to access the client certificate
+     * @param sslContextType        type of ssl context; should be TLS
+     * @param keyStoreType          type of the keystore with the client certificate
+     * @param trustStoreInputStream inputstream with trust store content; ATTENTION: if the stream is null, all server certificates are accepted without any validation
+     * @param trustStorePassword    password to access the trust store
+     * @param trustStoreType        type of the trust store with the server certificate
+     * @return SSLContext
+     * @throws SecretsManagerException will be thrown in case of invalid parameters
+     */
+    private SSLContext createSSLContext(InputStream keyStoreInputStream, char[] keyStorePassword,
+                                    SslContextType sslContextType, KeyStoreType keyStoreType,
+                                       InputStream trustStoreInputStream, char[] trustStorePassword,
+                                       KeyStoreType trustStoreType)
             throws SecretsManagerException {
         SSLContext sc;
 
         try {
             sc = SSLContext.getInstance(sslContextType.getSslContextType());
 
-            KeyManagerFactory kmf =
-                    KeyManagerFactory.getInstance( KeyManagerFactory.getDefaultAlgorithm() );
+            KeyManager[] keyManagers;
 
-            KeyStore ks = KeyStore.getInstance(keyStoreType.getKeyStoreType());
-            ks.load(keyStoreInputStream, keyStorePassword);
+            if (keyStoreInputStream != null) {
 
-            kmf.init(ks, keyStorePassword);
+                KeyManagerFactory kmf =
+                        KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
-            sc.init( kmf.getKeyManagers(), new TrustManager[]{new SSLUtilities.FakeX509TrustManager()}, null );
+                KeyStore ks = getKeyStoreFromInputStream(keyStoreInputStream, keyStoreType, keyStorePassword);
+
+                kmf.init(ks, keyStorePassword);
+
+                keyManagers = kmf.getKeyManagers();
+            } else {
+                keyManagers = null;
+            }
+
+            TrustManager[] trustManagers;
+
+            if (trustStoreInputStream != null) {
+                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
+                KeyStore trustKeyStore = getKeyStoreFromInputStream(trustStoreInputStream, trustStoreType,
+                        trustStorePassword);
+
+                trustManagerFactory.init(trustKeyStore);
+                trustManagers = trustManagerFactory.getTrustManagers();
+            } else {
+                // we have no choice but to trust all certificates if none is supplied since the connectors
+                // do not have a 'properly' signed certificate
+                trustManagers = new TrustManager[]{new SSLUtilities.FakeX509TrustManager()};
+                LOG.log(Level.WARNING, "Created SSLContext will accept all server certificates without validation");
+            }
+
+            sc.init(keyManagers, trustManagers, null );
         } catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException
                 | UnrecoverableKeyException | KeyManagementException e) {
             throw new SecretsManagerException("SSL context creation error.", e);
@@ -197,20 +260,45 @@ public class SecretsManagerService {
     }
 
     /**
-     * This method created a SSLContext that accepts all certificates without performing any kind of checks!
+     * Create a SSLContext with optional clientcertificate and optional trust store.
+     * <p>
+     * ATTENTION: if the trust store inputstream is null, all server certificates are accepted!
      *
-     * @return SSLContext without any certificate verification
-     * @throws SecretsManagerException error during SSLContext creation
+     * @param keyStoreFile       file path with keystore content; if it is null, no client certificate will be used; prefix with 'jks:' for JKS stores
+     * @param keyStorePassword   password to access the client certificate
+     * @param sslContextType     type of ssl context; should be TLS
+     * @param trustStoreFile     file path with trust store content; ATTENTION: if it is null, all server certificates are accepted without any validation; prefix with 'jks:' for JKS stores
+     * @param trustStorePassword password to access the trust store
+     * @return SSLContext
+     * @throws IOException             on accessing the file paths
+     * @throws SecretsManagerException will be thrown in case of invalid parameters
      */
-    public SSLContext createAcceptAllSSLContext() throws SecretsManagerException {
-        return createSSLContext((InputStream) null, null, SslContextType.TLS, KeyStoreType.PKCS12);
-    }
-
     public SSLContext createSSLContext(String keyStoreFile, String keyStorePassword, SslContextType sslContextType,
-                                       KeyStoreType keyStoreType) throws IOException, SecretsManagerException {
+                                       String trustStoreFile, String trustStorePassword) throws IOException,
+            SecretsManagerException {
 
-        try (FileInputStream fileInputStream = new FileInputStream(keyStoreFile)) {
-            return createSSLContext(fileInputStream, keyStorePassword.toCharArray(), sslContextType, keyStoreType);
+        if (keyStoreFile == null) {
+            if (trustStoreFile == null) {
+                return createSSLContext((InputStream) null, null, sslContextType, null, null, null, null);
+            } else {
+                try (FileInputStream trustStoreInputStream = new FileInputStream(normalizePath(trustStoreFile))) {
+                    return createSSLContext(null, null, sslContextType, null,
+                            trustStoreInputStream, trustStorePassword.toCharArray(), getKeyStoreType(trustStoreFile));
+                }
+            }
+        } else {
+            if (trustStoreFile == null) {
+                try (FileInputStream keyStoreInputStream = new FileInputStream(normalizePath(keyStoreFile))) {
+                    return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType, getKeyStoreType(keyStoreFile), null, null, null);
+                }
+            } else {
+                try (FileInputStream keyStoreInputStream = new FileInputStream(normalizePath(keyStoreFile));
+                     FileInputStream trustStoreInputStream = new FileInputStream(normalizePath(trustStoreFile))) {
+                    return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType,
+                            getKeyStoreType(keyStoreFile), trustStoreInputStream, trustStorePassword.toCharArray(),
+                            getKeyStoreType(trustStoreFile));
+                }
+            }
         }
     }
 
@@ -233,5 +321,34 @@ public class SecretsManagerService {
         Key key = keyGen.generateKey();
 
         return key;
+    }
+
+    /**
+     * Get the keystore type from a path string. If the path string has no (known) prefix, {@see KeyStoreType.PKCS12}
+     * will be returned.
+     *
+     * @param path path from which the keystore type is to be extracted
+     * @return key store type
+     */
+    private static KeyStoreType getKeyStoreType(String path) {
+        if (path.startsWith("jks:")) {
+            return KeyStoreType.JKS;
+        } else {
+            return KeyStoreType.PKCS12;
+        }
+    }
+
+    /**
+     * Removes the keystore type prefix (if present) from the path.
+     *
+     * @param path to be normalized path
+     * @return normalized path
+     */
+    private static String normalizePath(String path) {
+        if (path.startsWith("p12:") || path.startsWith("jks:")) {
+            return path.substring(4);
+        } else {
+            return path;
+        }
     }
 }
