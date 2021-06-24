@@ -23,9 +23,6 @@ public class RecoveryEntry {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate fr = null;
 
-    @JsonProperty("is")
-    private String is = null;
-
     @JsonProperty("df")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate df = null;
@@ -35,7 +32,9 @@ public class RecoveryEntry {
     private LocalDate du = null;
 
     /**
-     * Identifier of the health professional location (i.e. BSNR or similar identifer). It will be used in the construction of the DGCI (digitial green certificate identifier). Due to the specification of the DGCI only the use of uppercase letters and numbers 0-9 are allowed.
+     * Identifier of the health professional location (i.e. BSNR or similar identifer).
+     * It will be used in the construction of the DGCI (digitial green certificate identifier).
+     * Due to the specification of the DGCI only the use of uppercase letters and numbers 0-9 are allowed.
      *
      * @return id
      **/
@@ -83,22 +82,6 @@ public class RecoveryEntry {
     }
 
     /**
-     * Get is
-     *
-     * @return is
-     **/
-    @JsonProperty("is")
-    @NotNull
-    @Valid
-    public String getIs() {
-        return is;
-    }
-
-    public void setIs(String is) {
-        this.is = is;
-    }
-
-    /**
      * Certificate valid from date as ISO 8601.
      *
      * @return df
@@ -143,14 +126,13 @@ public class RecoveryEntry {
         return Objects.equals(this.id, recoveryEntry.id) &&
                 Objects.equals(this.tg, recoveryEntry.tg) &&
                 Objects.equals(this.fr, recoveryEntry.fr) &&
-                Objects.equals(this.is, recoveryEntry.is) &&
                 Objects.equals(this.df, recoveryEntry.df) &&
                 Objects.equals(this.du, recoveryEntry.du);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, tg, fr, is, df, du);
+        return Objects.hash(id, tg, fr, df, du);
     }
 
 
@@ -161,7 +143,6 @@ public class RecoveryEntry {
                 "    id: " + id + "\n" +
                 "    tg: " + tg + "\n" +
                 "    fr: " + fr + "\n" +
-                "    is: " + is + "\n" +
                 "    df: " + df + "\n" +
                 "    du: " + du + "\n" +
                 "}";

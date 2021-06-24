@@ -13,7 +13,6 @@ import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
 import health.ere.ps.model.dgc.V;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
-import health.ere.ps.ssl.SSLUtilities;
 import io.quarkus.runtime.StartupEvent;
 
 import javax.annotation.PostConstruct;
@@ -115,14 +114,13 @@ public class DigitalGreenCertificateService {
      * @param id  administering instance id
      * @param tg  disease
      * @param fr  date of test result, that has been positive
-     * @param is  issuer of certificate
      * @param df  certificate validity date beginning
      * @param du  certificate validity date ending
      * @param callContext optional call context that specifies the tenant
      * @return bytes of certificate pdf
      */
     public byte[] issueRecoveryCertificatePdf(String fn, String gn, LocalDate dob, String id, String tg, LocalDate fr,
-                                              String is, LocalDate df, LocalDate du, CallContext callContext) {
+                                              LocalDate df, LocalDate du, CallContext callContext) {
 
         RecoveryCertificateRequest recoveryCertificateRequest = new RecoveryCertificateRequest();
 
@@ -134,7 +132,6 @@ public class DigitalGreenCertificateService {
         r.setId(id);
         r.setTg(tg);
         r.setFr(fr);
-        r.setIs(is);
         r.setDf(df);
         r.setDu(du);
 
