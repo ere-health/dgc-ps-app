@@ -14,8 +14,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.xml.ws.BindingProvider;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,6 +42,8 @@ import java.util.logging.Logger;
 public class SecretsManagerService {
 
     private static Logger LOG = Logger.getLogger(SecretsManagerService.class.getName());
+
+    private static final String DATA_TYPE_PKCS = "data:application/x-pkcs12;base64,";
 
     public enum SslContextType {
         SSL("SSL"), TLS("TLS");
@@ -279,21 +284,21 @@ public class SecretsManagerService {
 
         if (keyStoreFile == null) {
             if (trustStoreFile == null) {
-                return createSSLContext((InputStream) null, null, sslContextType, null, null, null, null);
+                return createSSLContext(null, null, sslContextType, null, null, null, null);
             } else {
-                try (FileInputStream trustStoreInputStream = new FileInputStream(normalizePath(trustStoreFile))) {
+                try (InputStream trustStoreInputStream = createInputStream(trustStoreFile)) {
                     return createSSLContext(null, null, sslContextType, null,
                             trustStoreInputStream, trustStorePassword.toCharArray(), getKeyStoreType(trustStoreFile));
                 }
             }
         } else {
             if (trustStoreFile == null) {
-                try (FileInputStream keyStoreInputStream = new FileInputStream(normalizePath(keyStoreFile))) {
+                try (InputStream keyStoreInputStream = createInputStream(keyStoreFile)) {
                     return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType, getKeyStoreType(keyStoreFile), null, null, null);
                 }
             } else {
-                try (FileInputStream keyStoreInputStream = new FileInputStream(normalizePath(keyStoreFile));
-                     FileInputStream trustStoreInputStream = new FileInputStream(normalizePath(trustStoreFile))) {
+                try (InputStream keyStoreInputStream = createInputStream(keyStoreFile);
+                     InputStream trustStoreInputStream = createInputStream(trustStoreFile)) {
                     return createSSLContext(keyStoreInputStream, keyStorePassword.toCharArray(), sslContextType,
                             getKeyStoreType(keyStoreFile), trustStoreInputStream, trustStorePassword.toCharArray(),
                             getKeyStoreType(trustStoreFile));
@@ -333,22 +338,30 @@ public class SecretsManagerService {
     private static KeyStoreType getKeyStoreType(String path) {
         if (path.startsWith("jks:")) {
             return KeyStoreType.JKS;
+        } else if (path.startsWith(DATA_TYPE_PKCS)){
+            return KeyStoreType.PKCS12;
+        } else if (path.startsWith("data:")) {
+            throw new IllegalArgumentException("Unsupported data content type in " + path);
         } else {
             return KeyStoreType.PKCS12;
         }
     }
 
-    /**
-     * Removes the keystore type prefix (if present) from the path.
-     *
-     * @param path to be normalized path
-     * @return normalized path
-     */
-    private static String normalizePath(String path) {
+    private static InputStream createInputStream(String path) throws FileNotFoundException {
+        String normalizedPath;
+
         if (path.startsWith("p12:") || path.startsWith("jks:")) {
-            return path.substring(4);
+            normalizedPath = path.substring(4);
         } else {
-            return path;
+            normalizedPath = path;
+        }
+
+        if (normalizedPath.startsWith(DATA_TYPE_PKCS)) {
+            return new ByteArrayInputStream(Base64.getDecoder().decode(normalizedPath.substring(DATA_TYPE_PKCS.length())));
+        } else if (normalizedPath.startsWith("data:")) {
+            throw new IllegalArgumentException("Unsupported data content type in " + normalizedPath);
+        } else {
+            return new FileInputStream(normalizedPath);
         }
     }
 }
