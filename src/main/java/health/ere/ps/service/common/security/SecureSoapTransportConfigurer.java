@@ -1,5 +1,6 @@
 package health.ere.ps.service.common.security;
 
+import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.enterprise.context.Dependent;
@@ -11,7 +12,7 @@ import health.ere.ps.exception.common.security.SecretsManagerException;
 @Dependent
 public class SecureSoapTransportConfigurer {
     @Inject
-    SecretsManagerService secretsManagerService;
+    EndpointDiscoveryService endpointDiscoveryService;
 
     private BindingProvider bindingProvider;
 
@@ -19,19 +20,12 @@ public class SecureSoapTransportConfigurer {
         this.bindingProvider = soapClient.getBindingProvider().orElse(null);
     }
 
-    public void configureSecureTransport(String endpointAddress,
-                                         SecretsManagerService.SslContextType sslContextType,
-                                         String tlsCertKeyStore,
-                                         String tlsCertKeyStorePassword,
-                                         String tlsCertTrustStore,
-                                         String tlsCertTrustStorePassword,
-                                         boolean verifyHostnames) throws SecretsManagerException {
+    public void configureSecureTransport(String endpointAddress) throws SecretsManagerException {
         if (bindingProvider != null && StringUtils.isNotBlank(endpointAddress)) {
             bindingProvider.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointAddress);
 
-            secretsManagerService.configureSSLTransportContext(tlsCertKeyStore, tlsCertKeyStorePassword, sslContextType,
-                    tlsCertTrustStore, tlsCertTrustStorePassword, verifyHostnames, bindingProvider);
+            endpointDiscoveryService.configureSSLTransportContext(bindingProvider);
         }
     }
 }

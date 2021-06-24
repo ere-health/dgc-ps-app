@@ -82,7 +82,6 @@ import health.ere.ps.model.idp.client.field.IdpScope;
 import health.ere.ps.model.idp.client.token.IdpJwe;
 import health.ere.ps.model.idp.client.token.JsonWebToken;
 import health.ere.ps.model.idp.crypto.PkiIdentity;
-import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.idp.client.authentication.UriUtils;
 import health.ere.ps.service.idp.crypto.KeyAnalysis;
 import health.ere.ps.service.idp.crypto.jose4j.JsonWebSignatureWithExternalAuthentification;
@@ -94,9 +93,6 @@ public class IdpClient implements IIdpClient {
 
     @Inject
     AuthenticatorClient authenticatorClient;
-
-    @Inject
-    SecretsManagerService secretsManagerService;
 
     @Inject
     Logger logger;
@@ -132,29 +128,14 @@ public class IdpClient implements IIdpClient {
 
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
-
-            secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
-                    endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
-                    SecretsManagerService.SslContextType.TLS,
-                    endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
-                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                    endpointDiscoveryService.isConnectorVerifyHostnames(),
-                    bp);
-
+            endpointDiscoveryService.configureSSLTransportContext(bp);
 
             cardService = new CardService(getClass().getResource("/CardService.wsdl")).getCardServicePort();
             /* Set endpoint to configured endpoint */
             bp = (BindingProvider) cardService;
             bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     endpointDiscoveryService.getCardServiceEndpointAddress());
-
-            secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
-                    endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
-                    SecretsManagerService.SslContextType.TLS,
-                    endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
-                    endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                    endpointDiscoveryService.isConnectorVerifyHostnames(),
-                    bp);
+            endpointDiscoveryService.configureSSLTransportContext(bp);
 
         } catch(Exception ex) {
             logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);

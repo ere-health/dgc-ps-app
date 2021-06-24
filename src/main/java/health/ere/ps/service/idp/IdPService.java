@@ -12,7 +12,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.DeploymentException;
 import javax.inject.Inject;
 
 import health.ere.ps.config.AppConfig;
@@ -63,13 +62,7 @@ public class IdPService {
         secureSoapTransportConfigurer.init(connectorCardsService);
 
         secureSoapTransportConfigurer.configureSecureTransport(
-                endpointDiscoveryService.getEventServiceEndpointAddress(),
-                SecretsManagerService.SslContextType.TLS,
-                endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
-                endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                endpointDiscoveryService.isConnectorVerifyHostnames());
+                endpointDiscoveryService.getEventServiceEndpointAddress());
     }
 
     public void requestBearerToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {

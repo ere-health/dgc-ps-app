@@ -10,7 +10,6 @@ import de.gematik.ws.conn.certificateservicecommon.v2.X509DataInfoListType;
 import de.gematik.ws.conn.connectorcommon.v5.Status;
 import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
-import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +27,6 @@ public class CardCertReadExecutionService {
     @Inject
     EndpointDiscoveryService endpointDiscoveryService;
 
-    @Inject
-    SecretsManagerService secretsManagerService;
-
     private CertificateServicePortType certificateService;
 
     static {
@@ -46,14 +42,7 @@ public class CardCertReadExecutionService {
         
         bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                 endpointDiscoveryService.getCertificateServiceEndpointAddress());
-
-        secretsManagerService.configureSSLTransportContext(endpointDiscoveryService.getConnectorTlsCertAuthStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertAuthStorePwd(),
-                SecretsManagerService.SslContextType.TLS,
-                endpointDiscoveryService.getConnectorTlsCertTrustStoreFile().orElse(null),
-                endpointDiscoveryService.getConnectorTlsCertTrustStorePwd(),
-                endpointDiscoveryService.isConnectorVerifyHostnames(),
-                bp);
+        endpointDiscoveryService.configureSSLTransportContext(bp);
     }
 
     /**
