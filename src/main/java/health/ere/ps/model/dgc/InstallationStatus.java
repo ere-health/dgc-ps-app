@@ -2,6 +2,7 @@ package health.ere.ps.model.dgc;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class InstallationStatus {
@@ -50,18 +51,7 @@ public class InstallationStatus {
      */
     private State certificateServiceRouteState = State.UNKNOWN;
 
-    public InstallationStatus() {
-
-    }
-
-    public InstallationStatus(State connectorState, State parameterState,
-                              State cardState, State identityProviderRouteState, State certificateServiceRouteCorrect) {
-        this.connectorState = connectorState;
-        this.parameterState = parameterState;
-        this.cardState = cardState;
-        this.identityProviderRouteState = identityProviderRouteState;
-        this.certificateServiceRouteState = certificateServiceRouteCorrect;
-    }
+    private Map<String, String> connectorUrls;
 
     public State getConnectorState() {
         return connectorState;
@@ -103,6 +93,14 @@ public class InstallationStatus {
         this.certificateServiceRouteState = certificateServiceRouteState;
     }
 
+    public Map<String, String> getConnectorUrls() {
+        return connectorUrls;
+    }
+
+    public void setConnectorUrls(Map<String, String> connectorUrls) {
+        this.connectorUrls = connectorUrls;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -112,12 +110,14 @@ public class InstallationStatus {
                 && parameterState == that.parameterState
                 && cardState == that.cardState
                 && identityProviderRouteState == that.identityProviderRouteState
-                && certificateServiceRouteState == that.certificateServiceRouteState;
+                && certificateServiceRouteState == that.certificateServiceRouteState
+                && Objects.equals(connectorUrls, that.connectorUrls);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(connectorState, parameterState, cardState, identityProviderRouteState, certificateServiceRouteState);
+        return Objects.hash(connectorState, parameterState, cardState, identityProviderRouteState,
+                certificateServiceRouteState, connectorUrls);
     }
 
     @Override
@@ -128,6 +128,7 @@ public class InstallationStatus {
                 ", sMCBCardCorrect:" + cardState +
                 ", iDPRouteCorrect:" + identityProviderRouteState +
                 ", certificateServiceRouteCorrect:" + certificateServiceRouteState +
+                ", connectorUrls: " + connectorUrls +
                 '}';
     }
 }
