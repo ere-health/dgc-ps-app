@@ -21,6 +21,7 @@ import health.ere.ps.model.idp.client.field.CodeChallengeMethod;
 import health.ere.ps.model.idp.client.field.IdpScope;
 import health.ere.ps.model.idp.client.token.JsonWebToken;
 import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,7 +42,8 @@ class AuthenticatorClientTest {
     String idpAuthRequestUrl;
 
     @Test
-    @Disabled("This test needs access to the TI infrastructure")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU",
+            disabledReason = "This test needs access to the TI infrastructure")
     void test_Successful_Authorization_Request() throws IdpClientException, IdpException {
         AuthenticatorClient authenticatorClient = new AuthenticatorClient();
 
@@ -89,7 +91,8 @@ class AuthenticatorClientTest {
     }
 
     @Test
-    @Disabled("This test needs access to the TI infrastructure")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU",
+            disabledReason = "This test needs access to the TI infrastructure")
     void test_Successful_Retrieval_Of_Discovery_Document_Using_Idp_Http_Client()
             throws IdpClientException {
         IdpHttpClientService idpHttpClientService =
@@ -110,7 +113,8 @@ class AuthenticatorClientTest {
     }
 
     @Test
-    @Disabled("This test needs access to the TI infrastructure")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU",
+            disabledReason = "This test needs access to the TI infrastructure")
     void test_Successful_Retrieval_Of_Discovery_Document_Using_Auth_Client()
             throws IdpClientException, IdpException, IdpJoseException {
         DiscoveryDocumentResponse discoveryDocumentResponse =

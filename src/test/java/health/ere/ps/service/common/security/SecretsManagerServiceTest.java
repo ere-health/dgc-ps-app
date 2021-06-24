@@ -95,10 +95,4 @@ class SecretsManagerServiceTest {
             assertNotNull(sslContext);
         }
     }
-
-    @Disabled
-    @Test
-    void createSSLContext() {
-        Assertions.fail("Implement me");
-    }
 }

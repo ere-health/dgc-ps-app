@@ -147,3 +147,4 @@ supplied, `p12:` will be assumed. Some data-urls are supported as well:
 | Environment variable | Description | Example |
 | ----- | ----- | ----- |
 | `IDP_AUTH_REQUEST_URL` | Request URL for the IDP | `not-used` |
+| `TEST_ENVIRONMENT` | Environment to enable tests for RU; the value must set to `RU` enable this tests. | `RU` |
