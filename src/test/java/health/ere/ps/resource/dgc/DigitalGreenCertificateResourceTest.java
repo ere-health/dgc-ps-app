@@ -144,8 +144,6 @@ class DigitalGreenCertificateResourceTest {
 
         LocalDate fr = LocalDate.of(2021, 6, 10);
 
-        String is = "testIs";
-
         LocalDate df = LocalDate.of(2021, 7, 1);
 
         LocalDate du = LocalDate.of(2022, 1, 1);
@@ -160,10 +158,10 @@ class DigitalGreenCertificateResourceTest {
 
         byte[] bytes = new byte[] {2, 4, 6, 8};
 
-        when(digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df, du,
+        when(digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, df, du,
                 new CallContext(mandantId, clientSystem, workplace, cardHandle))).thenReturn(bytes);
 
-        Response response = digitalGreenCertificateResource.recovered(fn, gn, dob, id, tg, fr, is, df, du, mandantId,
+        Response response = digitalGreenCertificateResource.recovered(fn, gn, dob, id, tg, fr, df, du, mandantId,
                 clientSystem, workplace, cardHandle);
 
         assertNotNull(response);

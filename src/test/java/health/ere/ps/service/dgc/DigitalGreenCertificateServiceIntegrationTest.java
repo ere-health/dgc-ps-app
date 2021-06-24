@@ -178,7 +178,6 @@ class DigitalGreenCertificateServiceIntegrationTest {
 
         final String testId = "testId";
         final String testTg = "testTg";
-        final String testIs = "testIs";
         final String testDateFr = "2023-01-01";
         final String testDateDu = "2022-01-01";
         final String testDateDf = "2021-01-01";
@@ -194,7 +193,6 @@ class DigitalGreenCertificateServiceIntegrationTest {
                 "\"r\": [{" +
                 "\"id\": \"" + testId + "\"," +
                 "\"tg\": \"" + testTg + "\"," +
-                "\"is\": \"" + testIs + "\"," +
                 "\"fr\": \"" + testDateFr + "\"," +
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
@@ -213,7 +211,6 @@ class DigitalGreenCertificateServiceIntegrationTest {
         final RecoveryEntry recoveryEntry = new RecoveryEntry();
         recoveryEntry.setId(testId);
         recoveryEntry.setTg(testTg);
-        recoveryEntry.setIs(testIs);
         recoveryEntry.setFr(LocalDate.parse(testDateFr));
         recoveryEntry.setDu(LocalDate.parse(testDateDu));
         recoveryEntry.setDf(LocalDate.parse(testDateDf));
@@ -236,7 +233,6 @@ class DigitalGreenCertificateServiceIntegrationTest {
 
         final String testId = "testId";
         final String testTg = "testTg";
-        final String testIs = "testIs";
         final String testDateFr = "2023-01-01";
         final String testDateDu = "2022-01-01";
         final String testDateDf = "2021-01-01";
@@ -252,7 +248,6 @@ class DigitalGreenCertificateServiceIntegrationTest {
                 "\"r\": [{" +
                 "\"id\": \"" + testId + "\"," +
                 "\"tg\": \"" + testTg + "\"," +
-                "\"is\": \"" + testIs + "\"," +
                 "\"fr\": \"" + testDateFr + "\"," +
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
@@ -269,7 +264,7 @@ class DigitalGreenCertificateServiceIntegrationTest {
         );
 
         final byte[] actualResponse = digitalGreenCertificateService.issueRecoveryCertificatePdf(name, givenName,
-                LocalDate.parse(testDataDob), testId, testTg, LocalDate.parse(testDateFr), testIs,
+                LocalDate.parse(testDataDob), testId, testTg, LocalDate.parse(testDateFr),
                 LocalDate.parse(testDateDf), LocalDate.parse(testDateDu), callContext);
         assertNotNull(actualResponse);
         assertArrayEquals(response, actualResponse);
