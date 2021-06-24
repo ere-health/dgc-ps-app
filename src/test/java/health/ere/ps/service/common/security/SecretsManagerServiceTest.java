@@ -79,10 +79,4 @@ class SecretsManagerServiceTest {
 
         assertTrue(ksSize > 0);
     }
-
-    @Disabled
-    @Test
-    void createSSLContext() {
-        Assertions.fail("Implement me");
-    }
 }
