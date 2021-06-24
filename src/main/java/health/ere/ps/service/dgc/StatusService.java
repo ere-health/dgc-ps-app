@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class StatusService {
 
-    public static final Logger log = Logger.getLogger(StatusService.class.getName());
+    private static final Logger LOG = Logger.getLogger(StatusService.class.getName());
 
     @Inject
     ConnectorCardsService connectorCardsService;
@@ -93,6 +94,7 @@ public class StatusService {
             }
 
         } catch (Exception e) {
+            LOG.log(Level.WARNING, "Could not set connector states", e);
             installationStatus.setConnectorState(InstallationStatus.State.FAIL);
             installationStatus.setParameterState(InstallationStatus.State.UNKNOWN);
             installationStatus.setCardState(InstallationStatus.State.UNKNOWN);
@@ -111,7 +113,7 @@ public class StatusService {
                     .request("*/*").get();
             return response.getStatus() == 200 ? InstallationStatus.State.OK : InstallationStatus.State.FAIL;
         } catch (Exception e) {
-            log.severe("Check: route '" + path + "' not callable");
+            LOG.severe("Check: route '" + path + "' not callable");
             return InstallationStatus.State.FAIL;
         }
     }
