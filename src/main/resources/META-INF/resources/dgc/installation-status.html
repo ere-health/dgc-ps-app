@@ -1,0 +1,59 @@
+<!-- Copied and edit from ./covid-19-certificate.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>ere.health COVID-19 Zertifikat für Genesene drucken</title>
+    <link rel="stylesheet" href="../frontend/app/src/assets/css/main-style.css">
+    <link rel="stylesheet" href="certificate.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+    <script type="text/javascript" src="main.js"></script>
+</head>
+<body class="home-page" onload="fetchStatus();" onhashchange="fetchStatus();">
+    <div class="main-content-wrapper">
+        <header class="header-wrapper">
+            <div class="header">
+                <div class="logo">
+                    <img
+                            src="../frontend/app/src/assets/images/ere.health-logo.svg"
+                            alt="ere.health Logo"
+                    />
+                </div>
+            </div>
+        </header>
+        <section class="recipe-body dgn-body">
+            <div class="recipe-wrapper active" id="unsigned_1">
+                <div class="title-rezept-button">
+                    <h2>COVID-19 Zertifikat Service Installationstatus</h2>
+                    <button id="sign-recipe" onclick="fetchStatus();" class="open-modal jet-btn">
+                        Status aktualisieren
+                    </button>
+                </div>
+                <div id="loader" class="hidden">
+                    <div class="loader"></div>
+                    <span>Loading ...</span>
+                </div>
+                <div class="check">Check <span id="connector" style="color: red">&quest;</span>:
+                    connector is reachable
+                </div>
+                <div class="check">Check <span id="parameters" style="color: red">&quest;</span>:
+                    mandant/client/workspace parameters are correctly set up
+                </div>
+                <div class="check">Check <span id="card" style="color: red">&quest;</span>:
+                    SMC-B card handle is valid and correctly set up
+                </div>
+                <div class="check">Check <span id="idp" style="color: red">&quest;</span>:
+                    route to the IDP is correctly set up
+                </div>
+                <div class="check">Check <span id="cert" style="color: red">&quest;</span>:
+                    route to the certificate service is correctly set up
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

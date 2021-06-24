@@ -57,6 +57,29 @@
     width: inherit !important;
 }
 
+.loader {
+    border: 4px solid lightgrey;
+    border-top: 4px solid #11142D; /* Font color */
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 100%;
+    animation: rotateSpinner 2s linear infinite;
+}
+
+@keyframes rotateSpinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none;
+}
+
+.check {
+    margin: 1em;
+}
+
 .dgn-body fieldset {
     margin-left: 0.8rem;
     display: flex;
