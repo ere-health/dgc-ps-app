@@ -17,13 +17,16 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Base64;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLContext;
 
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.model.idp.crypto.PkiKeyResolver;
 import io.quarkus.test.junit.QuarkusTest;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
@@ -78,5 +81,18 @@ class SecretsManagerServiceTest {
         }
 
         assertTrue(ksSize > 0);
+    }
+
+    @Test
+    void createSSLContextFromDataUrl() throws IOException, SecretsManagerException {
+        try (InputStream inputStream = getClass().getResourceAsStream("/certs/" + TITUS_IDP_TRUST_STORE)) {
+            assertNotNull(inputStream);
+
+            String dataUrl = "data:application/x-pkcs12;base64," + Base64.getEncoder().encodeToString(inputStream.readAllBytes());
+
+            SSLContext sslContext = secretsManagerService.createSSLContext(dataUrl, "00", SecretsManagerService.SslContextType.TLS, null, null);
+
+            assertNotNull(sslContext);
+        }
     }
 }

@@ -185,23 +185,7 @@ public class EndpointDiscoveryService {
         return eventServiceEndpointAddress;
     }
 
-    public Optional<String> getConnectorTlsCertAuthStoreFile() {
-        return connectorTlsCertAuthStoreFile;
-    }
-
-    public String getConnectorTlsCertAuthStorePwd() {
-        return connectorTlsCertAuthStorePwd;
-    }
-
-    public Optional<String> getConnectorTlsCertTrustStoreFile() {
-        return connectorTlsCertTrustStoreFile;
-    }
-
-    public String getConnectorTlsCertTrustStorePwd() {
-        return connectorTlsCertTrustStorePwd;
-    }
-
-    public boolean isConnectorVerifyHostnames() {
+    private boolean isConnectorVerifyHostnames() {
         return !("false".equals(connectorVerifyHostname));
     }
 

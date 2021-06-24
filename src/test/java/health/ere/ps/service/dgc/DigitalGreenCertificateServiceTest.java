@@ -182,8 +182,6 @@ class DigitalGreenCertificateServiceTest {
 
         LocalDate fr = LocalDate.of(2021, 5, 31);
 
-        String is = "testIs";
-
         LocalDate df = LocalDate.of(2021, 7, 1);
 
         LocalDate du = LocalDate.of(2022, 7, 1);
@@ -200,7 +198,6 @@ class DigitalGreenCertificateServiceTest {
         r.setId(id);
         r.setTg(tg);
         r.setFr(fr);
-        r.setIs(is);
         r.setDf(df);
         r.setDu(du);
 
@@ -211,7 +208,7 @@ class DigitalGreenCertificateServiceTest {
         // doReturn because of the null check in issuePdf
         doReturn(bytes).when(digitalGreenCertificateService).issuePdf(recoveryCertificateRequest, callContext);
 
-        assertSame(bytes, digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df,
+        assertSame(bytes, digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, df,
                 du, callContext));
         verifyNoInteractions(callContext);
     }

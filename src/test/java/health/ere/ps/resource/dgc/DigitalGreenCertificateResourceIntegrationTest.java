@@ -132,7 +132,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
         // model copied from DigitalGreenCertificateServiceIntegrationTest
         final String testId = "testId";
         final String testTg = "testTg";
-        final String testIs = "testIs";
         final String testDateFr = "2023-01-01";
         final String testDateDu = "2022-01-01";
         final String testDateDf = "2021-01-01";
@@ -152,7 +151,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
                 "\"r\": [{" +
                 "\"id\": \"" + testId + "\"," +
                 "\"tg\": \"" + testTg + "\"," +
-                "\"is\": \"" + testIs + "\"," +
                 "\"fr\": \"" + testDateFr + "\"," +
                 "\"du\": \"" + testDateDu + "\"," +
                 "\"df\": \"" + testDateDf + "\""+
@@ -162,7 +160,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
         final RecoveryEntry recoveryEntry = new RecoveryEntry();
         recoveryEntry.setId(testId);
         recoveryEntry.setTg(testTg);
-        recoveryEntry.setIs(testIs);
         recoveryEntry.setFr(LocalDate.parse(testDateFr));
         recoveryEntry.setDu(LocalDate.parse(testDateDu));
         recoveryEntry.setDf(LocalDate.parse(testDateDf));
@@ -202,7 +199,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
         // model copied from DigitalGreenCertificateServiceIntegrationTest
         final String testId = "testId";
         final String testTg = "testTg";
-        final String testIs = "testIs";
         final String testDateFr = "2023-01-01";
         final String testDateDu = "2022-01-01";
         final String testDateDf = "2021-01-01";
@@ -219,7 +215,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
         final RecoveryEntry recoveryEntry = new RecoveryEntry();
         recoveryEntry.setId(testId);
         recoveryEntry.setTg(testTg);
-        recoveryEntry.setIs(testIs);
         recoveryEntry.setFr(LocalDate.parse(testDateFr));
         recoveryEntry.setDu(LocalDate.parse(testDateDu));
         recoveryEntry.setDf(LocalDate.parse(testDateDf));
@@ -244,7 +239,6 @@ class DigitalGreenCertificateResourceIntegrationTest {
                 .queryParam("id", testId)
                 .queryParam("tg", testTg)
                 .queryParam("fr", testDateFr)
-                .queryParam("is", testIs)
                 .queryParam("df", testDateDf)
                 .queryParam("du", testDateDu)
                 .request("application/pdf")

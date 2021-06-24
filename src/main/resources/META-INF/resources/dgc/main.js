@@ -112,7 +112,6 @@ async function sendRecoveredRequest() {
             {
                 "id": form.elements["id"].value,
                 "tg": form.elements["tg"].value,
-                "is": form.elements["is"].value,
                 "fr": form.elements["fr"].value,
                 "df": form.elements["df"].value,
                 "du": form.elements["du"].value,
@@ -129,7 +128,7 @@ function prefillRecoverParameters() {
     // remove '#' from hash
     const params = new URLSearchParams(window.location.hash.substring(1));
 
-    for (const name of ["fn", "gn", "dob", "id", "tg", "is", "fr", "df", "du"]) {
+    for (const name of ["fn", "gn", "dob", "id", "tg", "fr", "df", "du"]) {
         // setting the values to null will cause the validation to be triggered
         if (params.has(name)) {
             form.elements[name].value = params.get(name);
