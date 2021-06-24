@@ -17,6 +17,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -202,6 +203,16 @@ public class EndpointDiscoveryService {
 
     public boolean isConnectorVerifyHostnames() {
         return !("false".equals(connectorVerifyHostname));
+    }
+
+    public void configureSSLTransportContext(BindingProvider bindingProvider) throws SecretsManagerException {
+        secretsManagerService.configureSSLTransportContext(
+                connectorTlsCertAuthStoreFile.orElse(null),
+                connectorTlsCertAuthStorePwd, SecretsManagerService.SslContextType.TLS,
+                connectorTlsCertTrustStoreFile.orElse(null),
+                connectorTlsCertTrustStorePwd,
+                isConnectorVerifyHostnames(),
+                bindingProvider);
     }
 
     private String getEndpoint(Node serviceNode) {
