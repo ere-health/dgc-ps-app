@@ -78,15 +78,11 @@ public class AppConfig {
     }
 
     public String getCardHandle() {
-        return getSMCBCardHandle();
-    }
-
-    private String getSMCBCardHandle() {
-        if(cardHandle.isPresent()) {
+        if (cardHandle.isPresent()) {
             return cardHandle.get();
         } else {
             try {
-                return connectorCardsService.getConnectorCardHandle(CardHandleType.SMC_B).get();
+                return connectorCardsService.getConnectorCardHandle(CardHandleType.SMC_B).orElseThrow();
             } catch (ConnectorCardsException e) {
                 throw new RuntimeException(e);
             }
