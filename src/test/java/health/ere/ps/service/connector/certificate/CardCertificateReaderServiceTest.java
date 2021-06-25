@@ -16,6 +16,7 @@ import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.connector.ConnectorCardCertificateReadException;
 import health.ere.ps.service.idp.crypto.CryptoLoader;
 import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @QuarkusTest
 class CardCertificateReaderServiceTest {
@@ -26,7 +27,8 @@ class CardCertificateReaderServiceTest {
     AppConfig appConfig;
 
     @Test
-    @Disabled("Only works with a connector")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU",
+            disabledReason = "Only works with a connector")
     void test_Successful_ReadCardCertificate_API_Call() throws ConnectorCardCertificateReadException {
         Assertions.assertTrue(ArrayUtils.isNotEmpty(
                 cardCertificateReaderService.readCardCertificate(appConfig.getClientId(),
@@ -36,7 +38,8 @@ class CardCertificateReaderServiceTest {
     }
 
     @Test
-    @Disabled("Only works with a connector")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU",
+            disabledReason = "Only works with a connector")
     void test_Successful_X509Certificate_Creation_From_ReadCardCertificate_API_Call()
             throws ConnectorCardCertificateReadException, IOException, CertificateException,
             CryptoException {

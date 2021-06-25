@@ -25,8 +25,6 @@ public class DigitalGreenCertificateResource {
 
     private static final String HEADER_CARDHANDLE = "X-CardHandle";
 
-    private static Logger log = Logger.getLogger(DigitalGreenCertificateResource.class.getName());
-
     @Inject
     DigitalGreenCertificateService digitalGreenCertificateService;
 
@@ -72,14 +70,14 @@ public class DigitalGreenCertificateResource {
     @GET
     public Response recovered(@QueryParam("fn") String fn, @QueryParam("gn") String gn,
                               @QueryParam("dob") String dob, @QueryParam("id") String id,
-                              @QueryParam("tg") String tg, @QueryParam("fr") String fr, @QueryParam("is") String is,
+                              @QueryParam("tg") String tg, @QueryParam("fr") String fr,
                               @QueryParam("df") String df, @QueryParam("du") String du,
                               @HeaderParam(HEADER_MANDANTID) String mandantId,
                               @HeaderParam(HEADER_CLIENTSYSTEM) String clientSystem,
                               @HeaderParam(HEADER_WORKPLACE) String workplace,
                               @HeaderParam(HEADER_CARDHANDLE) String cardHandle) {
 
-        return okPdf(digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, is, df, du,
+        return okPdf(digitalGreenCertificateService.issueRecoveryCertificatePdf(fn, gn, dob, id, tg, fr, df, du,
                 new CallContext(mandantId, clientSystem, workplace, cardHandle)));
     }
 

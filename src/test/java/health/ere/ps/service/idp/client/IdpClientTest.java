@@ -26,6 +26,9 @@ import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
 import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -79,9 +82,9 @@ public class IdpClientTest {
                 endpointDiscoveryService.getEventServiceEndpointAddress());
     }
 
-
     @Test
-    @Disabled("This test will only work in the Telematik RU Infrastructure")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU",
+            disabledReason = "This test will only work in the Telematik RU Infrastructure")
     public void test_Successful_Idp_Login_With_Connector_Smcb() throws IdpJoseException,
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
             ConnectorCardsException {

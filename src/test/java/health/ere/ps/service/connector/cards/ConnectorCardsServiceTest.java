@@ -16,6 +16,7 @@ import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.exception.connector.ConnectorCardsException;
 import health.ere.ps.service.common.security.SecretsManagerService;
 import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @QuarkusTest
 class ConnectorCardsServiceTest {
@@ -41,7 +42,7 @@ class ConnectorCardsServiceTest {
     }
 
     @Test
-    @Disabled("Only works with a connector")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU", disabledReason = "Only works with a connector")
     void test_Successful_Retrieval_Of_SMC_B_Card_Handle() throws ConnectorCardsException {
         Optional<String> cardHandle = connectorCardsService.getConnectorCardHandle(
                 ConnectorCardsService.CardHandleType.SMC_B);
@@ -51,7 +52,7 @@ class ConnectorCardsServiceTest {
     }
 
     @Test
-    @Disabled("Only works with a connector")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU", disabledReason = "Only works with a connector")
     void test_Successful_Retrieval_Of_eHBA_Card_Handle() throws ConnectorCardsException {
         Optional<String> cardHandle = connectorCardsService.getConnectorCardHandle(
                 ConnectorCardsService.CardHandleType.HBA);
@@ -61,7 +62,7 @@ class ConnectorCardsServiceTest {
     }
 
     @Test
-    @Disabled("Only works with a connector")
+    @EnabledIfEnvironmentVariable(named = "TEST_ENVIRONMENT", matches = "RU", disabledReason = "Only works with a connector")
     void test_Unsuccessful_Retrieval_Of_Unsupported_KVK_Card_Handle() {
         Assertions.assertThrows(ConnectorCardsException.class,
                 () -> {

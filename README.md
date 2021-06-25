@@ -125,7 +125,7 @@ In regard to file and directory paths, configure the values for the environment 
 | `CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to access the connector | `client123` |
 | `CONNECTOR_MANDANT_ID` | Mandant that will be used for the connector | `MANDANT1234` |
 | `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
-| `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector | `SMB-C-123` |
+| `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector; optional - if not supplied, the card handle will be detected automatically | `SMB-C-123` |
 | `CONNECTOR_USER_ID` | User id that will be used for the connector | `user123` |
 | `CONNECTOR_BASE_URI` | Base URI for the connector (protocol+host+port) | `https://192.168.1.1` |
 | `CONNECTOR_VERIFY_HOSTNAME` | Set to `false` to disable host name verification when using TLS for the connector | `true` |
@@ -139,10 +139,12 @@ In regard to file and directory paths, configure the values for the environment 
 | `CERTIFICATE_SERVICE_ENDPOINT_ADDRESS` | Endpoint for the certificate SOAP-service; fallback if `CONNECTOR_BASE_URI` could not be used to determine it | `https://192.168.1.1/CertificateService` |
 
 _Hint *_: the file path may be prefixed with either `p12:` or `jks:` to indicate the key store type; if no prefix is
-supplied, `p12:` will be assumed.
+supplied, `p12:` will be assumed. Some data-urls are supported as well:
+* `data:application/x-pkcs12;base64,`
 
 #### Environment Variables for tests
 
 | Environment variable | Description | Example |
 | ----- | ----- | ----- |
 | `IDP_AUTH_REQUEST_URL` | Request URL for the IDP | `not-used` |
+| `TEST_ENVIRONMENT` | Environment to enable tests for RU; the value must set to `RU` enable this tests. | `RU` |

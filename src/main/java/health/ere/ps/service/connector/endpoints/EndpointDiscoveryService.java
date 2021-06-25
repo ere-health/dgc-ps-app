@@ -108,7 +108,7 @@ public class EndpointDiscoveryService {
         Invocation invocation = clientBuilder.build()
                 .target(connectorBaseUri)
                 .path("/connector.sds")
-                .request("application/xml")
+                .request()
                 .buildGet();
 
         try (InputStream inputStream = invocation.invoke(InputStream.class)) {
@@ -185,23 +185,7 @@ public class EndpointDiscoveryService {
         return eventServiceEndpointAddress;
     }
 
-    public Optional<String> getConnectorTlsCertAuthStoreFile() {
-        return connectorTlsCertAuthStoreFile;
-    }
-
-    public String getConnectorTlsCertAuthStorePwd() {
-        return connectorTlsCertAuthStorePwd;
-    }
-
-    public Optional<String> getConnectorTlsCertTrustStoreFile() {
-        return connectorTlsCertTrustStoreFile;
-    }
-
-    public String getConnectorTlsCertTrustStorePwd() {
-        return connectorTlsCertTrustStorePwd;
-    }
-
-    public boolean isConnectorVerifyHostnames() {
+    private boolean isConnectorVerifyHostnames() {
         return !("false".equals(connectorVerifyHostname));
     }
 

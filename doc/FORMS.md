@@ -28,6 +28,5 @@ To prefill values in this form, hash-parameter may be used (i.e. `.../dgc/covid-
 | `id`  | Administering id (Betriebsstättennummer) |
 | `tg`  | Disease (should be 840539006 in this context)
 | `fr`  | Date of first positive test, e.g. 2021-03-23 |
-| `is`  | Issuer |
 | `df`  | Start date of the certificate validity, e.g. 2021-04-24 |
 | `du`  | End date of the certificate validity, e.g. 2021-10-24 |

@@ -1,11 +1,14 @@
 package health.ere.ps.config;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import health.ere.ps.exception.connector.ConnectorCardsException;
+import health.ere.ps.service.connector.cards.ConnectorCardsService;
+import health.ere.ps.service.connector.cards.ConnectorCardsService.CardHandleType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
 import java.util.Optional;
 
 /**
@@ -40,7 +43,7 @@ public class AppConfig {
      * See ConnectorCommons.xsd in gematik specification.
      */
     @Inject @ConfigProperty(name = "connector.card.handle")
-    String cardHandle;
+    Optional<String> cardHandle;
 
     @Inject @ConfigProperty(name = "connector.user.id")
     String userId;
@@ -57,6 +60,9 @@ public class AppConfig {
     @Inject @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     String digitalGreenCertificateServiceIssuerAPI;
 
+    @Inject
+    ConnectorCardsService connectorCardsService;
+
     public String getClientId() {
         return clientId;
     }
@@ -70,7 +76,15 @@ public class AppConfig {
     }
 
     public String getCardHandle() {
-        return cardHandle;
+        if (cardHandle.isPresent()) {
+            return cardHandle.get();
+        } else {
+            try {
+                return connectorCardsService.getConnectorCardHandle(CardHandleType.SMC_B).orElseThrow();
+            } catch (ConnectorCardsException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public String getUserId() {
