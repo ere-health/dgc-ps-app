@@ -47,14 +47,14 @@ public class EndpointDiscoveryService {
     /**
      * Certificate to validate with the connector.
      */
-    @ConfigProperty(name = "connector.cert.trust.store.file")
+    @Inject @ConfigProperty(name = "connector.cert.trust.store.file")
     Optional<String> connectorTlsCertTrustStoreFile;
 
     /**
      * Password of the certificate to authenticate at the connector.
      * The default value is a empty sting, so that the password must not be set.
      */
-    @ConfigProperty(name = "connector.cert.trust.store.file.password", defaultValue = "!")
+    @Inject @ConfigProperty(name = "connector.cert.trust.store.file.password", defaultValue = "!")
     String connectorTlsCertTrustStorePwd;
 
     @Inject @ConfigProperty(name = "auth-signature-service.endpoint.address")
