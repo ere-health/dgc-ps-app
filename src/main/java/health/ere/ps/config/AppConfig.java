@@ -1,7 +1,5 @@
 package health.ere.ps.config;
 
-import org.apache.commons.lang3.StringUtils;
-
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import health.ere.ps.exception.connector.ConnectorCardsException;
