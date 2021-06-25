@@ -6,14 +6,12 @@ import health.ere.ps.service.dgc.DigitalGreenCertificateService;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 
 import javax.inject.Inject;
-import javax.mail.Header;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import java.util.logging.Logger;
 
 @Path("/api/certify/v2")
 public class DigitalGreenCertificateResource {
