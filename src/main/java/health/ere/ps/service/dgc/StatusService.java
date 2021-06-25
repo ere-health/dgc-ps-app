@@ -71,10 +71,20 @@ public class StatusService {
                 )
         ).join();
 
-        Map<String, String> connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
-                "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
-                "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
-                "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
+        Map<String, String> connectorUrls;
+
+        try {
+            connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
+                    "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
+                    "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
+                    "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Could not get connector endpoints", e);
+            connectorUrls = Map.of("AuthSignatureService", "ERROR",
+                    "CardService", "ERROR",
+                    "EventService", "ERROR",
+                    "CertificateService", "ERROR");
+        }
 
         installationStatus.setConnectorUrls(connectorUrls);
 
