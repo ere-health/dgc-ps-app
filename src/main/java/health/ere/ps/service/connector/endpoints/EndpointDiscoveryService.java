@@ -127,6 +127,11 @@ public class EndpointDiscoveryService {
             for (int i = 0, n = serviceNodeList.getLength(); i < n; ++i) {
                 Node node = serviceNodeList.item(i);
 
+                if (node.getNodeType() != 1) {
+                    // ignore formatting related text nodes
+                    continue;
+                }
+
                 if (!node.hasAttributes() || node.getAttributes().getNamedItem("Name") == null) {
                     break;
                 }
