@@ -125,7 +125,7 @@ In regard to file and directory paths, configure the values for the environment 
 | `CONNECTOR_CLIENT_SYSTEM_ID` | Client system id that will be used to access the connector | `client123` |
 | `CONNECTOR_MANDANT_ID` | Mandant that will be used for the connector | `MANDANT1234` |
 | `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
-| `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector | `SMB-C-123` |
+| `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector; optional - if not supplied, the card handle will be detected automatically | `SMB-C-123` |
 | `CONNECTOR_USER_ID` | User id that will be used for the connector | `user123` |
 | `CONNECTOR_BASE_URI` | Base URI for the connector (protocol+host+port) | `https://192.168.1.1` |
 | `CONNECTOR_VERIFY_HOSTNAME` | Set to `false` to disable host name verification when using TLS for the connector | `true` |
