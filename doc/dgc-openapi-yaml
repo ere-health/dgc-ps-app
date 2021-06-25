@@ -127,6 +127,32 @@ paths:
           $ref: '#/components/responses/InternalEreServerError'
         501:
           $ref: '#/components/responses/InvalidCertificateServerError'
+  /test-api/certify/v2/issue:
+    post:
+      description: This endpoint allows to test the integration into other systems
+        The response type may be controlled up to a certain extend by the given
+        name of the vaccinated person (400, 401, 403).
+      requestBody:
+        description: Vaccination certificate creation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VaccinationCertificateRequest'
+      responses:
+        200:
+          description: PDF file with certificate
+          content:
+            application/pdf: {}
+        400:
+          $ref: '#/components/responses/InvalidParameters'
+        401:
+          $ref: '#/components/responses/InvalidSmcbAuthentication'
+        403:
+          $ref: '#/components/responses/InvalidCertificateServiceAuthentication'
+        500:
+          $ref: '#/components/responses/InternalEreServerError'
+        501:
+          $ref: '#/components/responses/InvalidCertificateServerError'
 
 components:
   schemas:
