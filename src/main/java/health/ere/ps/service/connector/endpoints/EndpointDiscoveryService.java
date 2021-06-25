@@ -108,7 +108,7 @@ public class EndpointDiscoveryService {
         Invocation invocation = clientBuilder.build()
                 .target(connectorBaseUri)
                 .path("/connector.sds")
-                .request("application/xml")
+                .request()
                 .buildGet();
 
         try (InputStream inputStream = invocation.invoke(InputStream.class)) {
