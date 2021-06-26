@@ -133,7 +133,7 @@ async function fetchStatus() {
     loader.classList.remove("hidden")
 
     try {
-        const response = await fetch("../api/certify/v2/status", {
+        const response = await fetch("../rest/api/certify/v2/status", {
             method: "GET",
         });
         /**
