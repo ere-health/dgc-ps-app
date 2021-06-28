@@ -2,13 +2,13 @@ package health.ere.ps.service.connector.cards;
 
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 
@@ -20,9 +20,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @QuarkusTest
 class ConnectorCardsServiceTest {
-
-    @Inject
-    Logger logger;
+    private static final Logger LOG = Logger.getLogger(ConnectorCardsServiceTest.class.getName());
 
     @Inject
     ConnectorCardsService connectorCardsService;
@@ -48,7 +46,7 @@ class ConnectorCardsServiceTest {
                 ConnectorCardsService.CardHandleType.SMC_B);
         Assertions.assertTrue(cardHandle.isPresent(), "Card handle result is present");
 
-        logger.info("Card handle: " + cardHandle.get());
+        LOG.info("Card handle: " + cardHandle.get());
     }
 
     @Test
@@ -58,7 +56,7 @@ class ConnectorCardsServiceTest {
                 ConnectorCardsService.CardHandleType.HBA);
         Assertions.assertTrue(cardHandle.isPresent(), "Card handle result is present");
 
-        logger.info("Card handle: " + cardHandle.get());
+        LOG.info("Card handle: " + cardHandle.get());
     }
 
     @Test

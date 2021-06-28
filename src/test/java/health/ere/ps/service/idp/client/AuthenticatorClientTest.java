@@ -4,8 +4,6 @@ import health.ere.ps.config.AppConfig;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
@@ -23,17 +21,17 @@ import health.ere.ps.model.idp.client.token.JsonWebToken;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.util.logging.Logger;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 class AuthenticatorClientTest {
+    private static final Logger LOG = Logger.getLogger(AuthenticatorClientTest.class.getName());
 
     @Inject
     AuthenticatorClient authenticatorClient;
-
-    @Inject
-    Logger logger;
 
     @Inject
     AppConfig appConfig;
@@ -79,13 +77,13 @@ class AuthenticatorClientTest {
         assertNotNull(authorizationResponse.getAuthenticationChallenge().getChallenge(),
                 "Challenge Response Present");
 
-        logger.info("User consent scopes: " +
+        LOG.info("User consent scopes: " +
                 authorizationResponse.getAuthenticationChallenge()
                         .getUserConsent().getRequestedScopes());
-        logger.info("User consent claims: " +
+        LOG.info("User consent claims: " +
                 authorizationResponse.getAuthenticationChallenge()
                         .getUserConsent().getRequestedClaims());
-        logger.info("Auth challenge: " +
+        LOG.info("Auth challenge: " +
                 authorizationResponse.getAuthenticationChallenge()
                         .getChallenge());
     }
@@ -103,10 +101,10 @@ class AuthenticatorClientTest {
             String jsonString = response.readEntity(String.class);
             JsonWebToken jsonWebToken = new JsonWebToken(jsonString);
 
-            logger.info("Status = " + response.getStatus());
+            LOG.info("Status = " + response.getStatus());
             response.getHeaders().entrySet().stream().forEach(
-                    (entry -> logger.info(entry.getKey() + " = " + entry.getValue())));
-            logger.info("Body = " + jsonWebToken.getPayloadDecoded());
+                    (entry -> LOG.info(entry.getKey() + " = " + entry.getValue())));
+            LOG.info("Body = " + jsonWebToken.getPayloadDecoded());
 
             assertNotNull(jsonString);
         }
