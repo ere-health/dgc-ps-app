@@ -24,6 +24,7 @@ import javax.xml.ws.BindingProvider;
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.exception.connector.ConnectorCardsException;
 import health.ere.ps.service.common.security.SoapClient;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
 @ApplicationScoped
@@ -31,6 +32,13 @@ public class ConnectorCardsService implements SoapClient {
 
     @Inject
     AppConfig appConfig;
+
+    /**
+     * Card handle for the connector.
+     * See ConnectorCommons.xsd in gematik specification.
+     */
+    @ConfigProperty(name = "connector.card.handle")
+    Optional<String> cardHandle;
 
     @Inject
     EndpointDiscoveryService endpointDiscoveryService;
@@ -63,8 +71,8 @@ public class ConnectorCardsService implements SoapClient {
     }
 
     public String getCardHandle() {
-        if (appConfig.getCardHandle().isPresent()) {
-            return appConfig.getCardHandle().get();
+        if (cardHandle.isPresent()) {
+            return cardHandle.get();
         } else {
             try {
                 return this.getConnectorCardHandle(CardHandleType.SMC_B).orElseThrow();

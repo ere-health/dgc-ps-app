@@ -3,9 +3,6 @@ package health.ere.ps.config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
-import java.util.Optional;
 
 /**
  * Configurations of the application.
@@ -34,13 +31,6 @@ public class AppConfig {
     @ConfigProperty(name = "connector.workplace.id")
     String workplaceId;
 
-    /**
-     * Card handle for the connector.
-     * See ConnectorCommons.xsd in gematik specification.
-     */
-    @ConfigProperty(name = "connector.card.handle")
-    Optional<String> cardHandle;
-
     @ConfigProperty(name = "connector.user.id")
     String userId;
 
@@ -66,10 +56,6 @@ public class AppConfig {
 
     public String getWorkplaceId() {
         return workplaceId;
-    }
-
-    public Optional<String> getCardHandle() {
-        return cardHandle;
     }
 
     public String getUserId() {
