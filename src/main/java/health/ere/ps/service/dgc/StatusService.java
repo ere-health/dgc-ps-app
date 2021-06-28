@@ -106,7 +106,7 @@ public class StatusService {
                         .orElseGet(LinkedList::new)
                         .stream().map(CardInfoType::getCardHandle)
                         .collect(Collectors.toList());
-                if (cardHandles.contains(appConfig.getCardHandle())) {
+                if (cardHandles.contains(connectorCardsService.getCardHandle())) {
                     installationStatus.setCardState(InstallationStatus.State.OK);
                 } else {
                     installationStatus.setCardState(InstallationStatus.State.FAIL);

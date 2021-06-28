@@ -62,6 +62,18 @@ public class ConnectorCardsService implements SoapClient {
         }
     }
 
+    public String getCardHandle() {
+        if (appConfig.getCardHandle().isPresent()) {
+            return appConfig.getCardHandle().get();
+        } else {
+            try {
+                return this.getConnectorCardHandle(CardHandleType.SMC_B).orElseThrow();
+            } catch (ConnectorCardsException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @PostConstruct
     void init() throws SecretsManagerException {
         contextType = new ContextType();

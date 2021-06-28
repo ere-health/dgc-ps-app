@@ -4,6 +4,7 @@ import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.Throwing;
 
 import health.ere.ps.config.AppConfig;
+import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -99,6 +100,9 @@ public class IdpClient implements IIdpClient {
 
     @Inject
     AppConfig appConfig;
+
+    @Inject
+    ConnectorCardsService connectorCardsService;
 
     @Inject
     EndpointDiscoveryService endpointDiscoveryService;
@@ -209,7 +213,7 @@ public class IdpClient implements IIdpClient {
             Errors.rethrow().wrap((Throwing.Function<Pair<String, String>, String>) jwtPair -> {
                 final JsonWebSignatureWithExternalAuthentification jws =
                         new JsonWebSignatureWithExternalAuthentification(authSignatureService,
-                                appConfig.getCardHandle(),
+                                connectorCardsService.getCardHandle(),
                                 createContextType());
                 jws.setPayload(new String(Base64.getUrlDecoder().decode(jwtPair.getRight())));
                 Optional.ofNullable(jwtPair.getLeft())
@@ -267,7 +271,7 @@ public class IdpClient implements IIdpClient {
             authenticationRequest.setAuthenticationEndpointUrl(impfnachweisAuthorizationResponse.getLocation());
             
             JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(
-                    authSignatureService, appConfig.getCardHandle(), createContextType()
+                    authSignatureService, connectorCardsService.getCardHandle(), createContextType()
             );
             byte[] signedChallenge;
             try {
@@ -284,7 +288,7 @@ public class IdpClient implements IIdpClient {
                             Holder<PinResultEnum> pinResultEnum = new Holder<>();
                             Holder<BigInteger> error = new Holder<>();
                             cardService.verifyPin(createContextType(),
-                                    appConfig.getCardHandle(),
+                                    connectorCardsService.getCardHandle(),
                                     "PIN.SMC", status, pinResultEnum, error);
                             // try again
                             signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());

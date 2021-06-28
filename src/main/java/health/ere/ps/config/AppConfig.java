@@ -2,10 +2,6 @@ package health.ere.ps.config;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import health.ere.ps.exception.connector.ConnectorCardsException;
-import health.ere.ps.service.connector.cards.ConnectorCardsService;
-import health.ere.ps.service.connector.cards.ConnectorCardsService.CardHandleType;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -60,9 +56,6 @@ public class AppConfig {
     @ConfigProperty(name = "digital-green-certificate-service.issuerAPIUrl")
     String digitalGreenCertificateServiceIssuerAPI;
 
-    @Inject
-    ConnectorCardsService connectorCardsService;
-
     public String getClientId() {
         return clientId;
     }
@@ -75,16 +68,8 @@ public class AppConfig {
         return workplaceId;
     }
 
-    public String getCardHandle() {
-        if (cardHandle.isPresent()) {
-            return cardHandle.get();
-        } else {
-            try {
-                return connectorCardsService.getConnectorCardHandle(CardHandleType.SMC_B).orElseThrow();
-            } catch (ConnectorCardsException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public Optional<String> getCardHandle() {
+        return cardHandle;
     }
 
     public String getUserId() {
