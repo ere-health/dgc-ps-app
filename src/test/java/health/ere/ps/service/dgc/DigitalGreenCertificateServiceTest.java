@@ -7,6 +7,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceExce
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
@@ -84,7 +85,7 @@ class DigitalGreenCertificateServiceTest {
         issuePdfWithCertificateServiceException(403, DigitalGreenCertificateCertificateServiceAuthenticationException.class, 100403);
         issuePdfWithCertificateServiceException(400, DigitalGreenCertificateInvalidParametersException.class, 100400);
         issuePdfWithCertificateServiceException(406, DigitalGreenCertificateInvalidParametersException.class, 100406);
-        issuePdfWithCertificateServiceException(500, DigitalGreenCertificateCertificateServiceException.class, 100500);
+        issuePdfWithCertificateServiceException(500, DigitalGreenCertificateRemoteException.class, 100500);
         // other unknown codes
         issuePdfWithCertificateServiceException(543, DigitalGreenCertificateCertificateServiceException.class, 100543);
     }
@@ -110,7 +111,7 @@ class DigitalGreenCertificateServiceTest {
 
         // now, the getToken function will be called
 
-        assertThrows(DigitalGreenCertificateInternalAuthenticationException.class,
+        assertThrows(DigitalGreenCertificateRemoteException.class,
                 () -> digitalGreenCertificateService.issuePdf(mock(CertificateRequest.class), null));
     }
 
