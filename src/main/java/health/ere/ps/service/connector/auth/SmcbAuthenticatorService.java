@@ -10,6 +10,7 @@ import de.gematik.ws.conn.signatureservice.v7.BinaryDocumentType;
 import de.gematik.ws.conn.signatureservice.v7.ExternalAuthenticate;
 import de.gematik.ws.conn.signatureservice.v7.ExternalAuthenticateResponse;
 
+import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwx.CompactSerializer;
@@ -36,6 +37,9 @@ public class SmcbAuthenticatorService {
 
     @Inject
     AppConfig appConfig;
+
+    @Inject
+    ConnectorCardsService connectorCardsService;
 
     @Inject
     SmcbAuthenticatorExecutionService smcbAuthExecutionService;
@@ -99,7 +103,7 @@ public class SmcbAuthenticatorService {
             }
             byte[] encodedhash = digest.digest(inputBytes);
 
-            byte[] signatureBytes = externalAuthenticate(encodedhash, appConfig.getCardHandle());
+            byte[] signatureBytes = externalAuthenticate(encodedhash, connectorCardsService.getCardHandle());
             setSignature(signatureBytes);
         }
 
