@@ -4,6 +4,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuth
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
 import health.ere.ps.model.dgc.DigitalGreenCertificateError;
 
 import javax.ws.rs.core.MediaType;
@@ -29,6 +30,8 @@ public class DigitalGreenCertificateExceptionMapper implements ExceptionMapper<D
             return Response.Status.UNAUTHORIZED;
         } else if (digitalGreenCertificateException instanceof DigitalGreenCertificateCertificateServiceAuthenticationException) {
             return Response.Status.FORBIDDEN;
+        } else if (digitalGreenCertificateException instanceof DigitalGreenCertificateRemoteException) {
+            return Response.Status.fromStatusCode(501);
         } else {
             return Response.Status.INTERNAL_SERVER_ERROR;
         }

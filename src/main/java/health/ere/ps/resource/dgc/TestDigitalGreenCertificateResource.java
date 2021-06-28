@@ -4,6 +4,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuth
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
 import health.ere.ps.model.dgc.VaccinationCertificateRequest;
 
 import javax.ws.rs.POST;
@@ -31,6 +32,8 @@ public class TestDigitalGreenCertificateResource {
             throw new DigitalGreenCertificateCertificateServiceAuthenticationException(123456, "Auth error from IDP");
         } else if ("400".equals(vaccinationCertificateRequest.getNam().gn)) {
             throw new DigitalGreenCertificateInvalidParametersException(999999, "Generic 400 error");
+        } else if ("501".equals(vaccinationCertificateRequest.getNam().gn)) {
+            throw new DigitalGreenCertificateRemoteException(999999, "Remote exception from certificate service");
         } else {
             try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test/testpdf.pdf")) {
                 if (inputStream == null) {
