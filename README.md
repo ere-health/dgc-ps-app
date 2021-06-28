@@ -41,15 +41,21 @@ the application. The forms support helpers to [pre-fill parameters](doc/FORMS.md
 In order to reach the German certificate API (that is used by this system), the corresponding
 routing needs to be set up throgh the card connector.
 
+There are different routings needed for RU and PU:
+| Environment | Subnet |
+| ----- | ----- |
+| `PU` | `100.102.0.0` |
+| `RU` | `10.30.0.0` |
+
 #### Linux
 ```
-ip route add 100.102.0.0/16 via <IP_OF_THE_CARD_CONNECTOR>
+ip route add <SUBNET_DEPENDING_ON_RU_OR_PU>/16 via <IP_OF_THE_CARD_CONNECTOR>
 ```
 (depending on the used linux distribution)
 
 #### Windows
 ```
-route ADD 100.102.0.0 MASK 255.255.0.0 <IP_OF_THE_CARD_CONNECTOR>
+route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNECTOR>
 ```
 
 ### Running the DGC-PS-App Application
