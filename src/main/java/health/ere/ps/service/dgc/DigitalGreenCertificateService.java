@@ -6,6 +6,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuth
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
@@ -154,11 +155,18 @@ public class DigitalGreenCertificateService {
 
         Entity<CertificateRequest> entity = Entity.entity(requestData, "application/vnd.dgc.v1+json");
         // entity = Entity.entity("{\r\n  \"ver\": \"1.0.0\",\r\n  \"nam\": {\r\n    \"fn\": \"d'Ars\u00F8ns - van Halen\",\r\n    \"gn\": \"Fran\u00E7ois-Joan\",\r\n    \"fnt\": \"DARSONS<VAN<HALEN\",\r\n    \"gnt\": \"FRANCOIS<JOAN\"\r\n  },\r\n  \"dob\": \"2009-02-28\",\r\n  \"v\": [\r\n    {\r\n      \"id\": \"123456\",\r\n      \"tg\": \"840539006\",\r\n      \"vp\": \"1119349007\",\r\n      \"mp\": \"EU/1/20/1528\",\r\n      \"ma\": \"ORG-100030215\",\r\n      \"dn\": 2,\r\n      \"sd\": 2,\r\n      \"dt\": \"2021-04-21\",\r\n      \"co\": \"NL\",\r\n      \"is\": \"Ministry of Public Health, Welfare and Sport\",\r\n      \"ci\": \"urn:uvci:01:NL:PlA8UWS60Z4RZXVALl6GAZ\"\r\n    }\r\n  ]\r\n}", "application/vnd.dgc.v1+json");
-        Response response = client.target(appConfig.getDigitalGreenCertificateServiceIssuerAPI())
-                .path("/api/certify/v2/issue")
-                .request("application/pdf")
-                .header("Authorization", "Bearer " + getToken(callContext))
-                .post(entity);
+        Response response;
+
+        try {
+            response = client.target(appConfig.getDigitalGreenCertificateServiceIssuerAPI())
+                    .path("/api/certify/v2/issue")
+                    .request("application/pdf")
+                    .header("Authorization", "Bearer " + getToken(callContext))
+                    .post(entity);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Exception from fetching certificate", e);
+            throw new DigitalGreenCertificateRemoteException(2000000, "Could not successfully contact remote certificate service");
+        }
 
         // the error codes in the exceptions reflect the response https status from the api request
         // the offset is added to support future error codes; offset 100000 is used for errors that
@@ -186,7 +194,7 @@ public class DigitalGreenCertificateService {
             }
             case 500: {
                 String error = getError(response);
-                throw new DigitalGreenCertificateCertificateServiceException(100500, "Internal server error in certificate service "+error);
+                throw new DigitalGreenCertificateRemoteException(100500, "Internal server error in certificate service "+error);
             }
             default: {
                 throw new DigitalGreenCertificateCertificateServiceException(100000 + response.getStatus(), "Unspecified response from " +

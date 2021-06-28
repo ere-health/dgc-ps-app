@@ -5,6 +5,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceExce
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.DigitalGreenCertificateError;
@@ -264,6 +265,7 @@ class DigitalGreenCertificateResourceIntegrationTest {
         testExceptionMapper(new DigitalGreenCertificateInternalAuthenticationException(), 401, 200401);
         testExceptionMapper(new DigitalGreenCertificateCertificateServiceAuthenticationException(code, ""), 403, code);
         testExceptionMapper(new DigitalGreenCertificateCertificateServiceException(code, ""), 500, code);
+        testExceptionMapper(new DigitalGreenCertificateRemoteException(code, ""), 501, code);
     }
 
     private void testExceptionMapper(DigitalGreenCertificateException digitalGreenCertificateException, int expectedResponseCode, int expectedErrorCode)
