@@ -266,12 +266,13 @@ class DigitalGreenCertificateResourceIntegrationTest {
         testExceptionMapper(new DigitalGreenCertificateCertificateServiceAuthenticationException(code, ""), 403, code);
         testExceptionMapper(new DigitalGreenCertificateCertificateServiceException(code, ""), 500, code);
         testExceptionMapper(new DigitalGreenCertificateRemoteException(code, ""), 501, code);
+        testExceptionMapper(new RuntimeException("test"), 500, -1);
     }
 
-    private void testExceptionMapper(DigitalGreenCertificateException digitalGreenCertificateException, int expectedResponseCode, int expectedErrorCode)
+    private void testExceptionMapper(RuntimeException runtimeException, int expectedResponseCode, int expectedErrorCode)
             throws URISyntaxException {
 
-        doThrow(digitalGreenCertificateException).when(service).issuePdf(any(), any());
+        doThrow(runtimeException).when(service).issuePdf(any(), any());
 
         Client client = ClientBuilder.newBuilder().build();
 
