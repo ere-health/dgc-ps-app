@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +47,7 @@ public class StatusService {
 
     /**
      * Returns a HealthStatus to fill with the different states.
-     *
+     * <p>
      * This methods creates CompletableFuture to speed up the execution and wait for all to complete. So that there
      * are 3 Futures running: two for requesting the routes of the IDP and the certificate issuer. One Future is used
      * for connector, parameters and SMC-B card status.
@@ -61,38 +62,50 @@ public class StatusService {
                 CompletableFuture.runAsync(() ->
                         setConnectorStates(installationStatus)
                 ),
-                CompletableFuture.runAsync(() ->
-                        installationStatus.setIdentityProviderRouteState(requestStateOfPath(appConfig.getIdpBaseUrl()))
+                CompletableFuture.runAsync(() -> {
+                            try {
+                                String idpBaseUrl = appConfig.getIdpBaseUrl();
+                                installationStatus.setIdentityProviderConfigurationState(InstallationStatus.State.OK);
+                                installationStatus.setIdentityProviderRouteState(requestStateOfPath(idpBaseUrl));
+                            } catch (NoSuchElementException e) {
+                                installationStatus.setIdentityProviderConfigurationState(InstallationStatus.State.FAIL);
+                            }
+                        }
                 ),
-                CompletableFuture.runAsync(() ->
-                        installationStatus.setCertificateServiceRouteState(
-                                requestStateOfPath(appConfig.getDigitalGreenCertificateServiceIssuerAPI())
-                        )
-                )
+                CompletableFuture.runAsync(() -> {
+                            try {
+                                String digitalGreenCertificateServiceIssuerAPI = appConfig.getDigitalGreenCertificateServiceIssuerAPI();
+                                installationStatus.setCertificateServiceConfigurationState(InstallationStatus.State.OK);
+                                installationStatus.setCertificateServiceRouteState(
+                                        requestStateOfPath(digitalGreenCertificateServiceIssuerAPI));
+                            } catch (NoSuchElementException e) {
+                                installationStatus.setCertificateServiceConfigurationState(InstallationStatus.State.FAIL);
+                            }
+                        }
+                ),
+                CompletableFuture.runAsync(() -> {
+                    Map<String, String> connectorUrls;
+                    try {
+                        connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
+                                "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
+                                "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
+                                "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
+                    } catch (Exception e) {
+                        LOG.log(Level.SEVERE, "Could not get connector endpoints", e);
+                        connectorUrls = Map.of("AuthSignatureService", "ERROR",
+                                "CardService", "ERROR",
+                                "EventService", "ERROR",
+                                "CertificateService", "ERROR");
+                    }
+
+                    installationStatus.setConnectorUrls(connectorUrls);
+                })
         ).join();
-
-        Map<String, String> connectorUrls;
-
-        try {
-            connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
-                    "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
-                    "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
-                    "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Could not get connector endpoints", e);
-            connectorUrls = Map.of("AuthSignatureService", "ERROR",
-                    "CardService", "ERROR",
-                    "EventService", "ERROR",
-                    "CertificateService", "ERROR");
-        }
-
-        installationStatus.setConnectorUrls(connectorUrls);
 
         return installationStatus;
     }
 
     /**
-     *
      * @param installationStatus to set the status to, must be not null.
      */
     private void setConnectorStates(InstallationStatus installationStatus) {
@@ -127,6 +140,7 @@ public class StatusService {
     /**
      * Returns OK if the status is 200 on a get request with the path given as parameter.
      * All other status codes and errors return FAIL.
+     *
      * @param path to check via get request must have a URL scheme, must be not null.
      * @return OK if response status code is 200, otherwise FAIL
      */

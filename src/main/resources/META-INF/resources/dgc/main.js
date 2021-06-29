@@ -102,8 +102,11 @@ async function fetchStatus() {
     const connector = document.getElementById("connector");
     const parameters = document.getElementById("parameters");
     const card = document.getElementById("card");
+    const idpConfig = document.getElementById("idpConfig");
     const idp = document.getElementById("idp");
+    const certConfig = document.getElementById("certConfig");
     const cert = document.getElementById("cert");
+    const connectorUrls = document.getElementById("connectorUrls");
     const loader = document.getElementById("loader");
 
     /**
@@ -141,12 +144,21 @@ async function fetchStatus() {
          */
         let data = await response.json();
         setState(card, data.cardState);
-        setState(idp, data.identityProviderRouteState);
-        setState(cert, data.certificateServiceRouteState);
         setState(parameters, data.parameterState);
         setState(connector, data.connectorState);
+        setState(idpConfig, data.identityProviderConfigurationState);
+        setState(idp, data.identityProviderRouteState);
+        setState(certConfig, data.certificateServiceConfigurationState);
+        setState(cert, data.certificateServiceRouteState);
+
+        connectorUrls.innerHTML = `
+            <div>AuthSignatureService: ${data.connectorUrls.AuthSignatureService}</div>
+            <div>EventService: ${data.connectorUrls.EventService}</div>
+            <div>CardService: ${data.connectorUrls.CardService}</div>
+            <div>CertificateService: ${data.connectorUrls.CertificateService}</div>
+        `;
     } catch (e) {
-        console.error(e);
+        console.log(e);
         showError(e.message);
     } finally {
         loader.classList.add("hidden")

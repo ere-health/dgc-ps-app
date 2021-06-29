@@ -46,10 +46,14 @@ public class InstallationStatus {
      */
     private State identityProviderRouteState = State.UNKNOWN;
 
+    private State identityProviderConfigurationState = State.UNKNOWN;
+
     /**
      * Check if the DGC issuer is callable via GET.
      */
     private State certificateServiceRouteState = State.UNKNOWN;
+
+    private State certificateServiceConfigurationState = State.UNKNOWN;
 
     private Map<String, String> connectorUrls;
 
@@ -91,6 +95,22 @@ public class InstallationStatus {
 
     public void setCertificateServiceRouteState(State certificateServiceRouteState) {
         this.certificateServiceRouteState = certificateServiceRouteState;
+    }
+
+    public State getIdentityProviderConfigurationState() {
+        return identityProviderConfigurationState;
+    }
+
+    public void setIdentityProviderConfigurationState(State identityProviderConfigurationState) {
+        this.identityProviderConfigurationState = identityProviderConfigurationState;
+    }
+
+    public State getCertificateServiceConfigurationState() {
+        return certificateServiceConfigurationState;
+    }
+
+    public void setCertificateServiceConfigurationState(State certificateServiceConfigurationState) {
+        this.certificateServiceConfigurationState = certificateServiceConfigurationState;
     }
 
     public Map<String, String> getConnectorUrls() {
