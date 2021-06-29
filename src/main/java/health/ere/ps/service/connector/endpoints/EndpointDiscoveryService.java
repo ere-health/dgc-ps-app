@@ -83,6 +83,12 @@ public class EndpointDiscoveryService {
     @Inject @ConfigProperty(name = "connector.verify-hostname", defaultValue = "true")
     String connectorVerifyHostname;
 
+    @ConfigProperty(name = "connector.user.id")
+    String httpUser;
+
+    @ConfigProperty(name = "connector.user.password")
+    Optional<String> httpPassword;
+
     @Inject
     SecretsManagerService secretsManagerService;
 
@@ -202,6 +208,11 @@ public class EndpointDiscoveryService {
                 connectorTlsCertTrustStorePwd,
                 isConnectorVerifyHostnames(),
                 bindingProvider);
+
+        if (httpPassword.isPresent()) {
+            bindingProvider.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, httpUser);
+            bindingProvider.getRequestContext().put(BindingProvider.PASSWORD_PROPERTY, httpPassword.get());
+        }
     }
 
     private String getEndpoint(Node serviceNode) {

@@ -20,7 +20,7 @@ In the end the patient can scan the QR code with the [Corona-Warn-App](https://g
 ### Overview
 The dgc-ps-app is comprised of two main components. 
 
-* The dgc-ps-app back-end which is a Java 11 Quarkus (https://quarkus.io/) application.
+* The dgc-ps-app back-end which is a Java 11 Quarkus (https://quarkus.io/) application. See [API spec](doc/dgc-openapi.yaml) for details.
 * The dgc-ps-app front-end UI, which is a browser based HTML, CSS and JavaScript application.
 
 
@@ -133,6 +133,7 @@ In regard to file and directory paths, configure the values for the environment 
 | `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
 | `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector; optional - if not supplied, the card handle will be detected automatically | `SMB-C-123` |
 | `CONNECTOR_USER_ID` | User id that will be used for the connector | `user123` |
+| `CONNECTOR_USER_PASSWORD` | Password for `CONNECTOR_USER_ID`; only required if the connector is accessed via username and password | `someStrongPassword` |
 | `CONNECTOR_BASE_URI` | Base URI for the connector (protocol+host+port) | `https://192.168.1.1` |
 | `CONNECTOR_VERIFY_HOSTNAME` | Set to `false` to disable host name verification when using TLS for the connector | `true` |
 | `IDP_BASE_URL` | Base URL for the IDP | `https://id.impfnachweis.info/auth/realms/bmg-ti-certify` |
