@@ -20,7 +20,7 @@ In the end the patient can scan the QR code with the [Corona-Warn-App](https://g
 ### Overview
 The dgc-ps-app is comprised of two main components. 
 
-* The dgc-ps-app back-end which is a Java 11 Quarkus (https://quarkus.io/) application. See [API spec](doc/dgc-openapi.yml) for details.
+* The dgc-ps-app back-end which is a Java 11 Quarkus (https://quarkus.io/) application. See [API spec](doc/dgc-openapi.yaml) for details.
 * The dgc-ps-app front-end UI, which is a browser based HTML, CSS and JavaScript application.
 
 
