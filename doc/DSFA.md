@@ -88,4 +88,4 @@ In der Standardkonfiguration horcht das System auf allen IP-Adressen des Rechner
 | Risiko 2 | mittel | niedrig | keine möglich; Zertifikatserstellung muss dann erneut gestartet werden |
 | Risiko 3 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
 | Risiko 4 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden; Zertifikatsüberprüfung in Konfiguration aktivieren |
-| Risiko 5 | mittel | mittel | Netzwerktechnische Isolation des Systems (beispielsweise nur auf `127.0.0.1` horchen); zusätzlich lokale Zugriffsbeschränkungen (z.B. durch Sperren der Arbeitsstation) |
+| Risiko 5 | mittel | mittel | Netzwerktechnische Isolation des Systems (beispielsweise nur auf `127.0.0.1` horchen und/oder entsprechende Blockierung via Firewall); zusätzlich lokale Zugriffsbeschränkungen (z.B. durch Sperren der Arbeitsstation) |
