@@ -84,4 +84,4 @@ Durch eine fehlerhafte Konfiguration ist es möglich, die Transportverschlüssel
 | Risiko 1 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
 | Risiko 2 | mittel | niedrig | keine möglich; Zertifikatserstellung muss dann erneut gestartet werden |
 | Risiko 3 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
-| Risiko 4 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
+| Risiko 4 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden; Zertifikatsüberprüfung in Konfiguration aktivieren |
