@@ -13,7 +13,7 @@
           rel="stylesheet">
     <script type="text/javascript" src="main.js"></script>
 </head>
-<body class="home-page" onload="fetchStatus();" onhashchange="fetchStatus();">
+<body class="home-page" onload="fetchStatus();" onunload="abortRequest()" onhashchange="fetchStatus();">
     <div class="main-content-wrapper">
         <header class="header-wrapper">
             <div class="header">
@@ -51,12 +51,14 @@
                 </div>
                 <div class="check">Check <span id="idp" style="color: red">&quest;</span>:
                     route to the IDP is correctly set up
+                    <div class="check" id="idpRoute"></div>
                 </div>
                 <div class="check">Check <span id="certConfig" style="color: red">&quest;</span>:
                     <i>digital-green-certificate-service.issuerAPIUrl</i> configuration value set
                 </div>
                 <div class="check">Check <span id="cert" style="color: red">&quest;</span>:
                     route to the certificate service is correctly set up
+                    <div class="check" id="certRoute"></div>
                 </div>
                 <div class="check">Collected Paths:
                     <div class="check" id="connectorUrls"></div>

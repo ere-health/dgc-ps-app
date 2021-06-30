@@ -1,6 +1,7 @@
 package health.ere.ps.resource.dgc;
 
 import health.ere.ps.service.dgc.StatusService;
+import io.smallrye.common.annotation.Blocking;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -17,6 +18,7 @@ public class StatusResource {
     @Path("/status")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Blocking
     public Response status() {
         return Response.ok(statusService.collectStatus()).build();
     }

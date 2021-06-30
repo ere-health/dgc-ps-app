@@ -5,9 +5,9 @@ interface HealthStatus {
     connectorState: HealthState
     parameterState: HealthState
     identityProviderRouteState: HealthState
-    identityProviderConfigurationState: HealthState
+    identityProviderRoute: string | null
     certificateServiceRouteState: HealthState
-    certificateServiceConfigurationState: HealthState
+    certificateServiceRoute: string | null
     connectorUrls: {
         AuthSignatureService: string
         CardService: string

@@ -80,6 +80,8 @@ async function sendVaccinationRequest() {
     await sendRequest("../api/certify/v2/issue", oVacinationRequest)
 }
 
+let abortController = null;
+
 function prefillVaccineParameters() {
     const form = document.getElementById("vaccination-request-form");
 
@@ -91,6 +93,15 @@ function prefillVaccineParameters() {
         if (params.has(name)) {
             form.elements[name].value = params.get(name);
         }
+    }
+}
+
+/**
+ * Abort the current request
+ */
+function abortRequest() {
+    if (abortController) {
+        abortController.abort();
     }
 }
 
@@ -133,34 +144,54 @@ async function fetchStatus() {
                 break;
         }
     }
-    loader.classList.remove("hidden")
 
     try {
+        if (abortController) {
+            abortController.abort();
+        }
+        abortController = new AbortController();
+        setTimeout(() => loader.classList.remove("hidden"));
         const response = await fetch("../api/certify/v2/status", {
             method: "GET",
+            signal : abortController.signal
         });
-        /**
-         * @type {HealthStatus}
-         */
-        let data = await response.json();
-        setState(card, data.cardState);
-        setState(parameters, data.parameterState);
-        setState(connector, data.connectorState);
-        setState(idpConfig, data.identityProviderConfigurationState);
-        setState(idp, data.identityProviderRouteState);
-        setState(certConfig, data.certificateServiceConfigurationState);
-        setState(cert, data.certificateServiceRouteState);
+        if (response.status === 200) {
+            /**
+             * @type {HealthStatus}
+             */
+            let data = await response.json();
+            setState(card, data.cardState);
+            setState(parameters, data.parameterState);
+            setState(connector, data.connectorState);
+            setState(idpConfig, data.identityProviderRoute ? "OK" : "FAIL");
+            setState(idp, data.identityProviderRouteState);
+            if(data.certificateServiceRoute) {
+                document.getElementById("idpRoute").innerText = `Requested route ${data.identityProviderRoute}`;
+            }
+            setState(certConfig, data.certificateServiceRoute ? "OK" : "FAIL");
+            setState(cert, data.certificateServiceRouteState);
+            if(data.certificateServiceRoute) {
+                document.getElementById("certRoute").innerText = `Requested route ${data.certificateServiceRoute}`;
+            }
 
-        connectorUrls.innerHTML = `
+            connectorUrls.innerHTML = `
             <div>AuthSignatureService: ${data.connectorUrls.AuthSignatureService}</div>
             <div>EventService: ${data.connectorUrls.EventService}</div>
             <div>CardService: ${data.connectorUrls.CardService}</div>
             <div>CertificateService: ${data.connectorUrls.CertificateService}</div>
         `;
+        } else {
+            console.log(response);
+            showError("Fail to fetch with response: " + response.status)
+        }
     } catch (e) {
-        console.log(e);
-        showError(e.message);
+        // filter abort.
+        if (e.name !== 'AbortError') {
+            console.log(e);
+            showError(e.message);
+        }
     } finally {
+        abortController = null;
         loader.classList.add("hidden")
     }
 }

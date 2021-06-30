@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,61 +46,44 @@ public class StatusService {
 
     /**
      * Returns a HealthStatus to fill with the different states.
-     * <p>
-     * This methods creates CompletableFuture to speed up the execution and wait for all to complete. So that there
-     * are 3 Futures running: two for requesting the routes of the IDP and the certificate issuer. One Future is used
-     * for connector, parameters and SMC-B card status.
      *
      * @return a new filled HealthStatus.
      */
     public InstallationStatus collectStatus() {
         InstallationStatus installationStatus = new InstallationStatus();
 
-        // wait for the requests any parallel them to save time to use max 1 minute.
-        CompletableFuture.allOf(
-                CompletableFuture.runAsync(() ->
-                        setConnectorStates(installationStatus)
-                ),
-                CompletableFuture.runAsync(() -> {
-                            try {
-                                String idpBaseUrl = appConfig.getIdpBaseUrl();
-                                installationStatus.setIdentityProviderConfigurationState(InstallationStatus.State.OK);
-                                installationStatus.setIdentityProviderRouteState(requestStateOfPath(idpBaseUrl));
-                            } catch (NoSuchElementException e) {
-                                installationStatus.setIdentityProviderConfigurationState(InstallationStatus.State.FAIL);
-                            }
-                        }
-                ),
-                CompletableFuture.runAsync(() -> {
-                            try {
-                                String digitalGreenCertificateServiceIssuerAPI = appConfig.getDigitalGreenCertificateServiceIssuerAPI();
-                                installationStatus.setCertificateServiceConfigurationState(InstallationStatus.State.OK);
-                                installationStatus.setCertificateServiceRouteState(
-                                        requestStateOfPath(digitalGreenCertificateServiceIssuerAPI));
-                            } catch (NoSuchElementException e) {
-                                installationStatus.setCertificateServiceConfigurationState(InstallationStatus.State.FAIL);
-                            }
-                        }
-                ),
-                CompletableFuture.runAsync(() -> {
-                    Map<String, String> connectorUrls;
-                    try {
-                        connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
-                                "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
-                                "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
-                                "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
-                    } catch (Exception e) {
-                        LOG.log(Level.SEVERE, "Could not get connector endpoints", e);
-                        connectorUrls = Map.of("AuthSignatureService", "ERROR",
-                                "CardService", "ERROR",
-                                "EventService", "ERROR",
-                                "CertificateService", "ERROR");
-                    }
+        setConnectorStates(installationStatus);
+        try {
+            String idpBaseUrl = appConfig.getIdpBaseUrl();
+            installationStatus.setIdentityProviderRoute(idpBaseUrl);
+            installationStatus.setIdentityProviderRouteState(requestStateOfPath(idpBaseUrl));
+        } catch (NoSuchElementException e) {
+            installationStatus.setIdentityProviderRoute(null);
+            installationStatus.setIdentityProviderRouteState(InstallationStatus.State.FAIL);
+        }
+        try {
+            String serviceIssuerAPI = appConfig.getDigitalGreenCertificateServiceIssuerAPI();
+            installationStatus.setCertificateServiceRoute(serviceIssuerAPI);
+            installationStatus.setCertificateServiceRouteState(requestStateOfPath(serviceIssuerAPI));
+        } catch (NoSuchElementException e) {
+            installationStatus.setCertificateServiceRoute(null);
+            installationStatus.setCertificateServiceRouteState(InstallationStatus.State.FAIL);
+        }
+        Map<String, String> connectorUrls;
+        try {
+            connectorUrls = Map.of("AuthSignatureService", endpointDiscoveryService.getAuthSignatureServiceEndpointAddress(),
+                    "CardService", endpointDiscoveryService.getCardServiceEndpointAddress(),
+                    "EventService", endpointDiscoveryService.getEventServiceEndpointAddress(),
+                    "CertificateService", endpointDiscoveryService.getCertificateServiceEndpointAddress());
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "Could not get connector endpoints: " + e.getMessage());
+            connectorUrls = Map.of("AuthSignatureService", "ERROR",
+                    "CardService", "ERROR",
+                    "EventService", "ERROR",
+                    "CertificateService", "ERROR");
+        }
 
-                    installationStatus.setConnectorUrls(connectorUrls);
-                })
-        ).join();
-
+        installationStatus.setConnectorUrls(connectorUrls);
         return installationStatus;
     }
 
@@ -130,7 +112,7 @@ public class StatusService {
             }
 
         } catch (Exception e) {
-            LOG.log(Level.WARNING, "Could not set connector states", e);
+            LOG.log(Level.WARNING, "Could not set connector states: " + e.getMessage());
             installationStatus.setConnectorState(InstallationStatus.State.FAIL);
             installationStatus.setParameterState(InstallationStatus.State.UNKNOWN);
             installationStatus.setCardState(InstallationStatus.State.UNKNOWN);
@@ -150,7 +132,7 @@ public class StatusService {
                     .request("*/*").get();
             return response.getStatus() == 200 ? InstallationStatus.State.OK : InstallationStatus.State.FAIL;
         } catch (Exception e) {
-            LOG.severe("Check: route '" + path + "' not callable");
+            LOG.log(Level.WARNING, "Check: route '" + path + "' not callable: " + e.getMessage());
             return InstallationStatus.State.FAIL;
         }
     }
