@@ -65,15 +65,23 @@ Der Zugriff auf den Konnektor kann so konfiguriert werden, dass dieser ausschlie
 
 Es bestehen die bei jeder Datenübertragung in einem Netzwerk üblichen Risiken.
 
+### Risiko 1
 Insbesondere besteht die Möglichkeit, dass der Token, welcher die Authentifizierung des Arztes enthält, verloren geht oder an die falsche Stelle übertragen wird (z.B. wenn eine Fehlkonfiguration durch in der PVS-Integration vorliegt). Mit dieser Authentifizierung könnten dann Dritte, welche Zugriff auf die TI haben, für eine gewisse Zeit im Namen des Arztes Impf- und Genesenenzertifikate erstellen. Außerdem werden dann die zusätzlichen Metadataen, welche ebenfalls im Token enthalten sind, diesen Dritten bekannt gemacht.
 
-Wir die Antwort vom Zertifikatserstellungsdienst nicht korrekt übertragen, oder von diesem System verworfen, ist ein entsprechendes Zertifikat erstellt, aber nicht an den Patienten ausgeliefert worden.
+### Risko 2
+Wird die Antwort vom Zertifikatserstellungsdienst nicht korrekt übertragen, oder von diesem System verworfen, ist ein entsprechendes Zertifikat erstellt, aber nicht an den Patienten ausgeliefert worden.
 
+### Risiko 3
 Wird das System falsch konfiguriert (wenn der Endpunkt zur Zertifikatserstellung falsch angegeben wurde) kann, neben dem Arzt-Token auch die Patientendaten, wie oben beschrieben, Dritten am angegebenen Endpunkt bekannt gemacht werden.
 
+### Risiko 4
 Durch eine fehlerhafte Konfiguration ist es möglich, die Transportverschlüsselung via HTTPS zu deaktivieren oder eine Zertifikatsüberprüfung (des TLS-Zertifikates) zu deaktivieren. In diesem Fall besteht die Möglichkeit durch Dritte, alle übertragenen Daten abzugreifen und zu verändern. Die Nutzung der so abgefangenen Daten ist oben in diesem Abschnitt beschrieben. Eine Manipulation der Daten auf dem Transportweg ergibt die Möglichkeit der Änderung der zur Zertifikatserstellung verwendeten daten.
-
 
 ## Bewertung der Risiken
 
-TODO
+| Risiko | Eintrittswahrscheinlichkeit | Auswirkungen | Prävention |
+| ----- | ----- | ------ | ------ |
+| Risiko 1 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
+| Risiko 2 | mittel | niedrig | TODO |
+| Risiko 3 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
+| Risiko 4 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
