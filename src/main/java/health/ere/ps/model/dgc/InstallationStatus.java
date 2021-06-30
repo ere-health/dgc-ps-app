@@ -46,10 +46,14 @@ public class InstallationStatus {
      */
     private State identityProviderRouteState = State.UNKNOWN;
 
+    private String identityProviderRoute = null;
+
     /**
      * Check if the DGC issuer is callable via GET.
      */
     private State certificateServiceRouteState = State.UNKNOWN;
+
+    private String certificateServiceRoute = null;
 
     private Map<String, String> connectorUrls;
 
@@ -93,6 +97,22 @@ public class InstallationStatus {
         this.certificateServiceRouteState = certificateServiceRouteState;
     }
 
+    public String getIdentityProviderRoute() {
+        return identityProviderRoute;
+    }
+
+    public void setIdentityProviderRoute(String identityProviderRoute) {
+        this.identityProviderRoute = identityProviderRoute;
+    }
+
+    public String getCertificateServiceRoute() {
+        return certificateServiceRoute;
+    }
+
+    public void setCertificateServiceRoute(String certificateServiceRoute) {
+        this.certificateServiceRoute = certificateServiceRoute;
+    }
+
     public Map<String, String> getConnectorUrls() {
         return connectorUrls;
     }
@@ -106,29 +126,33 @@ public class InstallationStatus {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InstallationStatus that = (InstallationStatus) o;
-        return connectorState == that.connectorState
-                && parameterState == that.parameterState
+        return connectorState == that.connectorState && parameterState == that.parameterState
                 && cardState == that.cardState
                 && identityProviderRouteState == that.identityProviderRouteState
+                && Objects.equals(identityProviderRoute, that.identityProviderRoute)
                 && certificateServiceRouteState == that.certificateServiceRouteState
+                && Objects.equals(certificateServiceRoute, that.certificateServiceRoute)
                 && Objects.equals(connectorUrls, that.connectorUrls);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(connectorState, parameterState, cardState, identityProviderRouteState,
-                certificateServiceRouteState, connectorUrls);
+        return Objects.hash(connectorState, parameterState, cardState,
+                identityProviderRouteState, identityProviderRoute,
+                certificateServiceRouteState, certificateServiceRoute, connectorUrls);
     }
 
     @Override
     public String toString() {
-        return "class HealthStatus {" +
-                "connectorReachable:" + connectorState +
-                ", parameterCorrect:" + parameterState +
-                ", sMCBCardCorrect:" + cardState +
-                ", iDPRouteCorrect:" + identityProviderRouteState +
-                ", certificateServiceRouteCorrect:" + certificateServiceRouteState +
-                ", connectorUrls: " + connectorUrls +
+        return "InstallationStatus{" +
+                "connectorState=" + connectorState +
+                ", parameterState=" + parameterState +
+                ", cardState=" + cardState +
+                ", identityProviderConfigurationState=" + identityProviderRouteState +
+                ", identityProviderRoute='" + identityProviderRoute + '\'' +
+                ", certificateServiceConfigurationState=" + certificateServiceRouteState +
+                ", certificateServiceRoute='" + certificateServiceRoute + '\'' +
+                ", connectorUrls=" + connectorUrls +
                 '}';
     }
 }
