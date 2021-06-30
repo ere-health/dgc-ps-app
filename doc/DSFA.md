@@ -78,6 +78,9 @@ Wird das System falsch konfiguriert (wenn der Endpunkt zur Zertifikatserstellung
 ### Risiko 4
 Durch eine fehlerhafte Konfiguration ist es möglich, die Transportverschlüsselung via HTTPS zu deaktivieren oder eine Zertifikatsüberprüfung (des TLS-Zertifikates) zu deaktivieren. In diesem Fall besteht die Möglichkeit durch Dritte, alle übertragenen Daten abzugreifen und zu verändern. Die Nutzung der so abgefangenen Daten ist oben in diesem Abschnitt beschrieben. Eine Manipulation der Daten auf dem Transportweg ergibt die Möglichkeit der Änderung der zur Zertifikatserstellung verwendeten daten.
 
+### Risiko 5
+In der Standardkonfiguration horcht das System auf allen IP-Adressen des Rechners, auf dem es läuft. Dies ermöglicht einen Zugriff von anderen Rechnern über das Netzwerk. Da dieses System keine Authentifizierung hat, wäre es in diesem Fall möglich, dass sich beliebige Nutzer, die via Netzwerk auf den Rechner zugreifen können, beliebig viele Impfzertifikate erstellen. Analoges gilt für einen Zugriff direkt vom Rechner auf dem das System installiert ist, unabhängig von der "Horchkonfiguration".
+
 ## Bewertung der Risiken
 
 | Risiko | Eintrittswahrscheinlichkeit | Auswirkungen | Prävention |
@@ -86,3 +89,4 @@ Durch eine fehlerhafte Konfiguration ist es möglich, die Transportverschlüssel
 | Risiko 2 | mittel | niedrig | keine möglich; Zertifikatserstellung muss dann erneut gestartet werden |
 | Risiko 3 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden |
 | Risiko 4 | gering | sehr hoch | Kontrolle der Konfiguration; vorgeschlagene Werte für PU verwenden; Zertifikatsüberprüfung in Konfiguration aktivieren |
+| Risiko 5 | mittel | mittel | Netzwerktechnische Isolation des Systems (beispielsweise nur auf `127.0.0.1` horchen); zusätzlich lokale Zugriffsbeschränkungen (z.B. Arbeitsstationsperre) |
