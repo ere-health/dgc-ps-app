@@ -46,7 +46,8 @@ Bei einer genesenen Person werden ausschließlich folgende Daten erfasst:
 Sowohl bei der Erstellung des Impfzertifikates, als auch bei der Erstellung des Genesenenzertifikates wird die Identifizierung des Arztes in Form einer Betriebsstättennummer übertragen.
 
 Die übertragenen Daten zur Identifizierung des Arztes werden im Wesentlichen durch `id.impfnachweis.info` festgelegt. Zum Erhalt der Authentifizierung werden folgende Daten übertragen:
-* TODO
+* SMC-B Zertifikat der Betriebsstätte des Arztes
+
 
 
 ## Datenspeicherung
