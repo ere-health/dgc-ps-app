@@ -96,6 +96,16 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   
   > http://localhost:8080/dgc/covid-19-certificate.html
 
+* #### Create a standalone single jar-file
+  Run
+  
+  > QUARKUS_PACKAGE_TYPE=uber-jar mvn package -DskipTests=true
+  
+  to create the file `target/ere-ps-app-VERSION-SNAPSHOT-runner.jar` which may then be started with
+  
+  > java -jar ere-ps-app-VERSION-SNAPSHOT-runner.jar
+
+
 ### Docker image
 To create a docker image, the corresponding quarkus extension may be used:
 ```
