@@ -91,12 +91,10 @@ import static org.jose4j.jws.AlgorithmIdentifiers.RSA_PSS_USING_SHA256;
 
 @Dependent
 public class IdpClient implements IIdpClient {
+    private static final Logger LOG = Logger.getLogger(IdpClient.class.getName());
 
     @Inject
     AuthenticatorClient authenticatorClient;
-
-    @Inject
-    Logger logger;
 
     @Inject
     AppConfig appConfig;
@@ -142,7 +140,7 @@ public class IdpClient implements IIdpClient {
             endpointDiscoveryService.configureSSLTransportContext(bp);
 
         } catch(Exception ex) {
-            logger.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
+            LOG.error("Could not init AuthSignatureService or CardService for IdpClient", ex);
         }
     }
 
@@ -246,7 +244,7 @@ public class IdpClient implements IIdpClient {
 
         // Authorization
         final String state = RandomStringUtils.randomAlphanumeric(20);
-        logger.debug("Performing Authorization with remote-URL: " +
+        LOG.debug("Performing Authorization with remote-URL: " +
                 getDiscoveryDocumentResponse().getAuthorizationEndpoint());
         final AuthorizationResponse authorizationResponse =
             getAuthenticatorClient()
@@ -262,7 +260,7 @@ public class IdpClient implements IIdpClient {
                         .build());
 
         // Authentication
-        logger.debug("Performing Authentication with remote-URL: " +
+        LOG.debug("Performing Authentication with remote-URL: " +
             getDiscoveryDocumentResponse().getAuthorizationEndpoint());
         AuthenticationResponse authenticationResponse;
         if(authorizationResponse instanceof ImpfnachweisAuthorizationResponse) {
@@ -384,7 +382,7 @@ public class IdpClient implements IIdpClient {
         }
 
         // get Token
-        logger.debug("Performing getToken with remote-URL: " +
+        LOG.debug("Performing getToken with remote-URL: " +
                 getDiscoveryDocumentResponse().getTokenEndpoint());
         return getAuthenticatorClient().retrieveAccessToken(TokenRequest.builder()
                 .tokenUrl(getDiscoveryDocumentResponse().getTokenEndpoint())
@@ -424,7 +422,7 @@ public class IdpClient implements IIdpClient {
 
         // Authorization
         final String state = RandomStringUtils.randomAlphanumeric(20);
-        logger.debug("Performing Authorization with remote-URL: " +
+        LOG.debug("Performing Authorization with remote-URL: " +
             getDiscoveryDocumentResponse().getAuthorizationEndpoint());
         final AuthorizationResponse authorizationResponse =
             getAuthenticatorClient()
@@ -442,7 +440,7 @@ public class IdpClient implements IIdpClient {
         // Authentication
         final String ssoChallengeEndpoint = getDiscoveryDocumentResponse().getAuthorizationEndpoint().replace(
             IdpConstants.BASIC_AUTHORIZATION_ENDPOINT, IdpConstants.SSO_ENDPOINT);
-        logger.debug("Performing Sso-Authentication with remote-URL: " + ssoChallengeEndpoint);
+        LOG.debug("Performing Sso-Authentication with remote-URL: " + ssoChallengeEndpoint);
         final AuthenticationResponse authenticationResponse =
             getAuthenticatorClient()
                 .performAuthenticationWithSsoToken(AuthenticationRequest.builder()
@@ -459,7 +457,7 @@ public class IdpClient implements IIdpClient {
         }
 
         // Get Token
-        logger.debug("Performing getToken with remote-URL: " +
+        LOG.debug("Performing getToken with remote-URL: " +
                 getDiscoveryDocumentResponse().getTokenEndpoint());
 
         return getAuthenticatorClient().retrieveAccessToken(TokenRequest.builder()
@@ -489,7 +487,7 @@ public class IdpClient implements IIdpClient {
     }
 
     private void assertThatClientIsInitialized() throws IdpClientException {
-        logger.debug("Verifying IDP-Client initialization...");
+        LOG.debug("Verifying IDP-Client initialization...");
         if (getDiscoveryDocumentResponse() == null ||
             StringUtils.isEmpty(getDiscoveryDocumentResponse().getAuthorizationEndpoint()) ||
             StringUtils.isEmpty(getDiscoveryDocumentResponse().getTokenEndpoint())) {
@@ -500,7 +498,7 @@ public class IdpClient implements IIdpClient {
 
     @Override
     public IIdpClient initializeClient() throws IdpClientException, IdpException, IdpJoseException {
-        logger.info("Initializing using url: " + getDiscoveryDocumentUrl());
+        LOG.info("Initializing using url: " + getDiscoveryDocumentUrl());
         setDiscoveryDocumentResponse(getAuthenticatorClient()
             .retrieveDiscoveryDocument(getDiscoveryDocumentUrl()));
         return this;

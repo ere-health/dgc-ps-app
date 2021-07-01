@@ -20,6 +20,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,13 +113,17 @@ public class EndpointDiscoveryService {
             clientBuilder = clientBuilder.hostnameVerifier(new SSLUtilities.FakeHostnameVerifier());
         }
 
-        Invocation invocation = clientBuilder.build()
+        Invocation.Builder builder = clientBuilder.build()
                 .target(connectorBaseUri)
                 .path("/connector.sds")
-                .request()
-                .buildGet();
+                .request();
 
-        try (InputStream inputStream = invocation.invoke(InputStream.class)) {
+        if (httpPassword.isPresent()) {
+            builder = builder.header("Authorization", "Basic " +
+                    Base64.getEncoder().encodeToString((httpUser + ":" + httpPassword.get()).getBytes(StandardCharsets.UTF_8)));
+        }
+
+        try (InputStream inputStream = builder.buildGet().invoke(InputStream.class)) {
             Document document = DocumentBuilderFactory.newDefaultInstance()
                     .newDocumentBuilder()
                     .parse(inputStream);
