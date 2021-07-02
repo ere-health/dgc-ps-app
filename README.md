@@ -116,6 +116,7 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   
   > java -jar ere-ps-app-VERSION-SNAPSHOT-runner.jar
 
+  This form of distribution may lead to problems as duplicate class files in the original library jar-files only end up once in the final jar.
 
 ### Docker image
 To create a docker image, the corresponding quarkus extension may be used:
