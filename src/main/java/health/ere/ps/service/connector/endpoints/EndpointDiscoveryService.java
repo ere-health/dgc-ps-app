@@ -242,7 +242,7 @@ public class EndpointDiscoveryService {
 
             String location = endpointNode.getAttributes().getNamedItem("Location").getTextContent();
 
-            if (location.startsWith(connectorBaseUri)) {
+            if (location.startsWith(connectorBaseUri + "/")) {
                 return location;
             }
         }

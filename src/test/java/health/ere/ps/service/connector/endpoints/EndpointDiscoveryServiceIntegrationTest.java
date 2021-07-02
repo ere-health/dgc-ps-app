@@ -42,9 +42,9 @@ class EndpointDiscoveryServiceIntegrationTest {
 
     private static final int BIND_PORT_HTTP = 8124;
 
-    private static final String BASE_URI_HTTPS = "https://" + BIND_ADDRESS + ":" + BIND_PORT_HTTPS + "/";
+    private static final String BASE_URI_HTTPS = "https://" + BIND_ADDRESS + ":" + BIND_PORT_HTTPS;
 
-    private static final String BASE_URI_HTTP = "http://" + BIND_ADDRESS + ":" + BIND_PORT_HTTP + "/";
+    private static final String BASE_URI_HTTP = "http://" + BIND_ADDRESS + ":" + BIND_PORT_HTTP;
 
     @TempDir
     File tempDir;
@@ -82,9 +82,9 @@ class EndpointDiscoveryServiceIntegrationTest {
 
         String cardServiceEndpoint = baseUri + "/testCardServiceEndpoint";
 
-        String eventServiceEndpoint = baseUri + "testEventServiceEndpoint";
+        String eventServiceEndpoint = baseUri + "/testEventServiceEndpoint";
 
-        String certificateServiceEndpoint = baseUri + "testCertificateServiceEndpoint";
+        String certificateServiceEndpoint = baseUri + "/testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
         endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
@@ -122,13 +122,13 @@ class EndpointDiscoveryServiceIntegrationTest {
 
     @Test
     void obtainConfigurationWithFallbackEndpoints() throws SecretsManagerException, IOException, ParserConfigurationException {
-        String authSignatureServiceEndpoint = BASE_URI_HTTPS + "testAuthSignatureServiceEndpoint";
+        String authSignatureServiceEndpoint = BASE_URI_HTTPS + "/testAuthSignatureServiceEndpoint";
 
-        String cardServiceEndpoint = BASE_URI_HTTPS + "testCardServiceEndpoint";
+        String cardServiceEndpoint = BASE_URI_HTTPS + "/testCardServiceEndpoint";
 
-        String eventServiceEndpoint = BASE_URI_HTTPS + "testEventServiceEndpoint";
+        String eventServiceEndpoint = BASE_URI_HTTPS + "/testEventServiceEndpoint";
 
-        String certificateServiceEndpoint = BASE_URI_HTTPS + "testCertificateServiceEndpoint";
+        String certificateServiceEndpoint = BASE_URI_HTTPS + "/testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
         endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
@@ -160,13 +160,13 @@ class EndpointDiscoveryServiceIntegrationTest {
 
     @Test
     void obtainConfigurationWithBasicAuth() throws IOException, ParserConfigurationException, SecretsManagerException {
-        String authSignatureServiceEndpoint = BASE_URI_HTTPS + "testAuthSignatureServiceEndpoint";
+        String authSignatureServiceEndpoint = BASE_URI_HTTPS + "/testAuthSignatureServiceEndpoint";
 
-        String cardServiceEndpoint = BASE_URI_HTTPS + "testCardServiceEndpoint";
+        String cardServiceEndpoint = BASE_URI_HTTPS + "/testCardServiceEndpoint";
 
-        String eventServiceEndpoint = BASE_URI_HTTPS + "testEventServiceEndpoint";
+        String eventServiceEndpoint = BASE_URI_HTTPS + "/testEventServiceEndpoint";
 
-        String certificateServiceEndpoint = BASE_URI_HTTPS + "testCertificateServiceEndpoint";
+        String certificateServiceEndpoint = BASE_URI_HTTPS + "/testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
         endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
