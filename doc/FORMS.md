@@ -5,7 +5,7 @@ To prefill values in this form, hash-parameter may be used (i.e. `.../dgc/covid-
 | Field | Description |
 | ----- | ----------- |
 | `fn`  | Family name |
-| `gn`  | Given name |
+| `gn`  | Given name(s) |
 | `dob` | Date of birth, e.g. 2000-01-31 |
 | `id`  | Administering id (Betriebsstättennummer) |
 | `dt`  | Date of vaccination, e.g. 2021-05-31 |
@@ -23,7 +23,7 @@ To prefill values in this form, hash-parameter may be used (i.e. `.../dgc/covid-
 | Field | Description |
 | ----- | ----------- |
 | `fn`  | Family name |
-| `gn`  | Given name |
+| `gn`  | Given name(s) |
 | `dob` | Date of birth, e.g. 2000-01-31 |
 | `id`  | Administering id (Betriebsstättennummer) |
 | `tg`  | Disease (should be 840539006 in this context)

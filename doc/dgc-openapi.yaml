@@ -324,7 +324,7 @@ components:
       name: gn
       in: query
       required: true
-      description: Given name
+      description: Given name(s)
       schema:
         type: string
     DateOfBirth:
