@@ -228,10 +228,12 @@ public class EndpointDiscoveryService {
             throw new IllegalArgumentException("No version tags found");
         }
 
+        boolean httpEndpoint = connectorBaseUri.startsWith("http://");
+
         NodeList versionNodes = versionsNode.getChildNodes();
 
         for (int i = 0, n = versionNodes.getLength(); i < n; ++i) {
-            Node endpointNode = getNodeWithTag(versionNodes.item(i), "EndpointTLS");
+            Node endpointNode = getNodeWithTag(versionNodes.item(i), httpEndpoint ? "Endpoint" : "EndpointTLS");
 
             if (endpointNode == null || !endpointNode.hasAttributes()
                     || endpointNode.getAttributes().getNamedItem("Location") == null) {
@@ -240,7 +242,7 @@ public class EndpointDiscoveryService {
 
             String location = endpointNode.getAttributes().getNamedItem("Location").getTextContent();
 
-            if (location.startsWith(connectorBaseUri)) {
+            if (location.startsWith(connectorBaseUri + "/")) {
                 return location;
             }
         }
