@@ -69,7 +69,7 @@ public class DigitalGreenCertificateService {
      * Issue a certificate based on the given values.
      *
      * @param fn  (family) name
-     * @param gn  given name
+     * @param gn  given name(s)
      * @param dob date of birth
      * @param id administering instance id
      * @param tg disease
@@ -110,7 +110,7 @@ public class DigitalGreenCertificateService {
      * Create a recovery certificate pdf.
      *
      * @param fn  (family) name
-     * @param gn  given name
+     * @param gn  given name(s)
      * @param dob date of birth
      * @param id  administering instance id
      * @param tg  disease
