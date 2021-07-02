@@ -96,6 +96,28 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   
   > http://localhost:8080/dgc/covid-19-certificate.html
 
+* #### Create a standalone application directory
+  Run
+
+  >  mvn clean package -DskipTests=true
+
+  to create the directory `target/quarkus-app` which contains the application files. It may then be started with
+
+  > java -jar target/quarkus-app/run-quarkus.jar
+  
+  Note that the `quarkus-app` directory structure is needed in order to run the application.
+
+* #### Create a standalone single jar-file
+  Run
+  
+  > QUARKUS_PACKAGE_TYPE=uber-jar mvn clean package -DskipTests=true
+  
+  to create the file `target/ere-ps-app-VERSION-SNAPSHOT-runner.jar` which may then be started with
+  
+  > java -jar ere-ps-app-VERSION-SNAPSHOT-runner.jar
+
+  This form of distribution may lead to problems as duplicate class files in the original library jar-files only end up once in the final jar.
+
 ### Docker image
 To create a docker image, the corresponding quarkus extension may be used:
 ```
