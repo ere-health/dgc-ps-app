@@ -85,7 +85,7 @@ public class IdPService {
                 clientSystem = appConfig.getClientSystemId();
                 workplace = appConfig.getWorkplaceId();
                 cardHandle = connectorCardsService.getConnectorCardHandle(
-                        ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+                        ConnectorCardsService.CardHandleType.SMC_B, mandantId, clientSystem, workplace).orElseThrow();
             } else {
                 mandantId = Optional.ofNullable(callContext.getMandantId()).orElseGet(appConfig::getMandantId);
                 clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElseGet(appConfig::getClientSystemId);
@@ -94,7 +94,7 @@ public class IdPService {
                     cardHandle = callContext.getCardHandle();
                 }  else {
                     cardHandle = connectorCardsService.getConnectorCardHandle(
-                            ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+                            ConnectorCardsService.CardHandleType.SMC_B, mandantId, clientSystem, workplace).orElseThrow();
                 }
             }
 
