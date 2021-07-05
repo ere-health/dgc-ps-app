@@ -91,11 +91,13 @@ class IdPServiceTest {
         when(appConfig.getMandantId()).thenReturn(mandantId);
         when(appConfig.getClientSystemId()).thenReturn(clientSystem);
         when(appConfig.getWorkplaceId()).thenReturn(workplace);
-        when(connectorCardsService.getConnectorCardHandle(ConnectorCardsService.CardHandleType.SMC_B))
+        when(connectorCardsService.getConnectorCardHandle(ConnectorCardsService.CardHandleType.SMC_B, mandantId,
+                clientSystem, workplace))
                 .thenReturn(Optional.of(cardHandle));
         when(cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace, cardHandle))
                 .thenReturn(x509Certificate);
-        when(idpClient.login(new PkiIdentity(x509Certificate))).thenReturn(idpTokenResult);
+        when(idpClient.login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace, cardHandle))
+                .thenReturn(idpTokenResult);
         when(idpTokenResult.getAccessToken()).thenReturn(accessToken);
         when(accessToken.getRawString()).thenReturn(token);
 
@@ -115,7 +117,8 @@ class IdPServiceTest {
         inOrder.verify(idpClient).initializeClient();
         inOrder.verify(cardCertificateReaderService).retrieveSmcbCardCertificate(mandantId, clientSystem, workplace,
                 cardHandle);
-        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate));
+        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace,
+                cardHandle);
     }
 
     @Test
@@ -149,7 +152,8 @@ class IdPServiceTest {
         when(callContext.getCardHandle()).thenReturn(cardHandle);
         when(cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace, cardHandle))
                 .thenReturn(x509Certificate);
-        when(idpClient.login(new PkiIdentity(x509Certificate))).thenReturn(idpTokenResult);
+        when(idpClient.login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace, cardHandle))
+                .thenReturn(idpTokenResult);
         when(idpTokenResult.getAccessToken()).thenReturn(accessToken);
         when(accessToken.getRawString()).thenReturn(token);
 
@@ -168,7 +172,8 @@ class IdPServiceTest {
         inOrder.verify(idpClient).initializeClient();
         inOrder.verify(cardCertificateReaderService).retrieveSmcbCardCertificate(mandantId, clientSystem, workplace,
                 cardHandle);
-        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate));
+        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace,
+                cardHandle);
     }
 
     @Test
