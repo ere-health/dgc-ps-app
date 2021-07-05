@@ -96,7 +96,8 @@ public class MockIdpClient implements IIdpClient {
     }
 
     @Override
-    public IdpTokenResult login(final PkiIdentity clientIdentity)
+    public IdpTokenResult login(final PkiIdentity clientIdentity, String mandantId, String clientSystem,
+                                String workplace, String cardHandle)
             throws IdpJoseException, IdpCryptoException {
         assertThatMockIdClientIsInitialized();
 

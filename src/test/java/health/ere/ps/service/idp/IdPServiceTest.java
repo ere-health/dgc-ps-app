@@ -7,6 +7,7 @@ import health.ere.ps.exception.connector.ConnectorCardsException;
 import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
 import health.ere.ps.exception.idp.IdpJoseException;
+import health.ere.ps.exception.idp.crypto.IdpCryptoException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.idp.client.IdpTokenResult;
 import health.ere.ps.model.idp.client.token.JsonWebToken;
@@ -69,7 +70,7 @@ class IdPServiceTest {
 
     @Test
     void requestBearerToken() throws ConnectorCardsException, ConnectorCardCertificateReadException, IdpJoseException,
-            IdpClientException, IdpException {
+            IdpClientException, IdpException, IdpCryptoException {
 
         String mandantId = "testMandantId";
 
@@ -119,7 +120,7 @@ class IdPServiceTest {
 
     @Test
     void requestBearerTokenWithCallContext() throws ConnectorCardCertificateReadException, IdpJoseException,
-            IdpClientException, IdpException {
+            IdpClientException, IdpException, IdpCryptoException {
 
         String mandantId = "testMandantId";
 

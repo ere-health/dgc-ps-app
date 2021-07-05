@@ -158,11 +158,11 @@ public class IdpClient implements IIdpClient {
     /**
      * Create a context type.
      */
-    ContextType createContextType() {
+    private ContextType createContextType(String mandantId, String clientSystemId, String workplaceId) {
         ContextType contextType = new ContextType();
-        contextType.setMandantId(appConfig.getMandantId());
-        contextType.setClientSystemId(appConfig.getClientSystemId());
-        contextType.setWorkplaceId(appConfig.getWorkplaceId());
+        contextType.setMandantId(Optional.ofNullable(mandantId).orElseGet(appConfig::getMandantId));
+        contextType.setClientSystemId(Optional.ofNullable(clientSystemId).orElseGet(appConfig::getClientSystemId));
+        contextType.setWorkplaceId(Optional.ofNullable(workplaceId).orElseGet(appConfig::getWorkplaceId));
         contextType.setUserId(appConfig.getUserId());
         return contextType;
     }
@@ -204,15 +204,22 @@ public class IdpClient implements IIdpClient {
         return signedServerChallengeJwt;
     }
 
-    public IdpTokenResult login(final PkiIdentity idpIdentity)
+    @Override
+    public IdpTokenResult login(final PkiIdentity idpIdentity, String mandantId, String clientSystem, String workplace,
+                                String cardHandle)
             throws IdpException, IdpClientException, IdpJoseException {
         assertThatIdpIdentityIsValid(idpIdentity);
+
+        String actualCardHandle = Optional.ofNullable(cardHandle).orElseGet(connectorCardsService::getCardHandle);
+
+        ContextType contextType = createContextType(mandantId, clientSystem, workplace);
+
         return login(idpIdentity.getCertificate(),
             Errors.rethrow().wrap((Throwing.Function<Pair<String, String>, String>) jwtPair -> {
                 final JsonWebSignatureWithExternalAuthentification jws =
                         new JsonWebSignatureWithExternalAuthentification(authSignatureService,
-                                connectorCardsService.getCardHandle(),
-                                createContextType());
+                                actualCardHandle,
+                                contextType);
                 jws.setPayload(new String(Base64.getUrlDecoder().decode(jwtPair.getRight())));
                 Optional.ofNullable(jwtPair.getLeft())
                     .map(b64Header -> new String(Base64.getUrlDecoder().decode(b64Header)))
@@ -231,11 +238,11 @@ public class IdpClient implements IIdpClient {
                 } catch (JoseException e) {
                     throw new IdpClientException("Error during encryption", e);
                 }
-            }));
+            }), contextType, actualCardHandle);
     }
 
-    public IdpTokenResult login(final X509Certificate certificate,
-        final Function<Pair<String, String>, String> contentSigner)
+    private IdpTokenResult login(final X509Certificate certificate,
+        final Function<Pair<String, String>, String> contentSigner, ContextType contextType, String cardHandle)
             throws IdpClientException, IdpException, IdpJoseException {
         assertThatClientIsInitialized();
 
@@ -269,7 +276,7 @@ public class IdpClient implements IIdpClient {
             authenticationRequest.setAuthenticationEndpointUrl(impfnachweisAuthorizationResponse.getLocation());
             
             JsonWebSignatureWithExternalAuthentification jws = new JsonWebSignatureWithExternalAuthentification(
-                    authSignatureService, connectorCardsService.getCardHandle(), createContextType()
+                    authSignatureService, cardHandle, contextType
             );
             byte[] signedChallenge;
             try {
@@ -285,8 +292,8 @@ public class IdpClient implements IIdpClient {
                             Holder<Status> status = new Holder<>();
                             Holder<PinResultEnum> pinResultEnum = new Holder<>();
                             Holder<BigInteger> error = new Holder<>();
-                            cardService.verifyPin(createContextType(),
-                                    connectorCardsService.getCardHandle(),
+                            cardService.verifyPin(contextType,
+                                    cardHandle,
                                     "PIN.SMC", status, pinResultEnum, error);
                             // try again
                             signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
