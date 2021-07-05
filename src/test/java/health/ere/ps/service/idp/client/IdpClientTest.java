@@ -1,5 +1,6 @@
 package health.ere.ps.service.idp.client;
 
+import health.ere.ps.exception.idp.crypto.IdpCryptoException;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.endpoints.EndpointDiscoveryService;
 import org.junit.jupiter.api.BeforeAll;
@@ -87,7 +88,7 @@ public class IdpClientTest {
             disabledReason = "This test will only work in the Telematik RU Infrastructure")
     public void test_Successful_Idp_Login_With_Connector_Smcb() throws IdpJoseException,
             IdpClientException, IdpException, ConnectorCardCertificateReadException,
-            ConnectorCardsException {
+            ConnectorCardsException, IdpCryptoException {
 
         discoveryDocumentUrl = appConfig.getIdpBaseUrl() + IdpHttpClientService.DISCOVERY_DOCUMENT_URI;
 

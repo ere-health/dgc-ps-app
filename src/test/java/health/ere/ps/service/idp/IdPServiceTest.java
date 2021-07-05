@@ -7,6 +7,7 @@ import health.ere.ps.exception.connector.ConnectorCardsException;
 import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
 import health.ere.ps.exception.idp.IdpJoseException;
+import health.ere.ps.exception.idp.crypto.IdpCryptoException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.idp.client.IdpTokenResult;
 import health.ere.ps.model.idp.client.token.JsonWebToken;
@@ -69,7 +70,7 @@ class IdPServiceTest {
 
     @Test
     void requestBearerToken() throws ConnectorCardsException, ConnectorCardCertificateReadException, IdpJoseException,
-            IdpClientException, IdpException {
+            IdpClientException, IdpException, IdpCryptoException {
 
         String mandantId = "testMandantId";
 
@@ -90,11 +91,13 @@ class IdPServiceTest {
         when(appConfig.getMandantId()).thenReturn(mandantId);
         when(appConfig.getClientSystemId()).thenReturn(clientSystem);
         when(appConfig.getWorkplaceId()).thenReturn(workplace);
-        when(connectorCardsService.getConnectorCardHandle(ConnectorCardsService.CardHandleType.SMC_B))
+        when(connectorCardsService.getConnectorCardHandle(ConnectorCardsService.CardHandleType.SMC_B, mandantId,
+                clientSystem, workplace))
                 .thenReturn(Optional.of(cardHandle));
         when(cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace, cardHandle))
                 .thenReturn(x509Certificate);
-        when(idpClient.login(new PkiIdentity(x509Certificate))).thenReturn(idpTokenResult);
+        when(idpClient.login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace, cardHandle))
+                .thenReturn(idpTokenResult);
         when(idpTokenResult.getAccessToken()).thenReturn(accessToken);
         when(accessToken.getRawString()).thenReturn(token);
 
@@ -114,12 +117,13 @@ class IdPServiceTest {
         inOrder.verify(idpClient).initializeClient();
         inOrder.verify(cardCertificateReaderService).retrieveSmcbCardCertificate(mandantId, clientSystem, workplace,
                 cardHandle);
-        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate));
+        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace,
+                cardHandle);
     }
 
     @Test
     void requestBearerTokenWithCallContext() throws ConnectorCardCertificateReadException, IdpJoseException,
-            IdpClientException, IdpException {
+            IdpClientException, IdpException, IdpCryptoException {
 
         String mandantId = "testMandantId";
 
@@ -148,7 +152,8 @@ class IdPServiceTest {
         when(callContext.getCardHandle()).thenReturn(cardHandle);
         when(cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace, cardHandle))
                 .thenReturn(x509Certificate);
-        when(idpClient.login(new PkiIdentity(x509Certificate))).thenReturn(idpTokenResult);
+        when(idpClient.login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace, cardHandle))
+                .thenReturn(idpTokenResult);
         when(idpTokenResult.getAccessToken()).thenReturn(accessToken);
         when(accessToken.getRawString()).thenReturn(token);
 
@@ -167,7 +172,8 @@ class IdPServiceTest {
         inOrder.verify(idpClient).initializeClient();
         inOrder.verify(cardCertificateReaderService).retrieveSmcbCardCertificate(mandantId, clientSystem, workplace,
                 cardHandle);
-        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate));
+        inOrder.verify(idpClient).login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace,
+                cardHandle);
     }
 
     @Test

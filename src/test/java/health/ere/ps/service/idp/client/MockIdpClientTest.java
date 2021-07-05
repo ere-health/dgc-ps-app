@@ -64,7 +64,7 @@ public class MockIdpClientTest {
     }
 
     @Test
-    public void verifyToken() throws IdpJoseException, IdpCryptoException {
+    public void verifyToken() throws IdpJoseException, IdpCryptoException, IdpClientException, IdpException {
         final IdpTokenResult authToken = mockIdpClient.login(rsaClientIdentity);
         authToken.getAccessToken().verify(mockIdpClient.getServerIdentity().getCertificate().getPublicKey());
     }
@@ -123,7 +123,7 @@ public class MockIdpClientTest {
 
     @Disabled
     @Test
-    public void verifyServerSignatureEcc() throws IdpJoseException, IdpCryptoException {
+    public void verifyServerSignatureEcc() throws IdpJoseException, IdpCryptoException, IdpClientException, IdpException {
         assertTrue(mockIdpClient.login(rsaClientIdentity)
                 .getAccessToken()
                 .getHeaderClaims().entrySet().stream().anyMatch(entry ->
@@ -134,7 +134,7 @@ public class MockIdpClientTest {
     @Disabled
     @Test
     public void verifyServerSignatureRsa(@PkiKeyResolver.Filename("rsa") final PkiIdentity rsaIdentity)
-            throws IdpCryptoException, IdpJoseException {
+            throws IdpCryptoException, IdpJoseException, IdpClientException, IdpException {
         mockIdpClient = MockIdpClient.builder()
                 .serverIdentity(rsaIdentity)
                 .uriIdpServer(URI_IDP_SERVER)
@@ -152,7 +152,7 @@ public class MockIdpClientTest {
     @Disabled
     @Test
     public void resignTokenWithNewBodyClaim_ShouldContainNewClaim()
-            throws IdpJoseException, IdpCryptoException {
+            throws IdpJoseException, IdpCryptoException, IdpClientException, IdpException {
         final JsonWebToken jwt = mockIdpClient.login(rsaClientIdentity)
                 .getAccessToken();
 
@@ -171,7 +171,7 @@ public class MockIdpClientTest {
     @Disabled
     @Test
     public void resignTokenWithNewHeaderClaim_ShouldContainNewHeaderClaim()
-            throws IdpJoseException, IdpCryptoException {
+            throws IdpJoseException, IdpCryptoException, IdpClientException, IdpException {
         final JsonWebToken jwt = mockIdpClient.login(rsaClientIdentity)
                 .getAccessToken();
 
@@ -191,7 +191,7 @@ public class MockIdpClientTest {
 
     /** A_20297-01 */
     @Test
-    public void verifyAccessTokenIssClaim() throws IdpJoseException, IdpCryptoException {
+    public void verifyAccessTokenIssClaim() throws IdpJoseException, IdpCryptoException, IdpClientException, IdpException {
         final JsonWebToken jwt = mockIdpClient.login(rsaClientIdentity).getAccessToken();
         final Map<String, Object> bodyClaims = jwt.getBodyClaims();
 
