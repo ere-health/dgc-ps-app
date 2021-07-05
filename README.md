@@ -79,6 +79,10 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   
   > mvn quarkus:dev
   
+  If mvn is not installed you can used the pre-bundled maven wrapper:
+  
+  > ./mnvw quarkus:dev
+  
   At this point, the application should be running as highlighted below.
   
   ```shell
