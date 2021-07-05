@@ -13,6 +13,7 @@ export CONNECTOR_USER_ID=
 # required unless specified using X-headers, see doc/dgc-openapi.yml
 export CONNECTOR_CLIENT_SYSTEM_ID=
 export CONNECTOR_WORKPLACE_ID=
+export CONNECTOR_MANDANT_ID=
 
 # optional but recommended; adjust to the connector that is in use, especially CONNECTOR_VERIFY_HOSTNAME=true may
 # cause some problems
