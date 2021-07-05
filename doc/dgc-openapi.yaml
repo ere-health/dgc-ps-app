@@ -82,7 +82,6 @@ paths:
         - $ref: '#/components/parameters/AdministeringId'
         - $ref: '#/components/parameters/Illness'
         - $ref: '#/components/parameters/PositiveTestDate'
-        - $ref: '#/components/parameters/Issuer'
         - $ref: '#/components/parameters/CertificateStartDate'
         - $ref: '#/components/parameters/CertificateEndDate'
       responses:
@@ -245,9 +244,6 @@ components:
                     type: string
                     format: date
                     description: Date of first positive test result
-                  is:
-                    type: string
-                    description: Issuer of certificate
                   df:
                     type: string
                     format: date
@@ -404,13 +400,6 @@ components:
       schema:
         type: string
         format: date
-    Issuer:
-      name: is
-      in: query
-      required: true
-      description: Issuer of certificate
-      schema:
-        type: string
     CertificateStartDate:
       name: df
       in: query
