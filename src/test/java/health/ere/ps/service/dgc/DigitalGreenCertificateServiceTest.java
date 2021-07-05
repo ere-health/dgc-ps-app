@@ -5,7 +5,6 @@ import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
-import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
 import health.ere.ps.model.dgc.CallContext;
