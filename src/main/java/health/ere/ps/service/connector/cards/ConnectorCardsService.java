@@ -43,7 +43,6 @@ public class ConnectorCardsService implements SoapClient {
     @Inject
     EndpointDiscoveryService endpointDiscoveryService;
 
-    private ContextType contextType;
     private EventServicePortType eventService;
 
     public enum CardHandleType {
@@ -70,26 +69,24 @@ public class ConnectorCardsService implements SoapClient {
         }
     }
 
-    public String getCardHandle() {
+    public String getCardHandle(String mandantId, String clientSystemId, String workplaceId) {
         if (cardHandle.isPresent()) {
             return cardHandle.get();
         } else {
             try {
-                return this.getConnectorCardHandle(CardHandleType.SMC_B).orElseThrow();
+                return this.getConnectorCardHandle(CardHandleType.SMC_B, mandantId, clientSystemId, workplaceId).orElseThrow();
             } catch (ConnectorCardsException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
+    public String getCardHandle() {
+        return getCardHandle(null, null, null);
+    }
+
     @PostConstruct
     void init() throws SecretsManagerException {
-        contextType = new ContextType();
-        contextType.setMandantId(appConfig.getMandantId());
-        contextType.setClientSystemId(appConfig.getClientSystemId());
-        contextType.setWorkplaceId(appConfig.getWorkplaceId());
-        contextType.setUserId(appConfig.getUserId());
-
         eventService = new EventService(getClass().getResource(
                 "/EventService.wsdl")).getEventServicePort();
 
@@ -101,9 +98,16 @@ public class ConnectorCardsService implements SoapClient {
         endpointDiscoveryService.configureSSLTransportContext(bp);
     }
 
-    public GetCardsResponse getConnectorCards()
+    public GetCardsResponse getConnectorCards(String mandantId, String clientSystemId, String workplaceId)
             throws ConnectorCardsException {
         GetCards parameter = new GetCards();
+
+        ContextType contextType = new ContextType();
+
+        contextType.setMandantId(Optional.ofNullable(mandantId).orElseGet(appConfig::getMandantId));
+        contextType.setClientSystemId(Optional.ofNullable(clientSystemId).orElseGet(appConfig::getClientSystemId));
+        contextType.setWorkplaceId(Optional.ofNullable(workplaceId).orElseGet(appConfig::getWorkplaceId));
+        contextType.setUserId(appConfig.getUserId());
 
         parameter.setContext(contextType);
 
@@ -114,8 +118,12 @@ public class ConnectorCardsService implements SoapClient {
         }
     }
 
-    public Optional<List<CardInfoType>> getConnectorCardsInfo() throws ConnectorCardsException {
-        GetCardsResponse response = getConnectorCards();
+    public GetCardsResponse getConnectorCards() throws ConnectorCardsException {
+        return getConnectorCards(null, null, null);
+    }
+
+    public Optional<List<CardInfoType>> getConnectorCardsInfo(String mandantId, String clientSystemId, String workplaceId) throws ConnectorCardsException {
+        GetCardsResponse response = getConnectorCards(mandantId, clientSystemId, workplaceId);
         List<CardInfoType> cardHandleTypeList = null;
 
         if(response != null) {
@@ -131,9 +139,9 @@ public class ConnectorCardsService implements SoapClient {
         return Optional.ofNullable(cardHandleTypeList);
     }
 
-    public Optional<String> getConnectorCardHandle(CardHandleType cardHandleType)
+    public Optional<String> getConnectorCardHandle(CardHandleType cardHandleType, String mandantId, String clientSystemId, String workplaceId)
             throws ConnectorCardsException {
-        Optional<List<CardInfoType>> cardsInfoList = getConnectorCardsInfo();
+        Optional<List<CardInfoType>> cardsInfoList = getConnectorCardsInfo(mandantId, clientSystemId, workplaceId);
         String cardHandle = null;
 
         if(cardsInfoList.isPresent()) {
@@ -150,6 +158,10 @@ public class ConnectorCardsService implements SoapClient {
         }
 
         return Optional.ofNullable(cardHandle);
+    }
+
+    public Optional<String> getConnectorCardHandle(CardHandleType cardHandleType) throws ConnectorCardsException {
+        return getConnectorCardHandle(cardHandleType, null, null, null);
     }
 
     @Override

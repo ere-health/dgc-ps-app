@@ -210,7 +210,7 @@ public class IdpClient implements IIdpClient {
             throws IdpException, IdpClientException, IdpJoseException {
         assertThatIdpIdentityIsValid(idpIdentity);
 
-        String actualCardHandle = Optional.ofNullable(cardHandle).orElseGet(connectorCardsService::getCardHandle);
+        String actualCardHandle = Optional.ofNullable(cardHandle).orElseGet(() -> connectorCardsService.getCardHandle(mandantId, clientSystem, workplace));
 
         ContextType contextType = createContextType(mandantId, clientSystem, workplace);
 
