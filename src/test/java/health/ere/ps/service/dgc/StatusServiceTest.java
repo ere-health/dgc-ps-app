@@ -20,14 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.net.URL;
 import java.util.NoSuchElementException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.unauthorized;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -40,22 +37,21 @@ import static org.mockito.Mockito.when;
 class StatusServiceTest {
 
     @Mock
-    ConnectorCardsService connectorCardsService;
+    private ConnectorCardsService connectorCardsService;
 
     @Mock
-    EndpointDiscoveryService endpointDiscoveryService;
+    private EndpointDiscoveryService endpointDiscoveryService;
 
     @Mock
-    AppConfig appConfig;
+    private AppConfig appConfig;
 
     @InjectMocks
-    StatusService statusService;
+    private StatusService statusService;
 
     private WireMockServer wireMockServer;
 
     @BeforeEach
-    void startup() throws Exception {
-
+    void startup() {
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
         wireMockServer.start();
         assertTrue(wireMockServer.isRunning());
@@ -93,7 +89,7 @@ class StatusServiceTest {
     }
 
     @Test
-    void testConnectivityMissingUrls() throws Exception {
+    void testConnectivityMissingUrls() {
         // given
         final String dgcPath = "/digital-green-certificate";
 
