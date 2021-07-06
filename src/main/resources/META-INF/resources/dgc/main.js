@@ -147,7 +147,7 @@ async function fetchStatus() {
 
     try {
         if (abortController) {
-            abortController.abort();
+                abortController.abort();
         }
         abortController = new AbortController();
         setTimeout(() => loader.classList.remove("hidden"));
