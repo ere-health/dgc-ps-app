@@ -23,7 +23,6 @@ import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.exception.idp.IdpException;
 import health.ere.ps.exception.idp.IdpJoseException;
 import health.ere.ps.model.idp.client.IdpTokenResult;
-import health.ere.ps.service.common.security.SecretsManagerService;
 import health.ere.ps.service.common.security.SecureSoapTransportConfigurer;
 import health.ere.ps.service.connector.cards.ConnectorCardsService;
 import health.ere.ps.service.connector.certificate.CardCertificateReaderService;
@@ -86,7 +85,7 @@ public class IdPService {
                 clientSystem = appConfig.getClientSystemId();
                 workplace = appConfig.getWorkplaceId();
                 cardHandle = connectorCardsService.getConnectorCardHandle(
-                        ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+                        ConnectorCardsService.CardHandleType.SMC_B, mandantId, clientSystem, workplace).orElseThrow();
             } else {
                 mandantId = Optional.ofNullable(callContext.getMandantId()).orElseGet(appConfig::getMandantId);
                 clientSystem = Optional.ofNullable(callContext.getClientSystem()).orElseGet(appConfig::getClientSystemId);
@@ -95,7 +94,7 @@ public class IdPService {
                     cardHandle = callContext.getCardHandle();
                 }  else {
                     cardHandle = connectorCardsService.getConnectorCardHandle(
-                            ConnectorCardsService.CardHandleType.SMC_B).orElseThrow();
+                            ConnectorCardsService.CardHandleType.SMC_B, mandantId, clientSystem, workplace).orElseThrow();
                 }
             }
 
@@ -103,10 +102,10 @@ public class IdPService {
                     cardCertificateReaderService.retrieveSmcbCardCertificate(mandantId, clientSystem, workplace,
                             cardHandle);
 
-            IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate));
+            IdpTokenResult idpTokenResult = idpClient.login(new PkiIdentity(x509Certificate), mandantId, clientSystem, workplace, cardHandle);
             requestBearerTokenFromIdpEvent.setBearerToken(idpTokenResult.getAccessToken().getRawString());
-        } catch(IdpClientException | IdpException | IdpJoseException |
-                ConnectorCardCertificateReadException | ConnectorCardsException e) {
+        } catch(IdpClientException | IdpException | IdpJoseException | ConnectorCardCertificateReadException |
+                ConnectorCardsException e) {
             log.log(Level.WARNING, "Idp login did not work", e);
             exceptionEvent.fireAsync(e);
         }

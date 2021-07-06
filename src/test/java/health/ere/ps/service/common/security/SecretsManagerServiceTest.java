@@ -1,11 +1,8 @@
 package health.ere.ps.service.common.security;
 
-import org.jboss.logging.Logger;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -32,9 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @QuarkusTest
 @ExtendWith(PkiKeyResolver.class)
 class SecretsManagerServiceTest {
-    @Inject
-    Logger log;
-
     @Inject
     SecretsManagerService secretsManagerService;
 

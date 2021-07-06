@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   title: ERE Digital Green Certificate
-  version: 0.1.0
+  version: 0.1.1
   description: |
     Digital green certificate service for issuing both vaccination certificates
     and recovery certificates.
@@ -82,7 +82,6 @@ paths:
         - $ref: '#/components/parameters/AdministeringId'
         - $ref: '#/components/parameters/Illness'
         - $ref: '#/components/parameters/PositiveTestDate'
-        - $ref: '#/components/parameters/Issuer'
         - $ref: '#/components/parameters/CertificateStartDate'
         - $ref: '#/components/parameters/CertificateEndDate'
       responses:
@@ -245,9 +244,6 @@ components:
                     type: string
                     format: date
                     description: Date of first positive test result
-                  is:
-                    type: string
-                    description: Issuer of certificate
                   df:
                     type: string
                     format: date
@@ -324,7 +320,7 @@ components:
       name: gn
       in: query
       required: true
-      description: Given name
+      description: Given name(s)
       schema:
         type: string
     DateOfBirth:
@@ -404,13 +400,6 @@ components:
       schema:
         type: string
         format: date
-    Issuer:
-      name: is
-      in: query
-      required: true
-      description: Issuer of certificate
-      schema:
-        type: string
     CertificateStartDate:
       name: df
       in: query

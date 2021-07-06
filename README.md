@@ -79,6 +79,10 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   
   > mvn quarkus:dev
   
+  If mvn is not installed you can used the pre-bundled maven wrapper:
+  
+  > ./mnvw quarkus:dev
+  
   At this point, the application should be running as highlighted below.
   
   ```shell
@@ -95,6 +99,28 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   browser!
   
   > http://localhost:8080/dgc/covid-19-certificate.html
+
+* #### Create a standalone application directory
+  Run
+
+  >  mvn clean package -DskipTests=true
+
+  to create the directory `target/quarkus-app` which contains the application files. It may then be started with
+
+  > java -jar target/quarkus-app/run-quarkus.jar
+  
+  Note that the `quarkus-app` directory structure is needed in order to run the application.
+
+* #### Create a standalone single jar-file
+  Run
+  
+  > QUARKUS_PACKAGE_TYPE=uber-jar mvn clean package -DskipTests=true
+  
+  to create the file `target/ere-ps-app-VERSION-SNAPSHOT-runner.jar` which may then be started with
+  
+  > java -jar ere-ps-app-VERSION-SNAPSHOT-runner.jar
+
+  This form of distribution may lead to problems as duplicate class files in the original library jar-files only end up once in the final jar.
 
 ### Docker image
 To create a docker image, the corresponding quarkus extension may be used:
@@ -124,6 +150,7 @@ In regard to file and directory paths, configure the values for the environment 
 
 | Environment variable | Description | Example |
 | ----- | ----- | ----- |
+| `QUARKUS_HTTP_HOST` | IP address that the service will listen on; if not supplied, the service will listen on **all** IP addresses of the system and will therefore be available via network access from other hosts | `127.0.0.1` |
 | `CONNECTOR_CERT_AUTH_STORE_FILE` | File path to the client certificate that will be used to connect to the connector; may be empty; * | `p12:files/path/to/certificate.p12` |
 | `CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD` | Password for accessing the certificate that is configured in `CONNECTOR_CERT_AUTH_STORE_FILE` | `changeit` |
 | `CONNECTOR_CERT_TRUST_STORE_FILE` | File path to the certificate trust store that will be used to connect to the connector; may be empty; **Attention**: if not supplied, **ANY** tls certificate will be accepted which makes the connection to the connector vulnerable to MITM attacks; * | `jks:files/keystore` |
@@ -133,8 +160,8 @@ In regard to file and directory paths, configure the values for the environment 
 | `CONNECTOR_WORKPLACE_ID` | Workplace id that will be used for the connector | `12345` |
 | `CONNECTOR_CARD_HANDLE` | Card handle that will be used for the connector; optional - if not supplied, the card handle will be detected automatically | `SMB-C-123` |
 | `CONNECTOR_USER_ID` | User id that will be used for the connector | `user123` |
-| `CONNECTOR_USER_PASSWORD` | Password for `CONNECTOR_USER_ID`; only required if the connector is accessed via username and password | `someStrongPassword` |
-| `CONNECTOR_BASE_URI` | Base URI for the connector (protocol+host+port) | `https://192.168.1.1` |
+| `CONNECTOR_USER_PASSWORD` | Password for `CONNECTOR_USER_ID`; only required if the connector is accessed via username and password; will be used for **all** requests to the connector | `someStrongPassword` |
+| `CONNECTOR_BASE_URI` | Base URI for the connector (protocol+host+port, **no** trailing slash); will be used for discovery via `/connector.sds` of the other connector endpoints (see `*_ENDPOINT_ADDRESS`); it is highly recommended to use `https` since the base uri will be used for **all** connector interactions; connector urls that do not match this base uri, will not be used | `https://192.168.1.1` |
 | `CONNECTOR_VERIFY_HOSTNAME` | Set to `false` to disable host name verification when using TLS for the connector | `true` |
 | `IDP_BASE_URL` | Base URL for the IDP | `https://id.impfnachweis.info/auth/realms/bmg-ti-certify` |
 | `IDP_CLIENT_ID` | Client id for the auth procedure with the IDP to get a token for the certificate creation service; should be `user-access-ti` | `user-access-ti` |

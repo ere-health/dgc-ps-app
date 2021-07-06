@@ -1,6 +1,7 @@
 package health.ere.ps.service.connector.endpoints;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import health.ere.ps.exception.common.security.SecretsManagerException;
 import health.ere.ps.service.common.security.SecretsManagerService;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,9 +37,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class EndpointDiscoveryServiceIntegrationTest {
     private static final String BIND_ADDRESS = "127.0.0.1";
 
-    private static final int BIND_PORT = 8123;
+    private static final int BIND_PORT_HTTPS = 8123;
 
-    private static final String BASE_URI = "https://" + BIND_ADDRESS + ":" + BIND_PORT + "/";
+    private static final int BIND_PORT_HTTP = 8124;
+
+    private static final String BASE_URI_HTTPS = "https://" + BIND_ADDRESS + ":" + BIND_PORT_HTTPS;
+
+    private static final String BASE_URI_HTTP = "http://" + BIND_ADDRESS + ":" + BIND_PORT_HTTP;
 
     @TempDir
     File tempDir;
@@ -54,8 +61,8 @@ class EndpointDiscoveryServiceIntegrationTest {
     void setupMock() {
         wireMockServer = new WireMockServer(WireMockConfiguration.options()
                 .bindAddress(BIND_ADDRESS)
-                .httpDisabled(true)
-                .httpsPort(BIND_PORT));
+                .port(BIND_PORT_HTTP)
+                .httpsPort(BIND_PORT_HTTPS));
 
         wireMockServer.start();
     }
@@ -65,20 +72,26 @@ class EndpointDiscoveryServiceIntegrationTest {
         wireMockServer.stop();
     }
 
-    @Test
-    void obtainConfiguration() throws IOException, ParserConfigurationException, SecretsManagerException {
-        String authSignatureServiceEndpoint = BASE_URI + "testAuthSignatureServiceEndpoint";
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void obtainConfiguration(boolean https) throws IOException, ParserConfigurationException, SecretsManagerException {
+        String baseUri = https ? BASE_URI_HTTPS : BASE_URI_HTTP;
 
-        String cardServiceEndpoint = BASE_URI + "testCardServiceEndpoint";
+        String authSignatureServiceEndpoint = baseUri + "/testAuthSignatureServiceEndpoint";
 
-        String eventServiceEndpoint = BASE_URI + "testEventServiceEndpoint";
+        String cardServiceEndpoint = baseUri + "/testCardServiceEndpoint";
 
-        String certificateServiceEndpoint = BASE_URI + "testCertificateServiceEndpoint";
+        String eventServiceEndpoint = baseUri + "/testEventServiceEndpoint";
+
+        String certificateServiceEndpoint = baseUri + "/testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
         endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
         endpointDiscoveryService.connectorVerifyHostname = "false";
-        endpointDiscoveryService.connectorBaseUri = BASE_URI;
+        endpointDiscoveryService.connectorBaseUri = baseUri;
+
+        // disable http basic auth
+        endpointDiscoveryService.httpPassword = Optional.empty();
 
         // verify server certificate of wiremock server
         try (InputStream inputStream = getClass().getClassLoader().getResource("keystore").openConnection().getInputStream()) {
@@ -96,7 +109,7 @@ class EndpointDiscoveryServiceIntegrationTest {
         endpointDiscoveryService.fallbackEventServiceEndpointAddress = Optional.of(eventServiceEndpoint + "changed");
 
         mockEndpoints(authSignatureServiceEndpoint, cardServiceEndpoint, eventServiceEndpoint,
-                certificateServiceEndpoint);
+                certificateServiceEndpoint, null, null, https);
 
         endpointDiscoveryService.obtainConfiguration();
 
@@ -108,18 +121,21 @@ class EndpointDiscoveryServiceIntegrationTest {
 
     @Test
     void obtainConfigurationWithFallbackEndpoints() throws SecretsManagerException, IOException, ParserConfigurationException {
-        String authSignatureServiceEndpoint = BASE_URI + "testAuthSignatureServiceEndpoint";
+        String authSignatureServiceEndpoint = BASE_URI_HTTPS + "/testAuthSignatureServiceEndpoint";
 
-        String cardServiceEndpoint = BASE_URI + "testCardServiceEndpoint";
+        String cardServiceEndpoint = BASE_URI_HTTPS + "/testCardServiceEndpoint";
 
-        String eventServiceEndpoint = BASE_URI + "testEventServiceEndpoint";
+        String eventServiceEndpoint = BASE_URI_HTTPS + "/testEventServiceEndpoint";
 
-        String certificateServiceEndpoint = BASE_URI + "testCertificateServiceEndpoint";
+        String certificateServiceEndpoint = BASE_URI_HTTPS + "/testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
         endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
         endpointDiscoveryService.connectorVerifyHostname = "false";
-        endpointDiscoveryService.connectorBaseUri = BASE_URI;
+        endpointDiscoveryService.connectorBaseUri = BASE_URI_HTTPS;
+
+        // disable http basic auth
+        endpointDiscoveryService.httpPassword = Optional.empty();
 
         // disable server certificate verification of wiremock server
         endpointDiscoveryService.connectorTlsCertTrustStoreFile = Optional.empty();
@@ -131,7 +147,44 @@ class EndpointDiscoveryServiceIntegrationTest {
         endpointDiscoveryService.fallbackEventServiceEndpointAddress = Optional.of(eventServiceEndpoint);
 
         // mocking with empty strings causes the location to be discarded
-        mockEndpoints("", "", "", "");
+        mockEndpoints("", "", "", "", null, null, true);
+
+        endpointDiscoveryService.obtainConfiguration();
+
+        assertEquals(authSignatureServiceEndpoint, endpointDiscoveryService.getAuthSignatureServiceEndpointAddress());
+        assertEquals(cardServiceEndpoint, endpointDiscoveryService.getCardServiceEndpointAddress());
+        assertEquals(eventServiceEndpoint, endpointDiscoveryService.getEventServiceEndpointAddress());
+        assertEquals(certificateServiceEndpoint, endpointDiscoveryService.getCertificateServiceEndpointAddress());
+    }
+
+    @Test
+    void obtainConfigurationWithBasicAuth() throws IOException, ParserConfigurationException, SecretsManagerException {
+        String authSignatureServiceEndpoint = BASE_URI_HTTPS + "/testAuthSignatureServiceEndpoint";
+
+        String cardServiceEndpoint = BASE_URI_HTTPS + "/testCardServiceEndpoint";
+
+        String eventServiceEndpoint = BASE_URI_HTTPS + "/testEventServiceEndpoint";
+
+        String certificateServiceEndpoint = BASE_URI_HTTPS + "/testCertificateServiceEndpoint";
+
+        // disable client ssl certificate SSL context
+        endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
+        endpointDiscoveryService.connectorVerifyHostname = "false";
+        endpointDiscoveryService.connectorBaseUri = BASE_URI_HTTPS;
+
+        String username = "testBasicUsername";
+
+        String password = "testBasicPassword";
+
+        // enable http basic auth
+        endpointDiscoveryService.httpUser = username;
+        endpointDiscoveryService.httpPassword = Optional.of(password);
+
+        // disable server certificate verification of wiremock server
+        endpointDiscoveryService.connectorTlsCertTrustStoreFile = Optional.empty();
+
+        mockEndpoints(authSignatureServiceEndpoint, cardServiceEndpoint, eventServiceEndpoint,
+                certificateServiceEndpoint, username, password, true);
 
         endpointDiscoveryService.obtainConfiguration();
 
@@ -143,9 +196,15 @@ class EndpointDiscoveryServiceIntegrationTest {
 
     private void mockEndpoints(String authSignatureServiceEndpoint,
                                String cardServiceEndpoint, String eventServiceEndpoint,
-                               String certificateServiceEndpoint) {
+                               String certificateServiceEndpoint, String username, String password, boolean https) {
 
-        wireMockServer.stubFor(get("/connector.sds").willReturn(okXml("<ConnectorServices " +
+        MappingBuilder mappingBuilder = get("/connector.sds").withScheme(https ? "https" : "http");
+
+        if (username != null) {
+            mappingBuilder.withBasicAuth(username, password);
+        }
+
+        wireMockServer.stubFor(mappingBuilder.willReturn(okXml("<ConnectorServices " +
                 "xmlns=\"http://localhost/ns0/v0.1\" " +
                 "xmlns:ns10=\"http://localhost/ns10/v1.23\">" +
                 "<ns10:ServiceInformation>" +
@@ -157,7 +216,7 @@ class EndpointDiscoveryServiceIntegrationTest {
                         .stream()
                         .map(entry -> "<ns10:Service Name=\"" + entry.getKey() + "\">" +
                                 "<ns10:Versions><ns10:Version>" +
-                                "<ns10:EndpointTLS Location=\"" + entry.getValue() + "\"/>" +
+                                "<ns10:" + (https ? "EndpointTLS" : "Endpoint") + " Location=\"" + entry.getValue() + "\"/>" +
                                 "</ns10:Version></ns10:Versions>" +
                                 "</ns10:Service>")
                         .collect(Collectors.joining()) +

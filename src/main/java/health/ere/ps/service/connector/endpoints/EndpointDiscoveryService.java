@@ -20,6 +20,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,13 +113,17 @@ public class EndpointDiscoveryService {
             clientBuilder = clientBuilder.hostnameVerifier(new SSLUtilities.FakeHostnameVerifier());
         }
 
-        Invocation invocation = clientBuilder.build()
+        Invocation.Builder builder = clientBuilder.build()
                 .target(connectorBaseUri)
                 .path("/connector.sds")
-                .request()
-                .buildGet();
+                .request();
 
-        try (InputStream inputStream = invocation.invoke(InputStream.class)) {
+        if (httpPassword.isPresent()) {
+            builder = builder.header("Authorization", "Basic " +
+                    Base64.getEncoder().encodeToString((httpUser + ":" + httpPassword.get()).getBytes(StandardCharsets.UTF_8)));
+        }
+
+        try (InputStream inputStream = builder.buildGet().invoke(InputStream.class)) {
             Document document = DocumentBuilderFactory.newDefaultInstance()
                     .newDocumentBuilder()
                     .parse(inputStream);
@@ -222,10 +228,12 @@ public class EndpointDiscoveryService {
             throw new IllegalArgumentException("No version tags found");
         }
 
+        boolean httpEndpoint = connectorBaseUri.startsWith("http://");
+
         NodeList versionNodes = versionsNode.getChildNodes();
 
         for (int i = 0, n = versionNodes.getLength(); i < n; ++i) {
-            Node endpointNode = getNodeWithTag(versionNodes.item(i), "EndpointTLS");
+            Node endpointNode = getNodeWithTag(versionNodes.item(i), httpEndpoint ? "Endpoint" : "EndpointTLS");
 
             if (endpointNode == null || !endpointNode.hasAttributes()
                     || endpointNode.getAttributes().getNamedItem("Location") == null) {
@@ -234,7 +242,7 @@ public class EndpointDiscoveryService {
 
             String location = endpointNode.getAttributes().getNamedItem("Location").getTextContent();
 
-            if (location.startsWith(connectorBaseUri)) {
+            if (location.startsWith(connectorBaseUri + "/")) {
                 return location;
             } else {
             	LOG.warning(location+" does not start with: "+connectorBaseUri);
