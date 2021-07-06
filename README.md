@@ -110,6 +110,9 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   > java -jar target/quarkus-app/run-quarkus.jar
   
   Note that the `quarkus-app` directory structure is needed in order to run the application.
+  
+  When packaging this folder, make sure to include the `target/generated-sources/license/THIRD-PARTY.txt` and state the
+  location of the dependencies.
 
 * #### Create a standalone single jar-file
   Run
@@ -121,6 +124,8 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   > java -jar ere-ps-app-VERSION-SNAPSHOT-runner.jar
 
   This form of distribution may lead to problems as duplicate class files in the original library jar-files only end up once in the final jar.
+  
+  Make sure to properly mention the `THIRD-PARTY.txt` file that is included in the resulting jar file.
 
 ### Docker image
 To create a docker image, the corresponding quarkus extension may be used:
