@@ -217,6 +217,23 @@
                     <skipEmptyReport>false</skipEmptyReport>
                 </configuration>
             </plugin>
+            <plugin>
+                <!-- Missing licenses may be defined in src/license/THIRD-PARTY.properties -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>prepare-package</id>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                        <configuration>
+                            <excludedScopes>test</excludedScopes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>

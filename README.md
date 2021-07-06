@@ -77,6 +77,9 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   >  mvn clean package -DskipTests=true -Dmaven.test.skip=true
 
   to create the file `target/dgc-ps-app.war`.
+  
+  Make sure to properly mention the `THIRD-PARTY.txt` file that is included in the resulting war file (in
+  `WEB-INF/classes/`).
 
 
 ### Environment Variables
