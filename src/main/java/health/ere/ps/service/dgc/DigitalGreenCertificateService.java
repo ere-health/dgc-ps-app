@@ -50,6 +50,10 @@ public class DigitalGreenCertificateService {
 
     void onStart(@Observes StartupEvent ev) {               
         LOG.info("Application started go to: http://localhost:8080/dgc/covid-19-vaccination-certificate.html");
+        LOG.info("idp.client.id: " + appConfig.getClientId());
+        LOG.info("idp.base.url: " + appConfig.getIdpBaseUrl());
+        LOG.info("digital-green-certificate-service.issuerAPIUrl: " +
+                appConfig.getDigitalGreenCertificateServiceIssuerAPI());
     }
 
     @PostConstruct
