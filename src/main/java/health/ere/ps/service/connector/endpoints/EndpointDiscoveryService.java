@@ -82,6 +82,9 @@ public class EndpointDiscoveryService {
     @ConfigProperty(name = "connector.base-uri")
     String connectorBaseUri;
 
+    @ConfigProperty(name = "connector.base-uri.check", defaultValue = "false")
+    String connectorBaseUriCheck;
+
     @ConfigProperty(name = "connector.verify-hostname", defaultValue = "true")
     String connectorVerifyHostname;
 
@@ -242,7 +245,7 @@ public class EndpointDiscoveryService {
 
             String location = endpointNode.getAttributes().getNamedItem("Location").getTextContent();
 
-            if (location.startsWith(connectorBaseUri + "/")) {
+            if (location.startsWith(connectorBaseUri + "/") || "false".equals(connectorBaseUriCheck)) {
                 return location;
             }
         }

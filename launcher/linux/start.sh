@@ -16,7 +16,7 @@ export CONNECTOR_WORKPLACE_ID=
 export CONNECTOR_MANDANT_ID=
 
 # optional but recommended; adjust to the connector that is in use, especially CONNECTOR_VERIFY_HOSTNAME=true may
-# cause some problems
+# cause some problems as well as CONNECTOR_BASE_URI_CHECK=true
 export QUARKUS_HTTP_HOST=127.0.0.1
 export CONNECTOR_CERT_AUTH_STORE_FILE=
 export CONNECTOR_CERT_AUTH_STORE_FILE_PASSWORD=
@@ -24,6 +24,7 @@ export CONNECTOR_CERT_TRUST_STORE_FILE=
 export CONNECTOR_CERT_TRUST_STORE_FILE_PASSWORD=
 export CONNECTOR_USER_PASSWORD=
 export CONNECTOR_VERIFY_HOSTNAME=true
+export CONNECTOR_BASE_URI_CHECK=true
 
 # optional
 export CONNECTOR_CARD_HANDLE=

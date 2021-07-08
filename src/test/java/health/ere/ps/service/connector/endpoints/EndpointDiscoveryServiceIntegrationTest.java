@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
@@ -73,22 +74,25 @@ class EndpointDiscoveryServiceIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void obtainConfiguration(boolean https) throws IOException, ParserConfigurationException, SecretsManagerException {
+    @CsvSource({"true, true", "true, false", "false, true", "false, false"})
+    void obtainConfiguration(boolean https, boolean changeBaseUri) throws IOException, ParserConfigurationException, SecretsManagerException {
         String baseUri = https ? BASE_URI_HTTPS : BASE_URI_HTTP;
 
-        String authSignatureServiceEndpoint = baseUri + "/testAuthSignatureServiceEndpoint";
+        String baseUriChange = changeBaseUri ? "1" : "";
 
-        String cardServiceEndpoint = baseUri + "/testCardServiceEndpoint";
+        String authSignatureServiceEndpoint = baseUri + baseUriChange + "/testAuthSignatureServiceEndpoint";
 
-        String eventServiceEndpoint = baseUri + "/testEventServiceEndpoint";
+        String cardServiceEndpoint = baseUri + baseUriChange + "/testCardServiceEndpoint";
 
-        String certificateServiceEndpoint = baseUri + "/testCertificateServiceEndpoint";
+        String eventServiceEndpoint = baseUri + baseUriChange + "/testEventServiceEndpoint";
+
+        String certificateServiceEndpoint = baseUri + baseUriChange + "/testCertificateServiceEndpoint";
 
         // disable client ssl certificate SSL context
         endpointDiscoveryService.connectorTlsCertAuthStoreFile = Optional.empty();
         endpointDiscoveryService.connectorVerifyHostname = "false";
         endpointDiscoveryService.connectorBaseUri = baseUri;
+        endpointDiscoveryService.connectorBaseUriCheck = Boolean.toString(!changeBaseUri);
 
         // disable http basic auth
         endpointDiscoveryService.httpPassword = Optional.empty();
