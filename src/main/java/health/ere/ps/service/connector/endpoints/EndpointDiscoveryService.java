@@ -20,8 +20,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.ws.BindingProvider;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,6 +83,9 @@ public class EndpointDiscoveryService {
 
     @ConfigProperty(name = "connector.base-uri")
     String connectorBaseUri;
+
+    @ConfigProperty(name = "connector.base-uri.check", defaultValue = "false")
+    String connectorBaseUriCheck;
 
     @ConfigProperty(name = "connector.verify-hostname", defaultValue = "true")
     String connectorVerifyHostname;
@@ -228,7 +233,9 @@ public class EndpointDiscoveryService {
             throw new IllegalArgumentException("No version tags found");
         }
 
-        boolean httpEndpoint = connectorBaseUri.startsWith("http://");
+        URI connectorBaseUri = URI.create(this.connectorBaseUri);
+
+        boolean httpEndpoint = "http".equals(connectorBaseUri.getScheme());
 
         NodeList versionNodes = versionsNode.getChildNodes();
 
@@ -240,10 +247,13 @@ public class EndpointDiscoveryService {
                 continue;
             }
 
-            String location = endpointNode.getAttributes().getNamedItem("Location").getTextContent();
+            URI location = URI.create(endpointNode.getAttributes().getNamedItem("Location").getTextContent());
 
-            if (location.startsWith(connectorBaseUri + "/")) {
-                return location;
+            if ((Objects.equals(location.getScheme(), connectorBaseUri.getScheme()) &&
+                    Objects.equals(location.getHost(), connectorBaseUri.getHost()) &&
+                    getPort(location) == getPort(connectorBaseUri))
+                    || "false".equals(connectorBaseUriCheck)) {
+                return location.toString();
             }
         }
 
@@ -263,5 +273,19 @@ public class EndpointDiscoveryService {
         }
 
         return null;
+    }
+
+    private static int getPort(URI uri) {
+        int port = uri.getPort();
+
+        if (port == -1) {
+            if ("https".equals(uri.getScheme())) {
+                return 443;
+            } else if ("http".equals(uri.getScheme())) {
+                return 80;
+            }
+        }
+
+        return port;
     }
 }
