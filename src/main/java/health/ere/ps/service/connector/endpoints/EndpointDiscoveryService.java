@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -248,8 +249,8 @@ public class EndpointDiscoveryService {
 
             URI location = URI.create(endpointNode.getAttributes().getNamedItem("Location").getTextContent());
 
-            if ((location.getScheme().equals(connectorBaseUri.getScheme()) &&
-                    location.getHost().equals(connectorBaseUri.getHost()) &&
+            if ((Objects.equals(location.getScheme(), connectorBaseUri.getScheme()) &&
+                    Objects.equals(location.getHost(), connectorBaseUri.getHost()) &&
                     getPort(location) == getPort(connectorBaseUri))
                     || "false".equals(connectorBaseUriCheck)) {
                 return location.toString();
