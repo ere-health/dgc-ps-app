@@ -74,7 +74,7 @@ class EndpointDiscoveryServiceIntegrationTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"true, true", "true, false", "false, true", "false, false"})
+    @CsvSource({"true, false", "true, true", "false, false", "false, true"})
     void obtainConfiguration(boolean https, boolean changeBaseUri) throws IOException, ParserConfigurationException, SecretsManagerException {
         String baseUri = https ? BASE_URI_HTTPS : BASE_URI_HTTP;
 
