@@ -90,10 +90,10 @@ public class EndpointDiscoveryService {
     @Inject @ConfigProperty(name = "connector.base-uri.check", defaultValue = "false")
     String connectorBaseUriCheck;
 
-    @ConfigProperty(name = "connector.user.id")
+    @Inject @ConfigProperty(name = "connector.user.id")
     String httpUser;
 
-    @ConfigProperty(name = "connector.user.password")
+    @Inject @ConfigProperty(name = "connector.user.password")
     Optional<String> httpPassword;
 
     @Inject
