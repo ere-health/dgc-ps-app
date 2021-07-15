@@ -77,7 +77,7 @@ async function sendVaccinationRequest() {
             }
         ]
     };
-    await sendRequest("../api/certify/v2/issue", oVacinationRequest)
+    await sendRequest("../rest/api/certify/v2/issue", oVacinationRequest)
 }
 
 let abortController = null;
@@ -147,11 +147,11 @@ async function fetchStatus() {
 
     try {
         if (abortController) {
-            abortController.abort();
+                abortController.abort();
         }
         abortController = new AbortController();
         setTimeout(() => loader.classList.remove("hidden"));
-        const response = await fetch("../api/certify/v2/status", {
+        const response = await fetch("../rest/api/certify/v2/status", {
             method: "GET",
             signal : abortController.signal
         });
@@ -220,7 +220,7 @@ async function sendRecoveredRequest() {
             }
         ]
     };
-    await sendRequest("../api/certify/v2/recovered", requestData);
+    await sendRequest("../rest/api/certify/v2/recovered", requestData);
 }
 
 // Copy prefillParameter

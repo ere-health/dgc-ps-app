@@ -36,7 +36,7 @@ class AuthenticatorClientTest {
     @Inject
     AppConfig appConfig;
     
-    @ConfigProperty(name = "idp.auth.request.url")
+    @Inject @ConfigProperty(name = "idp.auth.request.url")
     String idpAuthRequestUrl;
 
     @Test

@@ -37,7 +37,7 @@ public class ConnectorCardsService implements SoapClient {
      * Card handle for the connector.
      * See ConnectorCommons.xsd in gematik specification.
      */
-    @ConfigProperty(name = "connector.card.handle")
+    @Inject @ConfigProperty(name = "connector.card.handle")
     Optional<String> cardHandle;
 
     @Inject

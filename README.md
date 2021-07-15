@@ -39,7 +39,7 @@ the application. The forms support helpers to [pre-fill parameters](doc/FORMS.md
 
 ### Routing
 In order to reach the German certificate API (that is used by this system), the corresponding
-routing needs to be set up throgh the card connector.
+routing needs to be set up through the card connector.
 
 There are different routings needed for RU and PU:
 | Environment | Subnet |
@@ -69,76 +69,18 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   2. Download and install the latest version of Apache Maven (https://maven.apache.org/). 
     
   3. The latest Chrome Browser (https://www.google.com/chrome/).
- 
-    
-* #### Running the Application (Development Mode)
-  Open a terminal window and change to the parent dgc-ps-app directory of the back-end and then run 
-  the following commands:
   
-  Then run:
-  
-  > mvn quarkus:dev
-  
-  If mvn is not installed you can used the pre-bundled maven wrapper:
-  
-  > ./mnvw quarkus:dev
-  
-  At this point, the application should be running as highlighted below.
-  
-  ```shell
-    __  ____  __  _____   ___  __ ____  ______ 
-     --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
-     -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
-    --\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
-    2021-06-14 08:25:16,406 INFO  [hea.ere.ps.ser.dgc.DigitalGreenCertificateService] (Quarkus Main Thread) Application started go to: http://localhost:8080/dgc/covid-19-certificate.html
-    2021-06-14 08:25:16,479 INFO  [io.quarkus] (Quarkus Main Thread) ere-ps-app 1.0.0-SNAPSHOT on JVM (powered by Quarkus 1.13.1.Final) started in 2.250s. Listening on: http://0.0.0.0:8080
-    2021-06-14 08:25:16,481 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
-    2021-06-14 08:25:16,481 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, rest-client, resteasy, resteasy-jsonb, servlet]
-  ```
-  You can access the front-end UI of the application by making reference to the following URL in a 
-  browser!
-  
-  > http://localhost:8080/dgc/covid-19-certificate.html
 
-* #### Create a standalone application directory
+* #### Create a war-package
   Run
 
-  >  mvn clean package -DskipTests=true
+  >  mvn clean package -DskipTests=true -Dmaven.test.skip=true
 
-  to create the directory `target/quarkus-app` which contains the application files. It may then be started with
+  to create the file `target/dgc-ps-app.war`.
+  
+  Make sure to properly mention the `THIRD-PARTY.txt` file that is included in the resulting war file (in
+  `WEB-INF/classes/`).
 
-  > java -jar target/quarkus-app/run-quarkus.jar
-  
-  Note that the `quarkus-app` directory structure is needed in order to run the application.
-  
-  When packaging this folder, make sure to include the `target/generated-sources/license/THIRD-PARTY.txt` and state the
-  location of the dependencies.
-
-* #### Create a standalone single jar-file
-  Run
-  
-  > QUARKUS_PACKAGE_TYPE=uber-jar mvn clean package -DskipTests=true
-  
-  to create the file `target/ere-ps-app-VERSION-SNAPSHOT-runner.jar` which may then be started with
-  
-  > java -jar ere-ps-app-VERSION-SNAPSHOT-runner.jar
-
-  This form of distribution may lead to problems as duplicate class files in the original library jar-files only end up once in the final jar.
-  
-  Make sure to properly mention the `THIRD-PARTY.txt` file that is included in the resulting jar file.
-
-### Docker image
-To create a docker image, the corresponding quarkus extension may be used:
-```
-mvn package -Dquarkus.container-image.build=true -DskipTests=true
-```
-
-This command will create a docker image called `ere.health/dgc:latest` which contains a service
-that listens on port 8080. To locally start the image, the command
-```
-docker run --rm -p 127.0.0.1:8080:8080 ere.health/dgc:latest
-```
-may be used.
 
 ### Environment Variables
 

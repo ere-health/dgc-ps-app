@@ -67,7 +67,7 @@ public class CardCertReadExecutionService {
             certificateService.readCardCertificate(cardHandle, contextType, certRefList,
                     statusHolder, certHolder);
         } catch (FaultMessage faultMessage) {
-            new ConnectorCardCertificateReadException("Exception reading aut certificate",
+            throw new ConnectorCardCertificateReadException("Exception reading aut certificate",
                     faultMessage);
         }
 

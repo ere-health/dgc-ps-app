@@ -5,8 +5,9 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <groupId>health.ere</groupId>
-    <artifactId>ere-ps-app</artifactId>
+    <artifactId>dgc-ps-app</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>war</packaging>
     <properties>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
         <maven.compiler.parameters>true</maven.compiler.parameters>
@@ -14,24 +15,34 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <quarkus-plugin.version>1.13.1.Final</quarkus-plugin.version>
-        <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
-        <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>1.13.1.Final</quarkus.platform.version>
-        <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+		<failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>${quarkus.platform.group-id}</groupId>
-                <artifactId>${quarkus.platform.artifact-id}</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    
     <dependencies>
+	    <dependency>
+		    <groupId>javax.ws.rs</groupId>
+		    <artifactId>javax.ws.rs-api</artifactId>
+		    <version>2.1</version>
+	    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.reactivestreams/reactive-streams -->
+		<dependency>
+		    <groupId>org.reactivestreams</groupId>
+		    <artifactId>reactive-streams</artifactId>
+		    <version>1.0.3</version>
+		</dependency>
+	    <!-- https://mvnrepository.com/artifact/org.eclipse.microprofile.config/microprofile-config-api -->
+		<dependency>
+		    <groupId>org.eclipse.microprofile.config</groupId>
+		    <artifactId>microprofile-config-api</artifactId>
+		    <version>2.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.smallrye.config/smallrye-config -->
+		<dependency>
+		    <groupId>io.smallrye.config</groupId>
+		    <artifactId>smallrye-config</artifactId>
+		    <version>2.3.0</version>
+		</dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -45,6 +56,7 @@
         <dependency>
             <artifactId>bcpkix-jdk15on</artifactId>
             <groupId>org.bouncycastle</groupId>
+            <version>1.69</version>
         </dependency>
         <dependency>
             <groupId>org.bitbucket.b_c</groupId>
@@ -59,6 +71,7 @@
         <dependency>  
             <groupId>org.jboss.slf4j</groupId>
             <artifactId>slf4j-jboss-logmanager</artifactId>
+            <version>1.1.0.Final</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -72,9 +85,9 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
-	    <groupId>com.google.code.gson</groupId>
-	    <artifactId>gson</artifactId>
-	    <version>2.8.7</version>
+		    <groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+		    <version>2.8.7</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
@@ -96,61 +109,59 @@
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
             <version>2.3.4</version>
-            <!--<exclusions>
-                <exclusion>
-                    <groupId>com.sun.istack</groupId>
-                    <artifactId>istack-commons-runtime</artifactId>
-                </exclusion>
-            </exclusions>-->
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-client-microprofile -->
+		<dependency>
+		    <groupId>org.jboss.resteasy</groupId>
+		    <artifactId>resteasy-client-microprofile</artifactId>
+		    <version>3.15.1.Final</version>
+		</dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-cdi</artifactId>
+            <version>3.15.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client</artifactId>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>3.15.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-undertow</artifactId>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-servlet-initializer</artifactId>
+            <version>3.15.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy</artifactId>
-        </dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-shaded</artifactId>
+            <version>3.1.5.Final</version>
+        </dependency>       
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-jsonb</artifactId>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson-provider</artifactId>
+            <version>3.1.0.Final</version>
         </dependency>
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.12.3</version>
+	    </dependency>
+	    <dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.12.3</version>
+	    </dependency>
+         <!-- https://mvnrepository.com/artifact/org.glassfish/javax.json -->
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-jackson</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.1.4</version>
         </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-container-image-docker</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5-mockito</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.junit-pioneer/junit-pioneer -->
-        <!-- to test environment variables set by quarkus-->
-        <dependency>
-            <groupId>org.junit-pioneer</groupId>
-            <artifactId>junit-pioneer</artifactId>
-            <version>1.4.2</version>
-            <scope>test</scope>
-        </dependency>
-
+	<dependency>
+		<groupId>org.glassfish.jersey.core</groupId>
+		<artifactId>jersey-common</artifactId>
+		<version>2.22.2</version>
+	</dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <!-- standalone is needed since the current quarkus dependencies include an old servlet api -->
@@ -158,35 +169,21 @@
             <version>2.28.0</version>
             <scope>test</scope>
         </dependency>
-        <!--
-            Produces: Modules com.sun.xml.bind and com.sun.istack.runtime export package com.sun.istack.localization to module fop
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-    -->
     </dependencies>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus-plugin.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+      <finalName>dgc-ps-app</finalName>
+      <plugins>
+	      <plugin>
+		      <groupId>org.apache.maven.plugins</groupId>
+		      <artifactId>maven-war-plugin</artifactId>
+              <version>3.3.1</version>
+		      <configuration>
+			      <warSourceDirectory>src/main/resources/META-INF/resources</warSourceDirectory>
+		      </configuration>
+	    </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-		<version>${compiler-plugin.version}</version>
+				<version>${compiler-plugin.version}</version>
                 <configuration>
 		    <forceJavacCompilerUse>true</forceJavacCompilerUse>
 	        </configuration>
