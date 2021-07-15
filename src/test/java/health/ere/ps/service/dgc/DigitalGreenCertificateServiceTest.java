@@ -92,22 +92,18 @@ class DigitalGreenCertificateServiceTest {
 
     @Test
     void issuePdfWithTokenException() {
-        doThrow(new RuntimeException()).when(requestBearerTokenFromIdpEventEvent).fire(any());
-
         // mock web request
         Client client = mock(Client.class);
 
         String issuerAPIUrl = "testIssuerAPIUrl";
 
-        WebTarget webTarget = mock(WebTarget.class);
-
-        Invocation.Builder builder = mock(Invocation.Builder.class);
-
         digitalGreenCertificateService.client = client;
         when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn(issuerAPIUrl);
-        when(client.target(issuerAPIUrl)).thenReturn(webTarget);
-        when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
-        when(webTarget.request("application/pdf")).thenReturn(builder);
+        when(client.target(issuerAPIUrl)).thenThrow(new RuntimeException());
+        doAnswer((invocation) -> {
+            ((RequestBearerTokenFromIdpEvent) invocation.getArgument(0)).setBearerToken("testToken");
+            return null;
+        }).when(requestBearerTokenFromIdpEventEvent).fire(any());
 
         // now, the getToken function will be called
 
@@ -117,25 +113,9 @@ class DigitalGreenCertificateServiceTest {
 
     @Test
     void issuePdfWithIdpClientExceptionInConnector() {
-        Client client = mock(Client.class);
-
-        String issuerAPIUrl = "testIssuerAPIUrl";
-
-        WebTarget webTarget = mock(WebTarget.class);
-
-        Invocation.Builder builder = mock(Invocation.Builder.class);
-
         String message = "testMessage";
 
-        // mock web request
-
-        digitalGreenCertificateService.client = client;
-        when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn(issuerAPIUrl);
-        when(client.target(issuerAPIUrl)).thenReturn(webTarget);
-        when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
-        when(webTarget.request("application/pdf")).thenReturn(builder);
-
-        // now, the getToken function will be called
+        // first, the getToken function will be called
         doAnswer(invocationOnMock -> {
             RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent = invocationOnMock.getArgument(0);
 

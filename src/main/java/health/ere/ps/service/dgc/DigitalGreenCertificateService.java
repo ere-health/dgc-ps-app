@@ -163,11 +163,13 @@ public class DigitalGreenCertificateService {
 
         Response response;
 
+        String token = getToken(callContext);
+
         try {
             response = client.target(appConfig.getDigitalGreenCertificateServiceIssuerAPI())
                     .path("/api/certify/v2/issue")
                     .request("application/pdf")
-                    .header("Authorization", "Bearer " + getToken(callContext))
+                    .header("Authorization", "Bearer " + token)
                     .post(entity);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Exception from fetching certificate", e);

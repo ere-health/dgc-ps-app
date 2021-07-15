@@ -291,7 +291,7 @@ class DigitalGreenCertificateServiceIntegrationTest {
 
         requestBearerTokenEventObserver.setException(new IdpClientException(message, IdpClientException.Origin.CONNECTOR));
 
-        assertThrows(DigitalGreenCertificateRemoteException.class,
-                () -> digitalGreenCertificateService.issuePdf(new CertificateRequest() {}, null));
+        assertEquals(assertThrows(DigitalGreenCertificateRemoteException.class,
+                () -> digitalGreenCertificateService.issuePdf(new CertificateRequest() {}, null)).getMessage(), message);
     }
 }
