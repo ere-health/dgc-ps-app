@@ -27,6 +27,7 @@ import de.gematik.ws.conn.connectorcontext.v2.ContextType;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -282,26 +283,27 @@ public class IdpClient implements IIdpClient {
             try {
                 signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
             } catch (JoseException e) {
-                if(e.getCause() instanceof FaultMessage) {
-                    FaultMessage authSignatureFaultMessage = (FaultMessage) e.getCause();
-                    // Zugriffsbedingungen nicht erfüllt
-                    boolean code4085 = authSignatureFaultMessage.getFaultInfo().getTrace().stream().anyMatch(t -> t.getCode().equals(BigInteger.valueOf(4085l)));
-                    if(code4085) {
+                if (isAccessRequirementsNotFulfilledError(e)) {
+                    try {
+                        Holder<Status> status = new Holder<>();
+                        Holder<PinResultEnum> pinResultEnum = new Holder<>();
+                        Holder<BigInteger> error = new Holder<>();
+                        cardService.verifyPin(contextType,
+                                cardHandle,
+                                "PIN.SMC", status, pinResultEnum, error);
+                    } catch (Exception e1) {
+                        throw new IdpClientException("Could not unlock SMC-B", e1, IdpClientException.Origin.CONNECTOR);
+                    }
 
-                        try {
-                            Holder<Status> status = new Holder<>();
-                            Holder<PinResultEnum> pinResultEnum = new Holder<>();
-                            Holder<BigInteger> error = new Holder<>();
-                            cardService.verifyPin(contextType,
-                                    cardHandle,
-                                    "PIN.SMC", status, pinResultEnum, error);
-                            // try again
-                            signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
-                        } catch (Exception e1) {
+                    try {
+                        // try again
+                        signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
+                    } catch (JoseException e1) {
+                        if (isAccessRequirementsNotFulfilledError(e1)) {
+                            throw new IdpClientException("Could not unlock SMC-B", e1, IdpClientException.Origin.CONNECTOR);
+                        } else {
                             throw new IdpJoseException(e);
                         }
-                    } else {
-                        throw new IdpJoseException(e);
                     }
                 } else {
                     throw new IdpJoseException(e);
@@ -316,6 +318,10 @@ public class IdpClient implements IIdpClient {
                     .get();
             } catch (CertificateEncodingException e1) {
                 throw new IdpClientException(e1);
+            }
+
+            if (response.getStatus() != 302) {
+                throw new IdpClientException("Unexpected response from " + URI.create(impfnachweisAuthorizationResponse.getLocation()).getHost(), IdpClientException.Origin.IDP);
             }
 
             URL url;
@@ -578,5 +584,15 @@ public class IdpClient implements IIdpClient {
 
     public void setDiscoveryDocumentResponse(DiscoveryDocumentResponse discoveryDocumentResponse) {
         this.discoveryDocumentResponse = discoveryDocumentResponse;
+    }
+
+    private static boolean isAccessRequirementsNotFulfilledError(JoseException e) {
+        if (e.getCause() instanceof FaultMessage) {
+            FaultMessage authSignatureFaultMessage = (FaultMessage) e.getCause();
+            // Zugriffsbedingungen nicht erfüllt
+            return authSignatureFaultMessage.getFaultInfo().getTrace().stream().anyMatch(t -> t.getCode().equals(BigInteger.valueOf(4085L)));
+        }
+
+        return false;
     }
 }
