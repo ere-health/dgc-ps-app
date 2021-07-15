@@ -5,7 +5,10 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import health.ere.ps.LocalOfflineQuarkusTestProfile;
 import health.ere.ps.config.AppConfig;
 import health.ere.ps.event.RequestBearerTokenFromIdpEvent;
+import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
+import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.model.dgc.CallContext;
+import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
 import health.ere.ps.model.dgc.RecoveryCertificateRequest;
 import health.ere.ps.model.dgc.RecoveryEntry;
@@ -35,6 +38,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -47,9 +51,12 @@ class DigitalGreenCertificateServiceIntegrationTest {
 
         private CallContext callContext;
 
+        private Exception exception;
+
         public void addToken(@Observes RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent) {
             assertEquals(callContext, requestBearerTokenFromIdpEvent.getCallContext());
             requestBearerTokenFromIdpEvent.setBearerToken(token);
+            requestBearerTokenFromIdpEvent.setException(exception);
         }
 
         public void setToken(String token) {
@@ -58,6 +65,10 @@ class DigitalGreenCertificateServiceIntegrationTest {
 
         public void setCallContext(CallContext callContext) {
             this.callContext = callContext;
+        }
+
+        public void setException(Exception exception) {
+            this.exception = exception;
         }
     }
 
@@ -270,5 +281,15 @@ class DigitalGreenCertificateServiceIntegrationTest {
         assertArrayEquals(response, actualResponse);
 
         verifyNoInteractions(callContext);
+    }
+
+    @Test
+    void issueVaccinationCertificateWithIdpClientException() {
+        String message = "testMessage";
+
+        requestBearerTokenEventObserver.setException(new IdpClientException(message, IdpClientException.Origin.CONNECTOR));
+
+        assertThrows(DigitalGreenCertificateRemoteException.class,
+                () -> digitalGreenCertificateService.issuePdf(new CertificateRequest() {}, null));
     }
 }
