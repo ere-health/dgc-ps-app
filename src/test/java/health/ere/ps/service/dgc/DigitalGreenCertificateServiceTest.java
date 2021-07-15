@@ -7,6 +7,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceExce
 import health.ere.ps.exception.dgc.DigitalGreenCertificateException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
+import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
@@ -91,24 +92,36 @@ class DigitalGreenCertificateServiceTest {
 
     @Test
     void issuePdfWithTokenException() {
-        doThrow(new RuntimeException()).when(requestBearerTokenFromIdpEventEvent).fire(any());
-
         // mock web request
         Client client = mock(Client.class);
 
         String issuerAPIUrl = "testIssuerAPIUrl";
 
-        WebTarget webTarget = mock(WebTarget.class);
-
-        Invocation.Builder builder = mock(Invocation.Builder.class);
-
         digitalGreenCertificateService.client = client;
         when(appConfig.getDigitalGreenCertificateServiceIssuerAPI()).thenReturn(issuerAPIUrl);
-        when(client.target(issuerAPIUrl)).thenReturn(webTarget);
-        when(webTarget.path("/api/certify/v2/issue")).thenReturn(webTarget);
-        when(webTarget.request("application/pdf")).thenReturn(builder);
+        when(client.target(issuerAPIUrl)).thenThrow(new RuntimeException());
+        doAnswer((invocation) -> {
+            ((RequestBearerTokenFromIdpEvent) invocation.getArgument(0)).setBearerToken("testToken");
+            return null;
+        }).when(requestBearerTokenFromIdpEventEvent).fire(any());
 
         // now, the getToken function will be called
+
+        assertThrows(DigitalGreenCertificateRemoteException.class,
+                () -> digitalGreenCertificateService.issuePdf(mock(CertificateRequest.class), null));
+    }
+
+    @Test
+    void issuePdfWithIdpClientExceptionInConnector() {
+        String message = "testMessage";
+
+        // first, the getToken function will be called
+        doAnswer(invocationOnMock -> {
+            RequestBearerTokenFromIdpEvent requestBearerTokenFromIdpEvent = invocationOnMock.getArgument(0);
+
+            requestBearerTokenFromIdpEvent.setException(new IdpClientException(message, IdpClientException.Origin.CONNECTOR));
+            return null;
+        }).when(requestBearerTokenFromIdpEventEvent).fire(any());
 
         assertThrows(DigitalGreenCertificateRemoteException.class,
                 () -> digitalGreenCertificateService.issuePdf(mock(CertificateRequest.class), null));

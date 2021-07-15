@@ -107,6 +107,7 @@ public class IdPService {
         } catch(IdpClientException | IdpException | IdpJoseException | ConnectorCardCertificateReadException |
                 ConnectorCardsException e) {
             log.log(Level.WARNING, "Idp login did not work", e);
+            requestBearerTokenFromIdpEvent.setException(e);
             exceptionEvent.fireAsync(e);
         }
     }

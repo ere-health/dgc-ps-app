@@ -7,6 +7,7 @@ import health.ere.ps.exception.dgc.DigitalGreenCertificateCertificateServiceExce
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInternalAuthenticationException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateInvalidParametersException;
 import health.ere.ps.exception.dgc.DigitalGreenCertificateRemoteException;
+import health.ere.ps.exception.idp.IdpClientException;
 import health.ere.ps.model.dgc.CallContext;
 import health.ere.ps.model.dgc.CertificateRequest;
 import health.ere.ps.model.dgc.PersonName;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -161,11 +163,13 @@ public class DigitalGreenCertificateService {
 
         Response response;
 
+        String token = getToken(callContext);
+
         try {
             response = client.target(appConfig.getDigitalGreenCertificateServiceIssuerAPI())
                     .path("/api/certify/v2/issue")
                     .request("application/pdf")
-                    .header("Authorization", "Bearer " + getToken(callContext))
+                    .header("Authorization", "Bearer " + token)
                     .post(entity);
         } catch (Exception e) {
             LOG.log(Level.SEVERE, "Exception from fetching certificate", e);
@@ -179,8 +183,7 @@ public class DigitalGreenCertificateService {
         switch (response.getStatus()) {
             case 200: {
                 try {
-                    byte[] pdf = response.readEntity(InputStream.class).readAllBytes();
-                    return pdf;
+                    return response.readEntity(InputStream.class).readAllBytes();
                 } catch (IOException ioe) {
                     throw new DigitalGreenCertificateCertificateServiceException(100200, "Could not read response from certificate service");
                 }
@@ -229,6 +232,18 @@ public class DigitalGreenCertificateService {
             requestBearerTokenFromIdp.fire(event);
         } catch (Throwable t) {
             LOG.log(Level.SEVERE, t, () -> "Error fetching token");
+            throw new DigitalGreenCertificateInternalAuthenticationException();
+        }
+
+        if (event.getException() != null) {
+            if (event.getException() instanceof IdpClientException) {
+                IdpClientException idpClientException = (IdpClientException) event.getException();
+
+                if (Set.of(IdpClientException.Origin.IDP, IdpClientException.Origin.CONNECTOR).contains(idpClientException.getOrigin())) {
+                    throw new DigitalGreenCertificateRemoteException(100500, idpClientException.getMessage());
+                }
+            }
+
             throw new DigitalGreenCertificateInternalAuthenticationException();
         }
 

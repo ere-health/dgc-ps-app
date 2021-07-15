@@ -112,7 +112,7 @@ class StatusServiceTest {
     @Test
     void testCardHandles() throws Exception {
         // given
-        final String cardHandle = "SMB-XXX";
+        final String cardHandle = "SMCB-XXX";
         final GetCardsResponse response = new GetCardsResponse();
         final Status status = new Status();
         status.setResult("OK");
@@ -135,7 +135,7 @@ class StatusServiceTest {
     @Test
     void testCardHandlesButNotMatch() throws Exception {
         // given
-        final String cardHandle = "SMB-YYY";
+        final String cardHandle = "SMCB-YYY";
         final GetCardsResponse response = new GetCardsResponse();
         final Status status = new Status();
         status.setResult("OK");
