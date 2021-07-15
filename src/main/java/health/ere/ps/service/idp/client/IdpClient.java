@@ -292,7 +292,7 @@ public class IdpClient implements IIdpClient {
                                 cardHandle,
                                 "PIN.SMC", status, pinResultEnum, error);
                     } catch (Exception e1) {
-                        throw new IdpClientException("Could not unlock SMB-C", e1, IdpClientException.Origin.CONNECTOR);
+                        throw new IdpClientException("Could not unlock SMC-B", e1, IdpClientException.Origin.CONNECTOR);
                     }
 
                     try {
@@ -300,7 +300,7 @@ public class IdpClient implements IIdpClient {
                         signedChallenge = jws.signBytes(impfnachweisAuthorizationResponse.getChallenge().getBytes());
                     } catch (JoseException e1) {
                         if (isAccessRequirementsNotFulfilledError(e1)) {
-                            throw new IdpClientException("Could not unlock SMB-C", e1, IdpClientException.Origin.CONNECTOR);
+                            throw new IdpClientException("Could not unlock SMC-B", e1, IdpClientException.Origin.CONNECTOR);
                         } else {
                             throw new IdpJoseException(e);
                         }
