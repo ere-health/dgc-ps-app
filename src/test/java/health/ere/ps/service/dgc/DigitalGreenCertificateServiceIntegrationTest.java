@@ -105,6 +105,8 @@ class DigitalGreenCertificateServiceIntegrationTest {
         String token = "testToken";
 
         requestBearerTokenEventObserver.setToken(token);
+        requestBearerTokenEventObserver.setException(null);
+        requestBearerTokenEventObserver.setCallContext(null);
 
         response = new byte[]{1, 2, 4, 8, 16};
         serverMatcher = post("/issue/api/certify/v2/issue")
