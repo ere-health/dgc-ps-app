@@ -9,6 +9,8 @@ public class RequestBearerTokenFromIdpEvent {
 
     private CallContext callContext;
 
+    private Exception exception;
+
     public String getBearerToken() {
         return this.bearerToken;
     }
@@ -25,16 +27,25 @@ public class RequestBearerTokenFromIdpEvent {
         this.callContext = callContext;
     }
 
+    public Exception getException() {
+        return exception;
+    }
+
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestBearerTokenFromIdpEvent that = (RequestBearerTokenFromIdpEvent) o;
-        return Objects.equals(bearerToken, that.bearerToken) && Objects.equals(callContext, that.callContext);
+        return Objects.equals(bearerToken, that.bearerToken) && Objects.equals(callContext, that.callContext)
+                && Objects.equals(exception, that.exception);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bearerToken, callContext);
+        return Objects.hash(bearerToken, callContext, exception);
     }
 }

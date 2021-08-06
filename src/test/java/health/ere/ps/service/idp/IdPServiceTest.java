@@ -187,7 +187,8 @@ class IdPServiceTest {
 
         idpService.requestBearerToken(requestBearerTokenFromIdpEvent);
 
-        verifyNoInteractions(requestBearerTokenFromIdpEvent);
+        verify(requestBearerTokenFromIdpEvent).setException(idpClientException);
+        verifyNoMoreInteractions(requestBearerTokenFromIdpEvent);
         verify(exceptionEvent).fireAsync(idpClientException);
     }
 }
