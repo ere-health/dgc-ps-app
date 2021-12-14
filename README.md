@@ -98,7 +98,9 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   You can access the front-end UI of the application by making reference to the following URL in a 
   browser!
   
-  > http://localhost:8080/dgc/covid-19-certificate.html
+  > http://localhost:8080/dgc/covid-19-vaccination-certificate.html
+
+  > http://localhost:8080/dgc/covid-19-recovered-certificate.html
 
 * #### Create a standalone application directory
   Run
@@ -126,6 +128,25 @@ route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNEC
   This form of distribution may lead to problems as duplicate class files in the original library jar-files only end up once in the final jar.
   
   Make sure to properly mention the `THIRD-PARTY.txt` file that is included in the resulting jar file.
+
+### Status URL
+
+ > http://localhost:8080/dgc/installation-status.html
+
+![](img/status-service.png)
+
+This page checks multiple services that have to be running to create caccination certificates:
+
+ * connector is reachable
+ * mandant/client/workspace parameters are correctly set up
+ * SMC-B card handle is valid and correctly set up
+ * idp.base.url configuration value set
+ * route to the IDP is correctly set up
+ * digital-green-certificate-service.issuerAPIUrl configuration value set
+ * route to the certificate service is correctly set up
+
+Output:
+ * Service urls from connector
 
 ### Docker image
 To create a docker image, the corresponding quarkus extension may be used:
