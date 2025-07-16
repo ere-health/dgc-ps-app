@@ -48,14 +48,28 @@ There are different routings needed for RU and PU:
 | `RU` | `10.30.0.0` |
 
 #### Linux
+PU:
 ```
 ip route add <SUBNET_DEPENDING_ON_RU_OR_PU>/16 via <IP_OF_THE_CARD_CONNECTOR>
 ```
 (depending on the used linux distribution)
 
+RU:
+```
+ip route add <SUBNET_DEPENDING_ON_RU_OR_PU>/15 via <IP_OF_THE_CARD_CONNECTOR>
+```
+
+
 #### Windows
+
+PU:
 ```
 route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.255.0.0 <IP_OF_THE_CARD_CONNECTOR>
+```
+
+RU:
+```
+route ADD <SUBNET_DEPENDING_ON_RU_OR_PU> MASK 255.254.0.0 <IP_OF_THE_CARD_CONNECTOR>
 ```
 
 ### Running the DGC-PS-App Application
